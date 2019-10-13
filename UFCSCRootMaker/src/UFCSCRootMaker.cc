@@ -378,7 +378,7 @@ private:
   // Comparator Digis
   int comparatorDigis_nDigis;
   int comparatorDigis_ID_endcap[10000], comparatorDigis_ID_station[10000], comparatorDigis_ID_layer[10000], comparatorDigis_cfeb[10000];
-  int comparatorDigis_ID_chamber[10000], comparatorDigis_ID_strip[10000], comparatorDigis_timeBin[10000], comparatorDigis_ID_ring[10000];
+  int comparatorDigis_ID_chamber[10000], comparatorDigis_ID_strip[10000], comparatorDigis_ID_halfStrip[10000], comparatorDigis_timeBin[10000], comparatorDigis_ID_ring[10000];
 
   // ALCTs
   int alct_nAlcts;
@@ -492,7 +492,6 @@ UFCSCRootMaker::UFCSCRootMaker(const edm::ParameterSet& iConfig) :
 //Destructor
 UFCSCRootMaker::~UFCSCRootMaker()
 {
-delete tree; 
    // do anything here that needs to be done at desctruction time
 
 }
@@ -506,7 +505,7 @@ void UFCSCRootMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
    using namespace std;
    /// Time in seconds since January 1, 1970.
    timeSecond = iEvent.time().unixTime();
-
+   //   std::cout<<"run analyzer ?? "<< std::endl;
    //Luminosity
 //   edm::Handle<LumiDetails> LumiDet;
 //   if(isFullRECO && isDATA) iEvent.getLuminosityBlock().getByToken("lumiProducer",LumiDet); 
@@ -626,8 +625,8 @@ void UFCSCRootMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
    if(addCalibrations && nEventsTotal == 1) doCalibrations(iSetup);
 
    //Fill the tree
-
-   if((addRecHits && recHits2D_nRecHits2D > 0 && (isFullRECO || isLocalRECO) ) || !addRecHits) {tree->Fill();}
+//cout << "nRHs: " << recHits2D_nRecHits2D << endl;
+   if((addRecHits && recHits2D_nRecHits2D > 0 && (isFullRECO || isLocalRECO) ) /*|| !addRecHits*/) {tree->Fill();}
 
 
    //clear some vectors 
@@ -947,7 +946,6 @@ void UFCSCRootMaker::doMuons(edm::Handle<reco::MuonCollection> muons, edm::Handl
     counter++;
   }
   standaloneMuons_nMuons = counter;
-cout << "nMuons: " << counter << endl;
 }
 
 void 
@@ -1953,6 +1951,7 @@ void UFCSCRootMaker::doCompTiming(const CSCComparatorDigiCollection& compars) {
 	    comparatorDigis_ID_chamber[counter] = id.chamber();
 	    comparatorDigis_ID_station[counter] = id.station();
 	    comparatorDigis_ID_strip[counter] = strip;
+            comparatorDigis_ID_halfStrip[counter] = (*digiIt).getHalfStrip();
 	    comparatorDigis_ID_layer[counter] = id.layer(); //idlayer?
 	    comparatorDigis_ID_ring[counter] = id.ring();
 	    comparatorDigis_cfeb[counter] = cfeb;
@@ -2906,7 +2905,7 @@ UFCSCRootMaker::bookTree(TTree *tree)
   tree->Branch("timeSecond",&timeSecond,"timeSecond/i");
 
   //Vertex
-//  tree->Branch("vertex_nVertex",&vertex_nVertex,"vertex_nVertex/I");
+  tree->Branch("vertex_nVertex",&vertex_nVertex,"vertex_nVertex/I");
 
   //Lumi
 /*
@@ -3141,6 +3140,7 @@ UFCSCRootMaker::bookTree(TTree *tree)
   tree->Branch("comparatorDigis_ID_ring", comparatorDigis_ID_ring,"comparatorDigis_ID_ring[comparatorDigis_nDigis]/I");
   tree->Branch("comparatorDigis_timeBin", comparatorDigis_timeBin,"comparatorDigis_timeBin[comparatorDigis_nDigis]/I");
   tree->Branch("comparatorDigis_cfeb", comparatorDigis_cfeb,"comparatorDigis_cfeb[comparatorDigis_nDigis]/I");
+  tree->Branch("comparatorDigis_ID_halfStrip", comparatorDigis_ID_halfStrip,"comparatorDigis_ID_halfStrip[comparatorDigis_nDigis]/I");
 
   //ALCTs
   tree->Branch("alct_nAlcts",&alct_nAlcts,"alct_nAlcts/I");
