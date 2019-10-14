@@ -12,7 +12,7 @@ def ParseOption():
 
 args=ParseOption()
 
-#filename = "DUMMYFILENAME_UF.root"
+filename = "DUMMYFILENAME.root"
 #filename = "DUMMYFILENAME_RU.root"
 tag = args.tag
 doME11 = args.doME11 
@@ -33,7 +33,8 @@ savedir = "DUMMY" #"/home/mhl/public_html/2017/20171017_cscSeg/"
 f_ = ROOT.TFile.Open(filename)
 t_ = f_.Get(treename)
 s_ = ROOT.TSelector.GetSelector(selectorname)
-s_.SetInputs(tag,savedir,doME11)
+#s_.SetInputs(tag,savedir,doME11)
 #s_.SetInputs(tag,doME11)
+s_.SetInputs(100,tag)
 t_.Process(s_)
 

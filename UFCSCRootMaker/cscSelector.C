@@ -662,17 +662,17 @@ void cscSelector::Terminate()
 
 // user defined function
 
-void cscSelector::SetInputs(int nEntry_, TString tag_/* TString savedir_, bool doME11_*/)
+void cscSelector::SetInputs(int nEntry_, TString tag_)//, TString savedir_, bool doME11_)
 {
 
    nEntry = nEntry_;
 
 
      tag = tag_;
-/*
-     savedir = savedir_;
-     doME11 = doME11_;
-*/
+
+     //     savedir = savedir_;
+     //     doME11 = doME11_;
+
 }
 
 

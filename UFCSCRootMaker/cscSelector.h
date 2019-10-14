@@ -399,7 +399,7 @@ public :
    virtual void    Terminate();
 
    virtual void    FillSegs(int segIndex, int chamberIndex, vector<SegsInChamber>& segs);
-   virtual void    SetInputs(int nEntry_ ,TString tag_/*, TString savedir_, bool doME11_*/);
+   virtual void    SetInputs(int nEntry_ ,TString tag_);//, TString savedir_, bool doME11_);
 //   virtual void    Initialize();
    virtual void    CountObjectsInCSCs(bool doRH, bool doSeg,
                                       bool doWire, bool doStrip, bool doComparator,
@@ -571,7 +571,7 @@ public :
    int nEntry;
 
    TString tag;
-//   TString savedir;
+   TString savedir;
 
 /*
    struct CSC1DSeg{
@@ -583,7 +583,7 @@ public :
 
    };
 */
-//   bool doME11;
+   bool doME11;
 
    TFile      *outputRootFile;
 

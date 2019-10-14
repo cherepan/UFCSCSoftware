@@ -1,15 +1,15 @@
 plotBase=$1
 
 echo $plotBase
-input1="inputRootFiles/DUMMYFILENAME_RU.root"
-input2="inputRootFiles/DUMMYFILENAME_UF.root"
+input1="DUMMYFILENAME.root"
+input2="DUMMYFILENAME.root"
 #plotdir1="~/public_html/2017/20171203_cscSeg/ME11/"
 #plotdir2="~/public_html/2017/20171203_cscSeg/nonME11/"
 plotdir1=${plotBase}"ME11/"
 plotdir2=${plotBase}"nonME11/"
 mkdir -p $plotdir1 $plotdir2
-cp /home/mhl/public_html/index.php $plotdir1
-cp /home/mhl/public_html/index.php $plotdir2
+#cp /home/mhl/public_html/index.php $plotdir1
+#cp /home/mhl/public_html/index.php $plotdir2
 
 plotfile1="tmpRootPlots/CSCresults_RU_ME11.root"
 plotfile2="tmpRootPlots/CSCresults_UF_ME11.root"
