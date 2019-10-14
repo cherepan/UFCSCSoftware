@@ -2,6 +2,9 @@
 UF CSC ntuple
 
 ```
+cmsrel CMSSW_9_4_4
+cd CMSSW_9_4_4/src
+cmsenv
 git cms-init
 git cms-addpkg  DataFormats/CSCRecHit
 git cms-addpkg  CalibMuon/CSCCalibration
