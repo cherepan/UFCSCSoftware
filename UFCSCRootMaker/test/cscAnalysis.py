@@ -1,4 +1,5 @@
-#!/usr/bin/python
+#!/usr/bin/env python
+
 import sys, os, pwd, commands
 import optparse, shlex, re
 import math
@@ -390,12 +391,14 @@ class Analysis():
     def endjob(self,singleFile):
 
         #Fill Eff Hists
+
         for x in range(0,600):
             eff = 0
             if self.simHitsEffDen[x] > 0:
                 eff = float(self.simHitsEffNum[x])/self.simHitsEffDen[x]
             if x == 599:
-                eff = float(self.simHitsOverallEffNum)/self.simHitsOverallEffDen
+#                eff = float(self.simHitsOverallEffNum)/self.simHitsOverallEffDen
+                eff = float(self.simHitsOverallEffNum)/1
 
             #print x,  self.simHitsEffDen[x], self.simHitsEffNum[x], eff, self.simHitsOverallEffDen, self.simHitsOverallEffDen
             self.hists1D['simHitsRecoEfficiency'].SetBinContent(x+1,eff)
