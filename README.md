@@ -2,8 +2,8 @@
 UF CSC ntuple
 
 ```
-cmsrel CMSSW_9_4_4
-cd CMSSW_9_4_4/src
+cmsrel CMSSW_10_6_20
+cd CMSSW_10_6_20/src
 cmsenv
 git cms-init
 git cms-addpkg  DataFormats/CSCRecHit
