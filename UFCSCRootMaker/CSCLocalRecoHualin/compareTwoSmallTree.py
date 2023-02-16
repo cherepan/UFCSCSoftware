@@ -94,7 +94,7 @@ def CompareLocalXY(t1,t2,t1Segs,t2Segs,h2,hx,hy):
            r = (t1.cscSegments_ID_ring)[segs1[0]]
            c = (t1.cscSegments_ID_chamber)[segs1[0]]
            if s==1 and r==4: r=1
-           compareNSeg.Fill(len(segs1),0)
+#           compareNSeg.Fill(len(segs1),0)
            log1 = ' '.join([str(t1.Event),str(e),str(s),str(r),str(c)]) 
            logger_1.info(log1)
 #           print t1.Event,e,s,r,c,len(segs1)
@@ -116,7 +116,7 @@ def CompareLocalXY(t1,t2,t1Segs,t2Segs,h2,hx,hy):
            c = (t2.cscSegments_ID_chamber)[segs2[0]]
            if s==1 and r==4: r=1
 #           print t2.Event,e,s,r,c,len(segs2)
-           compareNSeg.Fill(0,len(segs2))
+#           compareNSeg.Fill(0,len(segs2))
            log2 = ' '.join([str(t1.Event),str(e),str(s),str(r),str(c)])
            logger_2.info(log2)
         segMissed_RU = True
@@ -129,6 +129,8 @@ def CompareLocalXY(t1,t2,t1Segs,t2Segs,h2,hx,hy):
         for k in range(len(t2Segs)):
             segIndex2 = t2Segs[k][0]
             segs2 = t2Segs[k][1]
+            print  "segIndex1:",  segIndex1
+            print  "segIndex2:",  segIndex2
 
             if t1.Event==t2.Event and (segIndex1 == segIndex2) :
                compareNSeg.Fill(len(segs1),len(segs2))
@@ -201,7 +203,7 @@ def DrawHistOnCanvas(hist,option,savename,isLogy=False,isLogx=False):
 
 args=ParseOption()
 
-doME11 = args.doME11
+doME11 = False#args.doME11
 input1 = args.input1
 input2 = args.input2
 plotdir = args.plotdir
@@ -223,8 +225,8 @@ logger_7 = setup_logger('rh_uf_6_ru_5', 'logs/rh_uf_6_ru_5_' + ME11_tag + '.txt'
 compareLocalXY = ROOT.TH2F("compareLocalXY","",200,-100,100,200,-100,100)
 compareLocalX = ROOT.TH1F("compareLocalX","", 100,-1,1)
 compareLocalY = ROOT.TH1F("compareLocalY","", 100,-5,5)
-compareNSeg = ROOT.TH2F("compareNSeg","",10,0,10,10,0,10)
-compareNRH = ROOT.TH2F("compareNRH","",4,3,7,4,3,7)
+compareNSeg = ROOT.TH2F("compareNSeg","",10,-0.5,9.5,10,-0.5,9.5)
+compareNRH = ROOT.TH2F("compareNRH","",4,2.5,6.5,4,2.5,6.5)
 # could specify chamber type
 #filename1 = "DUMMYFILENAME_RU.root"
 #filename2 = "DUMMYFILENAME_UF.root"
@@ -261,10 +263,10 @@ compareLocalY.GetXaxis().SetTitle("#delta(localY) (cm)")
 compareLocalX.GetXaxis().SetTitle("#delta(localX) (cm)")
 compareLocalXY.GetXaxis().SetTitle("#delta(localX) (cm)")
 compareLocalXY.GetYaxis().SetTitle("#delta(localY) (cm)")
-compareNSeg.GetXaxis().SetTitle("nSeg(RU)")
-compareNSeg.GetYaxis().SetTitle("nSeg(UF)")
-compareNRH.GetXaxis().SetTitle("nRH per segment (RU)")
-compareNRH.GetYaxis().SetTitle("nRH per segment (UF)")
+compareNSeg.GetXaxis().SetTitle("# segments (recent reco)")
+compareNSeg.GetYaxis().SetTitle("# segments (UF)")
+compareNRH.GetXaxis().SetTitle("# RH per segment ")
+compareNRH.GetYaxis().SetTitle("# RH per segment (UF)")
 compareNRH.GetYaxis().SetNdivisions(105)
 compareNRH.GetXaxis().SetNdivisions(105)
 compareNSeg.GetXaxis().SetNdivisions(110)
@@ -277,6 +279,6 @@ savedir = plotdir
 DrawHistOnCanvas(compareLocalX,"HIST",savedir+compareLocalX.GetName(),True)
 DrawHistOnCanvas(compareLocalY,"HIST",savedir+compareLocalY.GetName(),True)
 DrawHistOnCanvas(compareLocalXY,"COLZ",savedir+compareLocalXY.GetName())
-DrawHistOnCanvas(compareNSeg,"text COLZ",savedir+compareNSeg.GetName())
-DrawHistOnCanvas(compareNRH,"text COLZ",savedir+compareNRH.GetName())
+DrawHistOnCanvas(compareNSeg,"BOXTEXT",savedir+compareNSeg.GetName())
+DrawHistOnCanvas(compareNRH,"BOXTEXT",savedir+compareNRH.GetName())
 

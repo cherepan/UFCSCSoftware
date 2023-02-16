@@ -422,7 +422,7 @@ public :
 
    virtual void    PrintSparseMatrix(TMatrixDSparse inputMatrix);
    virtual void    WriteTH2F(TH2F* hist);
-   virtual int    ChamberID_converter(int station, int ring);
+   virtual int     ChamberID_converter(int station, int ring);
 
    // save CSC's ID if there is a muon from Z decay
    vector<int> endcapL; 
@@ -475,8 +475,8 @@ public :
    TH1F* nCLCT_wide_rank_45_layer_56 = new TH1F("nCLCT_wide_rank_45_layer_56","",10,0,10);
    TH1F* nCLCT_narrow_rank_45_layer_56 = new TH1F("nCLCT_narrow_rank_45_layer_56","",10,0,10);
 
-   TH1F* nSegPerChamber = new TH1F("nSegPerChamebr","",10,0,10); 
-   TH1F* nRHPerSeg = new TH1F("nRHPerSeg","",7,0,7);
+   TH1F* nSegPerChamber = new TH1F("nSegPerChamebr","",5,-0.5,4.5); 
+   TH1F* nRHPerSeg = new TH1F("nRHPerSeg","",4,2.5,6.5);
    TH1F* chi2PerDOF = new TH1F("chi2PerDOF","",100,0,200);
 
    TH2F* nWireDigi_Layer = new TH2F("nWireDigi_Layer","",10,0,10,6,1,7);

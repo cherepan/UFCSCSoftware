@@ -38,6 +38,9 @@
 #include "clib/CSCWireSegmentPattern.h"
 #include "clib/CSCStripSegmentPattern.h"
 
+#include "TLorentzVector.h"
+
+
 /*
 void cscSelector::Initialize()
 {
@@ -88,6 +91,45 @@ Bool_t cscSelector::Process(Long64_t entry)
    // The return value is currently not used.
 
    fReader.SetEntry(entry);
+
+   vector<SegsInChamber> segs;
+   segs.clear();
+
+   for (int i = 0; i < *cscSegments_nSegments; i++) {
+
+     int endcap = cscSegments_ID_endcap[i];
+     int station = cscSegments_ID_station[i];
+     int ring = cscSegments_ID_ring[i];
+     int chamber = cscSegments_ID_chamber[i];
+     int chamberIndex = endcap*10000 + station*1000 + ring*100 + chamber;
+     bool isME11 = false;
+
+     if ( (station == 1 && (ring==1 || ring==4) ) ) isME11 = true;
+
+     if ( doME11 && !isME11 ) continue;
+     if ( !doME11 && isME11 ) continue;
+
+     FillSegs(i,chamberIndex,segs);
+   }
+
+
+   for (int i = 0; i < int(segs.size()); i++) {
+     int index = segs[i].first;
+     vector<int> tmpSegs = segs[i].second;
+     nSegPerChamber->Fill(tmpSegs.size());
+
+     for (int j = 0; j < tmpSegs.size(); j++) {
+       int treeIndex = tmpSegs[j];
+
+       if (tmpSegs.size() != 1) continue;
+       nRHPerSeg->Fill(cscSegments_nRecHits[treeIndex]);
+       chi2PerDOF->Fill(cscSegments_chi2[treeIndex]/cscSegments_nDOF[treeIndex]);
+
+     }
+   }
+
+
+
   
 //   if (entry > 200000) return kTRUE; 
    if (entry > 20000) return kTRUE;
@@ -98,13 +140,20 @@ Bool_t cscSelector::Process(Long64_t entry)
 
    SaveCSCWithMuon();
 
-
+   //   std::cout<<"   CSC with muons    "<< endcapL.size() << std::endl;
    // if no CSC contains a muon segment, skip this event
    if (int(endcapL.size()) == 0) return kTRUE;
 
    CountObjectsInCSCs(true,true,true,true,true,false,false,false); //RH,Seg,Wire,Strip,Comparator,ALCT,CLCT,CLT
 
 // SOMEHOW CANNOT PROCESS ALL DIGIS TOGHETHER !!!
+
+
+
+
+
+
+
 
    for (int i = 0; i < int(endcapL.size()); i++) {
 
@@ -156,6 +205,7 @@ Bool_t cscSelector::Process(Long64_t entry)
 
        TMatrixDSparse comparatorMatrix(6,2*nStrips+2);
        FillComparatorMatrix(nComparator[i], comparatorMatrix, doStagger);//, strip_min, strip_max);
+       //       comparatorMatrix.Print();
 //       TMatrixDSparse comparatorMatrix_full(6,2*nStrips+2);
 //       FillComparatorMatrix(nComparator[i], comparatorMatrix_full, doStagger);
 
@@ -489,7 +539,7 @@ cout << "here" << endl;
 //cout << "nWireSeg: " << allWireSegs.size() << endl;
 //cout << "nStripSeg: " << allComparatorSegs.size() << endl;
 
-    }//loop over chambers with muon
+   }//loop over chambers with muon
 
     return kTRUE;
 
@@ -545,6 +595,13 @@ void cscSelector::Terminate()
    nCLCT_narrow_layer_6->Write();
    nCLCT_wide_layer_5->Write();
    nCLCT_narrow_layer_5->Write();
+
+   nSegPerChamber->SetMaximum(2000);
+   nRHPerSeg->SetMaximum(2000);
+   nSegPerChamber->Write();
+   nRHPerSeg->Write();
+   chi2PerDOF->SetMinimum(0.1);
+   chi2PerDOF->Write();
    
 /*
    nHitsPerSeg_muonPt->Write();
@@ -564,9 +621,9 @@ void cscSelector::Terminate()
 
 //c1->SetLogy();
 //chi2PerDOF->SetMinimum(0.1);
-//nSegPerChamber->SetMaximum(9000);
-//nRHPerSeg->SetMaximum(8000);
-//   nSegPerChamber->Write();
+nSegPerChamber->SetMaximum(9000);
+nRHPerSeg->SetMaximum(8000);
+   nSegPerChamber->Write();
    nRHPerSeg->Write();
 //   chi2PerDOF->Write();
    nWireDigi_Layer->Write();
@@ -668,7 +725,7 @@ void cscSelector::SetInputs(int nEntry_, TString tag_)//, TString savedir_, bool
    nEntry = nEntry_;
 
 
-     tag = tag_;
+   tag = tag_;
 
      //     savedir = savedir_;
      //     doME11 = doME11_;
@@ -677,7 +734,7 @@ void cscSelector::SetInputs(int nEntry_, TString tag_)//, TString savedir_, bool
 
 
 
-void cscSelector::FillSegs(int segIndex, int chamberIndex, vector<SegsInChamber>& segs)
+void cscSelector::FillSegs(int segIndex, int chamberIndex, vector<SegsInChamber> &segs)
 {
 
        if (int(segs.size()) == 0) {

@@ -28,12 +28,13 @@ addDigiInfo = bool(True)
 addTimeMonitoringInfo = bool(True)
 addCalibrationInfo = bool(False)
 
-maxEvents = 100
+maxEvents = 1000
 
 #MCGlobalTag='PH2_1K_FB_V6::All' for DYmumu_PU140
 #DataGlobalTag='76X_dataRun2_v19'
 #DataGlobalTag='76X_dataRun2_v15'
-DataGlobalTag='92X_dataRun2_Prompt_v11'
+#DataGlobalTag='92X_dataRun2_Prompt_v11'
+DataGlobalTag='106X_dataRun2_v32'
 doDebug = bool(False)
 ###############################
 
@@ -99,7 +100,7 @@ process.out = cms.OutputModule("PoolOutputModule",
 
 process.TFileService = cms.Service("TFileService",
 #                                   fileName = cms.string("DUMMYFILENAME.root")
-                                   fileName = cms.string("DUMMYFILENAME.root")
+                                   fileName = cms.string("CSC_UF_ntuple_UF_SegmentBuilder.root")
                                    )
 
 # Primary Vertices
@@ -121,7 +122,26 @@ process.source = cms.Source ("PoolSource",
 
 if isDATA:
     process.source.fileNames = cms.untracked.vstring(
-        'file:../../../../../UFCSCSoftware/UFCSCRootMaker/Zmu_rawreco_2016H.root'
+        'file:/eos/user/c/cherepan/HeavyFiles/SingleMuon_RAW-RECO_ZMu-12Nov2019_UL2018_CSCSegmentBuilder_UF.root'
+#        'file:test/SingleMuon_RAW-RECO_ZMu-12Nov2019_UL2018_CSCSegmentBuilder_UF.root'
+#        '/store/data/Run2018B/SingleMuon/RAW-RECO/ZMu-12Nov2019_UL2018-v2/270003/5FE6A215-7096-6B41-B499-D12FE193A89B.root',
+#        '/store/data/Run2018B/SingleMuon/RAW-RECO/ZMu-12Nov2019_UL2018-v2/270003/A0AE2F0B-740C-B646-BF3B-58EE0943A261.root',
+#        '/store/data/Run2018B/SingleMuon/RAW-RECO/ZMu-12Nov2019_UL2018-v2/270003/7E66C6C3-7AEB-C048-8450-58BBD7E70343.root',
+#        '/store/data/Run2018B/SingleMuon/RAW-RECO/ZMu-12Nov2019_UL2018-v2/270003/2ACDF7AC-B65B-BB4C-915F-A0AF22098386.root',
+#        '/store/data/Run2018B/SingleMuon/RAW-RECO/ZMu-12Nov2019_UL2018-v2/270003/4C8FFD75-6243-8A4E-848E-ED14C0F8B9B2.root',
+#        '/store/data/Run2018B/SingleMuon/RAW-RECO/ZMu-12Nov2019_UL2018-v2/270003/F427E364-B84C-FA4D-9C5F-B1DF11176D71.root',
+#        '/store/data/Run2018B/SingleMuon/RAW-RECO/ZMu-12Nov2019_UL2018-v2/270003/7FD2532C-A050-DE47-B3CC-5D9FECA2312D.root',
+#        '/store/data/Run2018B/SingleMuon/RAW-RECO/ZMu-12Nov2019_UL2018-v2/270003/CC95D6CA-A6FE-D14B-98BF-77307ACFBCEE.root',
+#        '/store/data/Run2018B/SingleMuon/RAW-RECO/ZMu-12Nov2019_UL2018-v2/270003/A46A6EAF-311C-E248-8B44-FB8F13FDB3D5.root',
+#        '/store/data/Run2018B/SingleMuon/RAW-RECO/ZMu-12Nov2019_UL2018-v2/270003/D5A55C35-CF1A-664C-855C-0317C6F518A8.root',
+#        '/store/data/Run2018B/SingleMuon/RAW-RECO/ZMu-12Nov2019_UL2018-v2/270003/CA91E075-380C-2142-B047-0D214F6822B6.root',
+#        '/store/data/Run2018B/SingleMuon/RAW-RECO/ZMu-12Nov2019_UL2018-v2/270003/5DC4A3AC-206C-CC4A-9FBB-7080182ECDDD.root'
+
+#        'file:001D83E9-4350-6648-89D2-155101834DEF.root'
+
+
+#        '/store/data/Run2018B/SingleMuon/RAW-RECO/ZMu-12Nov2019_UL2018-v2/100000/001D83E9-4350-6648-89D2-155101834DEF.root'
+#        'file:../../../../../UFCSCSoftware/UFCSCRootMaker/Zmu_rawreco_2016H.root'
 # 'root://cmsxrootd.fnal.gov//store/data/Run2015D/SingleMuon/RAW-RECO/ZMu-16Dec2015-v1/10000/005D37B2-3CA9-E511-B9AF-001E67398223.root',
 # 'root://cmsxrootd.fnal.gov//store/data/Run2015D/SingleMuon/RAW-RECO/ZMu-16Dec2015-v1/10000/005D37B2-3CA9-E511-B9AF-001E67398223.root',
 # 'root://cmsxrootd.fnal.gov//store/data/Run2015D/SingleMuon/RAW-RECO/ZMu-16Dec2015-v1/10000/005D37B2-3CA9-E511-B9AF-001E67398223.root',
@@ -143,7 +163,7 @@ else:
         ]
     )
     
-process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(False)
+process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True)
                                      #,SkipEvent = cms.untracked.vstring('ProductNotFound')
                                      )
 

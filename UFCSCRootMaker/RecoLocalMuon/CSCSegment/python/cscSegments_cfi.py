@@ -11,7 +11,7 @@ cscSegments = cms.EDProducer("CSCSegmentProducer",
     # Define input
     inputObjects = cms.InputTag("csc2DRecHits"),
     # Choice of the building algo: 1 SK, 2 TC, 3 DF, 4 ST, 5 RU, 6 UF, ...
-    algo_type = cms.int32(6),
+    algo_type = cms.int32(5),
     # std::vector<edm::ParameterSet>
     algo_psets = cms.VPSet(
         cms.PSet(

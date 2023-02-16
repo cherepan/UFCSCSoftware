@@ -21,12 +21,12 @@ tag2 = args.tag2
 plotdir = args.plotdir
 
 histnames = ["nSegPerChamebr","nRHPerSeg","chi2PerDOF"]
-xmins = [0,0,0]
-xmaxs = [10,7,100]
+xmins = [0,2,0]
+xmaxs = [6,7,100]
 ymins = [0.1,0.1,0.1]
 #ymaxs = [10000,10000,10000,10000]
-ymaxs = [5000,5000,6000]
-xtitles = ["nSegPerChamber","nRHPerSeg","chi2/DOF"]
+ymaxs = [2000,2000,3000]
+xtitles = ["#Segments per chamber","# RecHits per Segment","chi2/DOF"]
 
 for i in range(len(histnames)):
 
@@ -40,18 +40,18 @@ for i in range(len(histnames)):
     plotter.GetHistFromRoot(plotfile2,histname,tag2)
 
     drawOps = ["HIST","HIST"]
-    colors = [1,2]
+    colors = [3,4]
     styles = [1,1]
     sizes = [2,2]
 
     tmpHists = [histname+'_RU',histname+'_UF']
 
-    plotter.AddPlot(tmpHists,drawOps, colors, styles, sizes)
+    plotter.AddPlot(tmpHists, drawOps, colors, styles, sizes)
 
-    comments = ["RU algo","UF algo"]
+    comments = ["Recent SegmentBuilder","UF "]
 
     canvasCord = [xmins[i],xmaxs[i],ymins[i],ymaxs[i]]  
-    legendCord = [0.7,0.75,0.9,0.9]
+    legendCord = [0.4,0.75,0.9,0.9]
     titles = [xtitles[i],'']
 
 #    savename = "/home/mhl/public_html/2017/20171203_cscSeg/ME11/" + histname

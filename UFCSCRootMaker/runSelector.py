@@ -15,16 +15,17 @@ def ParseOption():
 
 args=ParseOption()
 
-filename = "DUMMYFILENAME.root"
+filename = "CSC_UF_ntuple.root"
 #filename = "DUMMYFILENAME_RU.root"
+
 tag = args.tag
 doME11 = args.doME11 
+
 #tag = "RU"
 chamberType = ""
 
 #filename = "DUMMYFILENAME_"+tag+".root"
 filename = args.inputfile
-
 tag += chamberType
 
 #treename = "cscRootMaker/Events"

@@ -69,4 +69,5 @@ class Plotter():
 
           c1.SaveAs(savename+".png")
           c1.SaveAs(savename+".pdf")
+          c1.SaveAs(savename+".root")
 
