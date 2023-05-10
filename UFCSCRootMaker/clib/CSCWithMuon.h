@@ -8,7 +8,7 @@ void cscSelector::SaveCSCWithMuon()
    chamberL.clear(); 
    muIndex.clear(); 
    stripsFromMu.clear();
-
+   ChambersFromMu.clear();
 
    vector<int> ZmuIndex; ZmuIndex.clear();
 
@@ -29,16 +29,21 @@ void cscSelector::SaveCSCWithMuon()
    for (int i = 0; i < int(ZmuIndex.size()); i++) 
      {
        int tmpIndex = ZmuIndex[i];
+       //       std::cout<<"-------------------   muon index    "<< tmpIndex << " segments per muon   "  << int(muons_cscSegmentRecord_endcap[tmpIndex].size())<<std::endl;
        for (int j = 0; j < int(muons_cscSegmentRecord_endcap[tmpIndex].size()); j++) 
 	 {
            int endcap = muons_cscSegmentRecord_endcap[tmpIndex][j];
            int station = muons_cscSegmentRecord_station[tmpIndex][j];
            int ring = muons_cscSegmentRecord_ring[tmpIndex][j];
            int chamber = muons_cscSegmentRecord_chamber[tmpIndex][j];
+	   int chamberIndex = endcap*10000 + station*1000 + ring*100 + chamber;
            double localX = muons_cscSegmentRecord_localX[tmpIndex][j];
            double localY = muons_cscSegmentRecord_localY[tmpIndex][j];
 	   
-	   //	   std::cout<<"  endcap / station / ring / chamber / localX / localY / j: " << j << "   " << endcap << "  " 
+
+	   //	   std::cout<<">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>Segments assignet to the muon   endcap / station / ring / chamber"<< endcap << "  " << station << "  "<< ring << "  " << chamber <<std::endl;
+
+	   //	   std::cout<<"Segments assignet to the muon   endcap / station / ring / chamber / localX / localY / j: " << j << "   " << endcap << "  " 
 	   //		    << station << "  "<< ring << "  " << chamber <<"  " << localX <<"  "<<localY << std::endl;
 
 	   
@@ -53,8 +58,8 @@ void cscSelector::SaveCSCWithMuon()
            if ( (find(endcapL.begin(), endcapL.end(), endcap) != endcapL.end() ) &&
                 (find(stationL.begin(), stationL.end(), station) != stationL.end() ) &&
                 (find(ringL.begin(), ringL.end(), ring) != ringL.end() ) &&
-                (find(chamberL.begin(), chamberL.end(), chamber) != chamberL.end() )
-              ) 
+                (find(chamberL.begin(), chamberL.end(), chamber) != chamberL.end() ))
+		
 	     {
 	       
 	       int tmpIndex = find(endcapL.begin(), endcapL.end(), endcap) - endcapL.begin();
@@ -66,7 +71,7 @@ void cscSelector::SaveCSCWithMuon()
 	       
 	       continue;
 	     }
-
+	 
            endcapL.push_back(endcap);
            stationL.push_back(station);
            ringL.push_back(ring);
@@ -74,20 +79,17 @@ void cscSelector::SaveCSCWithMuon()
            muIndex.push_back(tmpIndex);
            stripsFromMu.push_back(tmpStrips);
 
-       }
+	 }
      }
-
-
 }
 
 
 vector<int> cscSelector::RHsMatching(int endcap, int station, int ring, int chamber, double localX, double localY) {
 
       vector<int> strips; strips.clear();
-
+      //      std::cout<<"all segments in the same chamber  "<< std::endl;
       for (int i = 0; i < *cscSegments_nSegments; i++) {
-	//	std::cout<<"a loop over segments  "<< i <<"  with local X:Y   " << cscSegments_localX[i] << " : "
-	//		 << cscSegments_localY[i]<<" nRecHits     "<< cscSegments_nRecHits[i] <<std::endl;
+
           int endcap_    = cscSegments_ID_endcap[i];
           int station_   = cscSegments_ID_station[i];
           int ring_      = cscSegments_ID_ring[i];
@@ -95,13 +97,18 @@ vector<int> cscSelector::RHsMatching(int endcap, int station, int ring, int cham
           double localX_ = cscSegments_localX[i];
           double localY_ = cscSegments_localY[i];
 
+	  if(endcap != endcap_ || station != station_ || ring != ring_ || chamber != chamber_) continue;
+	  //	   std::cout<<"-->  Segment "<< i  <<"  endcap / station / ring / chamber / localX / localY /: " << "   " << endcap_ << "  " 
+	  //		    << station_ << "  "<< ring_ << "  " << chamber_ <<"  " << localX_ <<"  "<<localY_ << std::endl;
+
+
           if (endcap != endcap_ || station != station_ || ring != ring_ || chamber != chamber_ ||
               localX != localX_ || localY != localY_) continue;
        
           for (int j = 0; j < int(cscSegments_recHitRecord_endcap[i].size()); j ++) 
 	    {
 	      //	      std::cout<<" loop over rechhits belonging to this segment    "<< j << std::endl;
-              int layer_rh      = cscSegments_recHitRecord_layer[i][j];
+              int    layer_rh   = cscSegments_recHitRecord_layer[i][j];
               double localX_rh  = cscSegments_recHitRecord_localX[i][j];
               double localY_rh  = cscSegments_recHitRecord_localY[i][j];
 	      //    std::cout<<" a loop over  rechits  belonging to a segment   "<< j << "   localX_rh/localY_rh     " <<localX_rh <<   "    "   <<localY_rh <<std::endl;

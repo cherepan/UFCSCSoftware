@@ -31,7 +31,7 @@ CSCSegmentBuilder::CSCSegmentBuilder(const edm::ParameterSet& ps) : geom_(0) {
     // Now load the right parameter set
     // Algo name
     std::string algoName = algoPSets[chosenAlgo].getParameter<std::string>("algo_name");
-        
+    std::cout<<" >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> algo_name : " << algoName << std::endl;
     LogDebug("CSCSegment|CSC")<< "CSCSegmentBuilder algorithm name: " << algoName;
 
     // SegAlgo parameter set

@@ -784,6 +784,7 @@ bool CSCSegAlgoRU::replaceHit(const CSCRecHit2D* h, int layer) {
   return addHit(h, layer);
 }
 
+
 void CSCSegAlgoRU::compareProtoSegment(const CSCRecHit2D* h, int layer) {
   // Copy the input CSCSegFit
   std::unique_ptr<CSCSegFit> oldfit;
@@ -799,6 +800,7 @@ void CSCSegAlgoRU::compareProtoSegment(const CSCRecHit2D* h, int layer) {
     sfit_ = std::move(oldfit); // reset to the original input fit
   }
 }
+
 
 void CSCSegAlgoRU::increaseProtoSegment(const CSCRecHit2D* h, int layer, int chi2_factor) {
   // Creates a new fit

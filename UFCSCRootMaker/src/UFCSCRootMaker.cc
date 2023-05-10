@@ -245,7 +245,7 @@ private:
   int counter;
 
   // Struct for map
-  struct ltrh
+ struct ltrh
   {
     bool operator()(const CSCRecHit2D rh1, const CSCRecHit2D rh2) const
     {
@@ -351,21 +351,21 @@ private:
   int hltTrigger_bits[10000];
 
   // Standalone Muons
-  int standaloneMuons_nMuons;
+  int    standaloneMuons_nMuons;
   double standaloneMuons_p[10000], standaloneMuons_pt[10000];
-  int standaloneMuons_nRecHits[10000];
+  int    standaloneMuons_nRecHits[10000];
   double standaloneMuons_chi2[10000], standaloneMuons_normChi2[10000];
-  int standaloneMuons_nDTHits[10000], standaloneMuons_nCSCHits[10000], standaloneMuons_nCSCHitsP[10000];
-  int standaloneMuons_nCSCHitsM[10000], standaloneMuons_nRPCHits[10000], standaloneMuons_nRPCHitsP[10000];
-  int standaloneMuons_nRPCHitsM[10000], standaloneMuons_nHitsP[10000], standaloneMuons_nHitsM[10000];
+  int    standaloneMuons_nDTHits[10000], standaloneMuons_nCSCHits[10000], standaloneMuons_nCSCHitsP[10000];
+  int    standaloneMuons_nCSCHitsM[10000], standaloneMuons_nRPCHits[10000], standaloneMuons_nRPCHitsP[10000];
+  int    standaloneMuons_nRPCHitsM[10000], standaloneMuons_nHitsP[10000], standaloneMuons_nHitsM[10000];
   double standaloneMuons_crudeLength[10000], standaloneMuons_deltaPhi[10000];
   double standaloneMuons_innerGlobalPolarAngle[10000], standaloneMuons_outerGlobalPolarAngle[10000];
 
   // Strip Digis
-  int firedStripDigis_nStripDigis;
-  int firedStripDigis_ID_endcap[10000], firedStripDigis_ID_station[10000], firedStripDigis_ID_layer[10000];
-  int firedStripDigis_ID_chamber[10000], firedStripDigis_ID_strip[10000], firedStripDigis_ID_ring[10000];
-  int firedStripDigis_tbinMax[10000];
+  int    firedStripDigis_nStripDigis;
+  int    firedStripDigis_ID_endcap[10000], firedStripDigis_ID_station[10000], firedStripDigis_ID_layer[10000];
+  int    firedStripDigis_ID_chamber[10000], firedStripDigis_ID_strip[10000], firedStripDigis_ID_ring[10000];
+  int    firedStripDigis_tbinMax[10000];
   double firedStripDigis_ADCTotal[10000], firedStripDigis_ADCMax[10000], firedStripDigis_localX[10000];
 
   // Wire Digis
@@ -873,18 +873,18 @@ void UFCSCRootMaker::doMuons(edm::Handle<reco::MuonCollection> muons, edm::Handl
       muons_cscSegmentRecord_localY.push_back(cscSegmentRecord_localY);
       muons_cscSegmentRecord_localX.push_back(cscSegmentRecord_localX);
     }
-  muons_nMuons = counter;
-  
 
+
+  muons_nMuons = counter;
 
 
   // Standalone Muon RecHits
   counter = 0;
   for(reco::TrackCollection::const_iterator muon = saMuons->begin(); muon != saMuons->end(); ++muon ) {
-    standaloneMuons_p[counter] = muon->p();
-    standaloneMuons_pt[counter] = muon->pt();
+    standaloneMuons_p[counter]        = muon->p();
+    standaloneMuons_pt[counter]       = muon->pt();
     standaloneMuons_nRecHits[counter] = muon->recHitsSize();
-    standaloneMuons_chi2[counter] = muon->chi2();
+    standaloneMuons_chi2[counter]     = muon->chi2();
     standaloneMuons_normChi2[counter] = muon->normalizedChi2();
     
     // loop over hits
@@ -901,16 +901,19 @@ void UFCSCRootMaker::doMuons(edm::Handle<reco::MuonCollection> muons, edm::Handl
     std::vector<CSCDetId> staChambers;
     for (trackingRecHit_iterator hit = muon->recHitsBegin(); hit != muon->recHitsEnd(); hit++ ) {
       const DetId detId( (*hit)->geographicalId() );
-      if (detId.det() == DetId::Muon) {
-	if (detId.subdetId() == MuonSubdetId::RPC) {
-	  RPCDetId rpcId(detId.rawId());
-	  nRPCHits++;
-	  if (rpcId.region() == 1){ nRPCHitsp++; np++;}
-	  if (rpcId.region() == -1){ nRPCHitsm++; nm++;}
-	}
-	if (detId.subdetId() == MuonSubdetId::DT) {
-	  nDTHits++;
-	}
+      if (detId.det() == DetId::Muon) 
+	{
+	if (detId.subdetId() == MuonSubdetId::RPC) 
+	  {
+	    RPCDetId rpcId(detId.rawId());
+	    nRPCHits++;
+	    if (rpcId.region() == 1){ nRPCHitsp++; np++;}
+	    if (rpcId.region() == -1){ nRPCHitsm++; nm++;}
+	  }
+	if (detId.subdetId() == MuonSubdetId::DT) 
+	  {
+	    nDTHits++;
+	  }
 	else if (detId.subdetId() == MuonSubdetId::CSC) {
 	  CSCDetId cscId(detId.rawId());
 	  staChambers.push_back(detId.rawId());
@@ -922,15 +925,15 @@ void UFCSCRootMaker::doMuons(edm::Handle<reco::MuonCollection> muons, edm::Handl
       recHitCounter++;
     }
     
-    standaloneMuons_nDTHits[counter] = nDTHits;
-    standaloneMuons_nCSCHits[counter] = nCSCHits;
+    standaloneMuons_nDTHits[counter]   = nDTHits;
+    standaloneMuons_nCSCHits[counter]  = nCSCHits;
     standaloneMuons_nCSCHitsP[counter] = nCSCHitsp;
     standaloneMuons_nCSCHitsM[counter] = nCSCHitsm;
-    standaloneMuons_nRPCHits[counter] = nRPCHits;
+    standaloneMuons_nRPCHits[counter]  = nRPCHits;
     standaloneMuons_nRPCHitsP[counter] = nRPCHitsp;
     standaloneMuons_nRPCHitsM[counter] = nRPCHitsm;
-    standaloneMuons_nHitsP[counter] = np;
-    standaloneMuons_nHitsM[counter] = nm;
+    standaloneMuons_nHitsP[counter]    = np;
+    standaloneMuons_nHitsM[counter]    = nm;
     
     
     GlobalPoint  innerPnt(muon->innerPosition().x(),muon->innerPosition().y(),muon->innerPosition().z());

@@ -404,16 +404,8 @@ public :
    virtual void    CountObjectsInCSCs(bool doRH, bool doSeg,
                                       bool doWire, bool doStrip, bool doComparator,
                                       bool doALCT, bool doCLCT, bool LCT);
-   virtual void     SaveCSCWithMuon();
-   virtual void     MuonsHelper();
-
-   vector<int>      RHsMatching(int endcap, int station, int ring, int chamber, double localX, double localY);
-   void RecHitInSegmentMatching(int endcap, int station, int ring, int chamber, double localX, double localY,std::vector<int> &strips, std::vector<int> &wires, std::vector<int>  &wiresgroup);
-   std::vector<int>  allSegmentsInChamber(unsigned int chamber);
-   std::vector<int>  allSegments_belonging_toMuon(unsigned int muon);
-   std::vector<int>  allSegments_inChamber_NOT_belonging_toMuon(unsigned int idchamber, unsigned int muon);
-
-
+   virtual void    SaveCSCWithMuon();
+   vector<int>     RHsMatching(int endcap, int station, int ring, int chamber, double localX, double localY);
    virtual void    FillWireMatrix(vector<int> wireDigiIndexs, TMatrixDSparse& wireMatrix);
    virtual void    FillComparatorMatrix(vector<int> comparatorDigiIndexs, TMatrixDSparse& comparatorMatrix, bool doStagger, int min=0, int max=120);
 
@@ -432,14 +424,6 @@ public :
    virtual void    WriteTH2F(TH2F* hist);
    virtual int     ChamberID_converter(int station, int ring);
 
-
-
-
-   TLorentzVector  Muon_P4(unsigned int i);
-   std::vector<int> Chambers_crossedByMuon(unsigned int i);
-   int ChamberID(int endcap, int station, int ring, int chamber);
-   bool CheckCommon( std::vector< int > inVectorA, std::vector< int > inVectorB );
-
    // save CSC's ID if there is a muon from Z decay
    vector<int> endcapL; 
    vector<int> stationL;
@@ -447,15 +431,6 @@ public :
    vector<int> chamberL;
    vector<int> muIndex;
    vector<vector<int> > stripsFromMu;
-   vector<vector<int> > ChambersFromMu;
-
-   std::vector<std::vector<int> >      Muon_segment_endcap;
-   std::vector<std::vector<int> >      Muon_segment_station;
-   std::vector<std::vector<int> >      Muon_segment_ring;
-   std::vector<std::vector<int> >      Muon_segment_chamber;
-   std::vector<std::vector<float> >    Muon_segment_localX;
-   std::vector<std::vector<float> >    Muon_segment_localY;
-   std::vector<int> Muons_Index;
 
    vector<int> nRH[540] = {};
    vector<int> nSegmentL[540] = {};
@@ -466,16 +441,8 @@ public :
    vector<int> nCLCT[540] = {};
    vector<int> nLCT[540] = {};
 
-
-
-
-
    TH1F* nHitsPerCLCT_wide = new TH1F("nHitsPerCLCT_wide","",7,0,7);
    TH1F* nHitsPerCLCT_narrow = new TH1F("nHitsPerCLCT_narrow","",7,0,7);
-
-
-
-   TH1F* nMuons_perEvent= new TH1F("nMuon_perEvent","",8,-0.5,7.5);
 
    TH1F* nTotal = new TH1F("nTotal","",10,0,10); 
    TH1F* nTotal_wideHasLess = new TH1F("nTotal_wideHasLess","",10,0,10);
@@ -508,8 +475,8 @@ public :
    TH1F* nCLCT_wide_rank_45_layer_56 = new TH1F("nCLCT_wide_rank_45_layer_56","",10,0,10);
    TH1F* nCLCT_narrow_rank_45_layer_56 = new TH1F("nCLCT_narrow_rank_45_layer_56","",10,0,10);
 
-   TH1F* nSegPerChamber = new TH1F("nSegPerChamebr","",5,-0.5,4.5); 
-   TH1F* nRHPerSeg = new TH1F("nRHPerSeg","",4,2.5,6.5);
+   TH1F* nSegPerChamber = new TH1F("nSegPerChamebr","",10,0,10); 
+   TH1F* nRHPerSeg = new TH1F("nRHPerSeg","",7,0,7);
    TH1F* chi2PerDOF = new TH1F("chi2PerDOF","",100,0,200);
 
    TH2F* nWireDigi_Layer = new TH2F("nWireDigi_Layer","",10,0,10,6,1,7);
@@ -600,8 +567,6 @@ public :
    TH2F* SegRanking_muonPt = new TH2F("SegRanking_muonPt","", 20, 0, 100, 5, 1, 6);
    TH2F* nHitsPerSeg_muonPt_old = new TH2F("nHitsPerSeg_muonPt_old","", 20, 0, 100, 3, 4, 7);
    TH2F* SegRanking_muonPt_old = new TH2F("SegRanking_muonPt_old","", 20, 0, 100, 5, 1, 6);
-
-
 
    int nEntry;
 

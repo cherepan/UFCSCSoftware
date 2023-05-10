@@ -47,8 +47,8 @@ void CSCSegmentProducer::produce(edm::Event& ev, const edm::EventSetup& setup) {
     edm::ESHandle<CSCGeometry> h;
     setup.get<MuonGeometryRecord>().get(h);
     const CSCGeometry* pgeom = &*h;
-    segmentBuilder_->setGeometry(pgeom);
 
+    segmentBuilder_->setGeometry(pgeom);
     recoConditions_->initializeEvent( setup );
 	
     // get the collection of CSCRecHit2D

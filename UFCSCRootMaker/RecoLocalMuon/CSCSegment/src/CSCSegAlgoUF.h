@@ -4,20 +4,7 @@
 /**
  * \class CSCSegAlgoUF
  *
- * This is the original algorithm for building endcap muon track segments
- * out of the rechit's in a CSCChamber
- * 'RU' = 'RUssia' = Road Usage
- *
- * A CSCSegment is a RecSegment4D, and is built from
- * CSCRecHit2D objects, each of which is a RecHit2DLocalPos. <BR>
- *
- * This class is used by the CSCSegmentAlgorithm. <BR>
- * Alternative algorithms can be used for the segment building
- * by writing classes like this, and then selecting which one is actually
- * used via the CSCSegmentBuilder. <BR>
- *
- * developed and implemented by Vladimir Palichik <Vladimir.Paltchik@cern.ch>
- *                          and Nikolay Voytishin <nikolay.voytishin@cern.ch>
+
  */
 
 #include <RecoLocalMuon/CSCSegment/src/CSCSegmentAlgorithm.h>

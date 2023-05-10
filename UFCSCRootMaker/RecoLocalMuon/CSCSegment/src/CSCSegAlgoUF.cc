@@ -214,9 +214,9 @@ if (int(wireSegs.size()) == 1) {
               const CSCWireHit* cscwirehit = wirehits[wHitsFromWSeg[k]]; 
               const CSCStripHit* cscstriphit = striphits[sHitsFromSSeg[k]];
 
-              const CSCWireHit& wirehit = *cscwirehit;
+              const CSCWireHit&  wirehit  = *cscwirehit;
               const CSCStripHit& striphit = *cscstriphit;
-              const CSCDetId& detId = CSCDetId(theChamber->id().endcap(),
+              const CSCDetId&    detId    = CSCDetId(theChamber->id().endcap(),
                                                theChamber->id().station(),
                                                theChamber->id().ring(),
                                                theChamber->id().chamber(), k+1);
@@ -391,6 +391,7 @@ void CSCSegAlgoUF::FillStripMatrix(TH2F* shitsMatrix, ChamberStripHitContainer s
          if (int(shit->strips().size()) == 3) {
 
             int sp = (shit->strips())[1];            
+	    
 //            double leftC = (shit->s_adc())[1]; double rightC = (shit->s_adc())[9]; 
 //std::cout << (shit->s_adc())[0] << " " << (shit->s_adc())[4] << " " << (shit->s_adc())[8] << std::endl;
 //std::cout << (shit->s_adc())[1] << " " << (shit->s_adc())[5] << " " << (shit->s_adc())[9] << std::endl;
@@ -482,12 +483,12 @@ void CSCSegAlgoUF::ScanForWireSeg(TH2F* wHitsPerChamber, std::list<CSCWireSegmen
 
                 }
 
-if (debug) {
-
-   std::cout << theChamber->id() << std::endl;
-   std::cout << "n layer = " << nLayer << std::endl; 
-   std::cout << "before:" << std::endl; WriteTH2F(wHitsPerChamber);
-}
+	     if (debug) {
+	       
+	       std::cout << theChamber->id() << std::endl;
+	       std::cout << "n layer = " << nLayer << std::endl; 
+	       std::cout << "before:" << std::endl; WriteTH2F(wHitsPerChamber);
+	     }
              wHitsPerChamber->Add(wirePattern,-1); // delete wire group being used
 //std::cout << "after:" << std::endl; WriteTH2F(wHitsPerChamber);
              delete wirePattern; 
