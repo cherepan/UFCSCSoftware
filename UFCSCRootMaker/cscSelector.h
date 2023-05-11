@@ -412,7 +412,8 @@ public :
    std::vector<int>  allSegmentsInChamber(unsigned int chamber);
    std::vector<int>  allSegments_belonging_toMuon(unsigned int muon);
    std::vector<int>  allSegments_inChamber_NOT_belonging_toMuon(unsigned int idchamber, unsigned int muon);
-
+   std::vector<int>  allrechits_of_segment(unsigned int segment);
+     
 
    virtual void    FillWireMatrix(vector<int> wireDigiIndexs, TMatrixDSparse& wireMatrix);
    virtual void    FillComparatorMatrix(vector<int> comparatorDigiIndexs, TMatrixDSparse& comparatorMatrix, bool doStagger, int min=0, int max=120);

@@ -152,7 +152,8 @@ Bool_t cscSelector::Process(Long64_t entry)
      {
 
        std::cout<<"  muon index  "<< Muons_Index.at(imu) << "    has #segments:    "<< Muon_segment_chamber.at(imu).size() <<std::endl;
-       allSegments_belonging_toMuon(Muons_Index.at(imu));
+       std::vector<int>  testsegs = allSegments_belonging_toMuon(Muons_Index.at(imu));
+       if(testsegs.size()!=0) allrechits_of_segment(testsegs.at(0));
        for(unsigned int isegment = 0; isegment< Muon_segment_chamber.at(imu).size(); isegment++)
 	 {
 
@@ -177,6 +178,11 @@ Bool_t cscSelector::Process(Long64_t entry)
 
 	   allSegmentsInChamber(thechamber);
 	   allSegments_inChamber_NOT_belonging_toMuon(thechamber, Muons_Index.at(imu));
+
+
+
+
+
 
 	 }
        
@@ -1226,7 +1232,59 @@ cscSelector::allSegments_belonging_toMuon(unsigned int muon)
   return out;
 }
 
+std::vector<int> 
+cscSelector::allrechits_of_segment(unsigned int segment)
+{
+  std::vector<int> out;
 
+
+  int segment_endcap     = cscSegments_ID_endcap[segment];
+  int segment_station    = cscSegments_ID_station[segment];
+  int segment_ring       = cscSegments_ID_ring[segment];
+  int segment_chamber    = cscSegments_ID_chamber[segment];
+  int chamber_of_segment = ChamberID(segment_endcap,segment_station,segment_ring,segment_chamber);
+
+
+  for (unsigned int iRecHit = 0; iRecHit < cscSegments_recHitRecord_endcap[segment].size(); iRecHit++)
+    {
+
+      int chamber_of_srechit = ChamberID(cscSegments_recHitRecord_endcap[segment][iRecHit],cscSegments_recHitRecord_endcap[segment][iRecHit],cscSegments_recHitRecord_ring[segment][iRecHit],cscSegments_recHitRecord_chamber[segment][iRecHit]);
+      
+      std::cout<<"  chamber must be as of the segment   "<< chamber_of_srechit<<std::endl;
+      std::cout<< "------------------------------   rechit in layer  "<< cscSegments_recHitRecord_layer[segment][iRecHit] << " X/Y  "<<cscSegments_recHitRecord_localX[segment][iRecHit]
+	       <<"  \  " <<cscSegments_recHitRecord_localY[segment][iRecHit] <<std::endl;
+
+
+      for (int i2DRecHit = 0; i2DRecHit < *recHits2D_nRecHits2D; i2DRecHit++)
+	{
+
+	  int layer_2DRecHit     = recHits2D_ID_layer[i2DRecHit];
+	  double localX_2DRecHit = recHits2D_localX[i2DRecHit];
+	  double localY_2DRecHit = recHits2D_localY[i2DRecHit];
+	  if(ChamberID(recHits2D_ID_endcap[i2DRecHit],recHits2D_ID_station[i2DRecHit],recHits2D_ID_ring[i2DRecHit],recHits2D_ID_chamber[i2DRecHit]) == chamber_of_srechit)
+	    {
+	      if(recHits2D_localX[i2DRecHit] == cscSegments_recHitRecord_localX[segment][iRecHit] && 
+		 recHits2D_localY[i2DRecHit] == cscSegments_recHitRecord_localY[segment][iRecHit])
+		
+		{
+
+
+		
+		  out.push_back(i2DRecHit);
+		  std::cout<< "          ------------------------------   in a loop over all rechit in layer  "<< layer_2DRecHit << "   x/y   "<< localX_2DRecHit<< "  :  "<< localY_2DRecHit << std::endl;
+
+		}
+
+	    }
+
+	}
+
+    }
+
+
+  return out;
+
+}
 
 std::vector<int>  
 cscSelector::allSegments_inChamber_NOT_belonging_toMuon(unsigned int idchamber, unsigned int muon)
@@ -1245,9 +1303,8 @@ cscSelector::allSegments_inChamber_NOT_belonging_toMuon(unsigned int idchamber, 
       int chamber_of_segment = ChamberID(segment_endcap,segment_station,segment_ring,segment_chamber);
       if(chamber_of_segment == idchamber)
 	{
-	  if ( std::find(allSegments_belonging_toMuon(muon).begin(), 
-			 allSegments_belonging_toMuon(muon).end(), 
-			 isegment) != allSegments_belonging_toMuon(muon).end() ) continue;
+	  std::vector<int> muonsegments = allSegments_belonging_toMuon(muon);
+	  if ( std::find(muonsegments.begin(), muonsegments.end(), isegment) != muonsegments.end() ) continue;
 	  out.push_back(isegment);
 	  std::cout<<"==================  In a chamber  "<< chamber_of_segment << "   not a muon segment    "<< isegment << std::endl;
 	}
