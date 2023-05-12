@@ -113,7 +113,7 @@ Bool_t cscSelector::Process(Long64_t entry)
 
      FillSegs(i,chamberIndex,segs);
    }
-   std::cout<<" --------------------------------------------------------------    l'evenement a commencee ici  ---------------------------------------- " << std::endl;
+
 
    for (int i = 0; i < int(segs.size()); i++) {
      int index = segs[i].first;
@@ -126,7 +126,7 @@ Bool_t cscSelector::Process(Long64_t entry)
        int treeIndex = tmpSegs[j];
 
        if (tmpSegs.size() != 1) continue;
-       nRHPerSeg->Fill(cscSegments_nRecHits[treeIndex]);
+
        chi2PerDOF->Fill(cscSegments_chi2[treeIndex]/cscSegments_nDOF[treeIndex]);
 
      }
@@ -146,14 +146,34 @@ Bool_t cscSelector::Process(Long64_t entry)
    MuonsHelper();
 
 
-   std::cout<<"  N muons:    "<< Muons_Index.size() << std::endl;
+
+
+   std::vector<int>    allChambersWithSegments =   allChambersWithASegment();
+   for(auto chamber  : allChambersWithSegments )
+     {
+       std::vector<int> allsegments_in_a_chamber =   allSegmentsInChamber(chamber);
+       nSegmentsPerChamber->Fill(allsegments_in_a_chamber.size());
+     }
 
    for(unsigned int imu=0; imu < Muons_Index.size(); imu++)
      {
 
-       std::cout<<"  muon index  "<< Muons_Index.at(imu) << "    has #segments:    "<< Muon_segment_chamber.at(imu).size() <<std::endl;
-       std::vector<int>  testsegs = allSegments_belonging_toMuon(Muons_Index.at(imu));
-       if(testsegs.size()!=0) allrechits_of_segment(testsegs.at(0));
+       std::vector<int>  MuonSegments = allSegments_belonging_toMuon(Muons_Index.at(imu));
+       std::vector<int> list_of_chambers_crossed_by_muon = Chambers_crossedByMuon(Muons_Index.at(imu));
+       for(auto  ch : list_of_chambers_crossed_by_muon)
+	 {
+	   std::vector<int> allsegments_in_a_chamber_crossed_by_muon =   allSegmentsInChamber(ch);
+	   nSegmentsPerMuonChamber->Fill(allsegments_in_a_chamber_crossed_by_muon.size());
+	 }
+
+       for(auto iseg : MuonSegments)
+	 {
+	   int nrechit = allrechits_of_segment(iseg).size();
+	   nRHPerSeg->Fill(nrechit); 
+	   
+	 }
+
+       //       if(testsegs.size()!=0) allrechits_of_segment(testsegs.at(0));
        for(unsigned int isegment = 0; isegment< Muon_segment_chamber.at(imu).size(); isegment++)
 	 {
 
@@ -168,21 +188,16 @@ Bool_t cscSelector::Process(Long64_t entry)
 
 
 
-	   
-	   std::cout<<" Muon  segment #   "<< isegment<< "  in chamber   "<< 
-	     ChamberID(Muon_segment_endcap.at(imu).at(isegment), 
-		       Muon_segment_station.at(imu).at(isegment), 
-		       Muon_segment_ring.at(imu).at(isegment), 
-		       Muon_segment_chamber.at(imu).at(isegment))  << "  with local X/Y  " 
-		    << Muon_segment_localX.at(imu).at(isegment) << "   /   "<< Muon_segment_localY.at(imu).at(isegment)  << std::endl;
+	   //	   std::vector<int>  rechits_per_segment = 
+	   //	   std::cout<<" Muon  segment #   "<< isegment<< "  in chamber   "<< 
+	   //	     ChamberID(Muon_segment_endcap.at(imu).at(isegment), 
+	   //		       Muon_segment_station.at(imu).at(isegment), 
+	   //		       Muon_segment_ring.at(imu).at(isegment), 
+	   //		       Muon_segment_chamber.at(imu).at(isegment))  << "  with local X/Y  " 
+	   //		    << Muon_segment_localX.at(imu).at(isegment) << "   /   "<< Muon_segment_localY.at(imu).at(isegment)  << std::endl;
 
-	   allSegmentsInChamber(thechamber);
+
 	   allSegments_inChamber_NOT_belonging_toMuon(thechamber, Muons_Index.at(imu));
-
-
-
-
-
 
 	 }
        
@@ -669,6 +684,9 @@ void cscSelector::Terminate()
   chi2PerDOF->SetMinimum(0.1);
   chi2PerDOF->Write();
    
+  nSegmentsPerMuonChamber -> Write();
+  nSegmentsPerChamber -> Write();
+
   /*
     nHitsPerSeg_muonPt->Write();
     SegRanking_muonPt->Write();
@@ -1150,6 +1168,20 @@ cscSelector::allSegmentsInChamber_NOT_fromMuon(unsigned int idchamber, unsigned 
 }
 */
 
+
+std::vector<int> 
+cscSelector::allChambersWithASegment()
+{
+  std::vector<int> out;
+  for (unsigned int isegment = 0; isegment < *cscSegments_nSegments; isegment++)
+    {
+      int chamber = ChamberID(cscSegments_ID_endcap[isegment],cscSegments_ID_station[isegment],cscSegments_ID_ring[isegment],cscSegments_ID_chamber[isegment]);
+      if(std::find(out.begin(), out.end(), chamber) != out.end()) continue;
+      out.push_back(chamber);
+    }
+  return out;
+}
+
 std::vector<int>
 cscSelector::allSegmentsInChamber(unsigned int idchamber)
 {
@@ -1166,8 +1198,7 @@ cscSelector::allSegmentsInChamber(unsigned int idchamber)
       int segment_station = cscSegments_ID_station[isegment];
       int segment_ring    = cscSegments_ID_ring[isegment];
       int segment_chamber = cscSegments_ID_chamber[isegment];
-      std::cout<< "  >>>>>>>>>>>  In  a chamber   "<<  ChamberID(segment_endcap,segment_station,segment_ring,segment_chamber) << "    segment # " << isegment <<"      with local  X/Y  "<< cscSegments_localX[isegment] 
-	       <<" /  " << cscSegments_localY[isegment] <<std::endl;
+      //      std::cout<< "  >>>>>>>>>>>  In  a chamber   "<<  ChamberID(segment_endcap,segment_station,segment_ring,segment_chamber) << "    segment # " << isegment <<"      with local  X/Y  "<< cscSegments_localX[isegment] <<" /  " << cscSegments_localY[isegment] <<std::endl;
 
 
       if( ChamberID(segment_endcap,segment_station,segment_ring,segment_chamber) == idchamber)
@@ -1221,7 +1252,7 @@ cscSelector::allSegments_belonging_toMuon(unsigned int muon)
 	     muon_segment_localX     == segment_localX       &&
 	     muon_segment_localY     == segment_localY)  
 	    {
-	      std::cout<<" <<<<<<<<<<<<<<<<<<<<<<   check that cham,bers are different   "<< chamber_of_segment << "  seg #   "<<isegment <<"   with local X/Y   " <<segment_localX << "  \ " <<segment_localY <<std::endl;
+	      //	      std::cout<<" <<<<<<<<<<<<<<<<<<<<<<   check that cham,bers are different   "<< chamber_of_segment << "  seg #   "<<isegment <<"   with local X/Y   " <<segment_localX << "  \ " <<segment_localY <<std::endl;
 	      out.push_back(isegment);
 
 	    }
@@ -1250,9 +1281,9 @@ cscSelector::allrechits_of_segment(unsigned int segment)
 
       int chamber_of_srechit = ChamberID(cscSegments_recHitRecord_endcap[segment][iRecHit],cscSegments_recHitRecord_endcap[segment][iRecHit],cscSegments_recHitRecord_ring[segment][iRecHit],cscSegments_recHitRecord_chamber[segment][iRecHit]);
       
-      std::cout<<"  chamber must be as of the segment   "<< chamber_of_srechit<<std::endl;
-      std::cout<< "------------------------------   rechit in layer  "<< cscSegments_recHitRecord_layer[segment][iRecHit] << " X/Y  "<<cscSegments_recHitRecord_localX[segment][iRecHit]
-	       <<"  \  " <<cscSegments_recHitRecord_localY[segment][iRecHit] <<std::endl;
+      //      std::cout<<"  chamber must be as of the segment   "<< chamber_of_srechit<<std::endl;
+      //      std::cout<< "------------------------------   rechit in layer  "<< cscSegments_recHitRecord_layer[segment][iRecHit] << " X/Y  "<<cscSegments_recHitRecord_localX[segment][iRecHit]
+      //	       <<"  \  " <<cscSegments_recHitRecord_localY[segment][iRecHit] <<std::endl;
 
 
       for (int i2DRecHit = 0; i2DRecHit < *recHits2D_nRecHits2D; i2DRecHit++)
@@ -1271,7 +1302,7 @@ cscSelector::allrechits_of_segment(unsigned int segment)
 
 		
 		  out.push_back(i2DRecHit);
-		  std::cout<< "          ------------------------------   in a loop over all rechit in layer  "<< layer_2DRecHit << "   x/y   "<< localX_2DRecHit<< "  :  "<< localY_2DRecHit << std::endl;
+		  //		  std::cout<< "          ------------------------------   in a loop over all rechit in layer  "<< layer_2DRecHit << "   x/y   "<< localX_2DRecHit<< "  :  "<< localY_2DRecHit << std::endl;
 
 		}
 
@@ -1306,7 +1337,7 @@ cscSelector::allSegments_inChamber_NOT_belonging_toMuon(unsigned int idchamber, 
 	  std::vector<int> muonsegments = allSegments_belonging_toMuon(muon);
 	  if ( std::find(muonsegments.begin(), muonsegments.end(), isegment) != muonsegments.end() ) continue;
 	  out.push_back(isegment);
-	  std::cout<<"==================  In a chamber  "<< chamber_of_segment << "   not a muon segment    "<< isegment << std::endl;
+	  //	  std::cout<<"==================  In a chamber  "<< chamber_of_segment << "   not a muon segment    "<< isegment << std::endl;
 	}
 
 

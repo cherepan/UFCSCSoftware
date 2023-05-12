@@ -20,13 +20,14 @@ tag1 = args.tag1
 tag2 = args.tag2
 plotdir = args.plotdir
 
-histnames = ["nSegPerChamebr","nRHPerSeg","chi2PerDOF"]
-xmins = [0,2,0]
-xmaxs = [6,7,100]
-ymins = [0.1,0.1,0.1]
+
+histnames = ["nSegPerChamebr","nRHPerSeg","chi2PerDOF","nSegmentsPerChamber","nSegmentsPerMuonChamber"]
+xmins = [0,2,0,0,0]
+xmaxs = [6,7,100,6,6]
+ymins = [0.1,0.1,0.1,0.1,0.1]
 #ymaxs = [10000,10000,10000,10000]
-ymaxs = [2000,2000,3000]
-xtitles = ["#Segments per chamber","# RecHits per Segment","chi2/DOF"]
+ymaxs = [10000,5000,3000,50000,20000]
+xtitles = ["#Segments per chamber","# RecHits per Segment","chi2/DOF","# Segments per Chamber (new)","# Segments per chamber w/ #mu"]
 
 for i in range(len(histnames)):
 

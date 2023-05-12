@@ -409,6 +409,9 @@ public :
 
    vector<int>      RHsMatching(int endcap, int station, int ring, int chamber, double localX, double localY);
    void RecHitInSegmentMatching(int endcap, int station, int ring, int chamber, double localX, double localY,std::vector<int> &strips, std::vector<int> &wires, std::vector<int>  &wiresgroup);
+
+
+   std::vector<int>  allChambersWithASegment();
    std::vector<int>  allSegmentsInChamber(unsigned int chamber);
    std::vector<int>  allSegments_belonging_toMuon(unsigned int muon);
    std::vector<int>  allSegments_inChamber_NOT_belonging_toMuon(unsigned int idchamber, unsigned int muon);
@@ -509,8 +512,12 @@ public :
    TH1F* nCLCT_wide_rank_45_layer_56 = new TH1F("nCLCT_wide_rank_45_layer_56","",10,0,10);
    TH1F* nCLCT_narrow_rank_45_layer_56 = new TH1F("nCLCT_narrow_rank_45_layer_56","",10,0,10);
 
-   TH1F* nSegPerChamber = new TH1F("nSegPerChamebr","",5,-0.5,4.5); 
-   TH1F* nRHPerSeg = new TH1F("nRHPerSeg","",4,2.5,6.5);
+   TH1F* nSegPerChamber = new TH1F("nSegPerChamebr","",5,-0.5,4.5);
+
+   TH1F* nSegmentsPerChamber     = new TH1F("nSegmentsPerChamber","",5,-0.5,4.5);  
+   TH1F* nSegmentsPerMuonChamber = new TH1F("nSegmentsPerMuonChamber","",5,-0.5,4.5);
+
+   TH1F* nRHPerSeg = new TH1F("nRHPerSeg","",5,2.5,7.5);
    TH1F* chi2PerDOF = new TH1F("chi2PerDOF","",100,0,200);
 
    TH2F* nWireDigi_Layer = new TH2F("nWireDigi_Layer","",10,0,10,6,1,7);

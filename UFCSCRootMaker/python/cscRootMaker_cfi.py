@@ -5,8 +5,8 @@ cscRootMaker = cms.EDAnalyzer('UFCSCRootMaker',
   vertexSrc = cms.untracked.InputTag('offlinePrimaryVertices'),
   standAloneMuonsSrc = cms.untracked.InputTag('standAloneMuons'),
   cscRecHitTagSrc = cms.untracked.InputTag('csc2DRecHits'),
-  cscSegTagSrc = cms.untracked.InputTag('cscSegments','','reRECO'),   #  UF reco
-#  cscSegTagSrc = cms.untracked.InputTag('cscSegments','','RECO'),    #  RU reco
+#  cscSegTagSrc = cms.untracked.InputTag('cscSegments','','reRECO'),   #  UF reco
+  cscSegTagSrc = cms.untracked.InputTag('cscSegments','','RECO'),    #  RU reco
 
   level1TagSrc = cms.untracked.InputTag('gtDigis'),
   hltTagSrc = cms.untracked.InputTag('TriggerResults', '', 'HLT'),
