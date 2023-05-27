@@ -1,0 +1,1 @@
+[cherepan@lxplus717]/afs/cern.ch/work/c/cherepan/CSC/Synchronise_10_05/CMSSW_10_6_20/src/SkimProduction/CRAB%  dasgoclient  -query="dataset=/SingleMuon/Run2018B*/RAW-RECO"
