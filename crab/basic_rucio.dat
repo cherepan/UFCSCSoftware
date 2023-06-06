@@ -1,0 +1,15 @@
+
+source /cvmfs/cms.cern.ch/cmsset_default.sh
+source /cvmfs/cms.cern.ch/rucio/setup-py3.sh
+export RUCIO_ACCOUNT=cherepan
+site=T2_US_Florida
+
+
+rucio list-dataset-replicas --deep cms:/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL18RECO-PUForTRKv2_TRKv2_106X_upgrade2018_realistic_v11_L1v1-v2/GEN-SIM-RECO  -look for blocks
+rucio list-file-replicas  cms:/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL18RECO-PUForTRKv2_TRKv2_106X_upgrade2018_realistic_v11_L1v1-v2/GEN-SIM-RECO#fc161657-ee70-4d01-8aa0-23aebbb884cb  -get file list in the block
+rucio download cms:<file> - download file
+
+/afs/cern.ch/work/c/cherepan/CSC/Synchronise_10_05/CSC_RU_Seg_Alog/CMSSW_10_6_20/src/UFCSCSoftware/crab/cms/store/mc/RunIISummer20UL18RECO/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/GEN-SIM-RECO/PUForTRKv2_TRKv2_106X_upgrade2018_realistic_v11_L1v1-v2/2530000/2F7C3E79-EED3-E646-A228-99CB16BDEC95.root
+
+
+/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL18HLT-PUForTRKv2_TRKv2_102X_upgrade2018_realistic_v15-v2/GEN-SIM-DIGI-RAW
