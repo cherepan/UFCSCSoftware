@@ -1,4 +1,4 @@
-## Dump  10  events in CSC rechit builder - Tim Cox - 07.11.2012
+#e# Dump  10  events in CSC rechit builder - Tim Cox - 07.11.2012
 ## This version runs in 6_0_1_PostLS1 on a simulated data DIGI sample.
 
 import FWCore.ParameterSet.Config as cms
@@ -16,7 +16,9 @@ process.load('Configuration.StandardSequences.Services_cff')
 ##################################################
 # --- MATCH GT TO RELEASE AND DATA SAMPLE
 #process.GlobalTag.globaltag = "POSTLS161_V11::All"
-process.GlobalTag.globaltag = "106X_dataRun2_v32"
+#process.GlobalTag.globaltag = "106X_dataRun2_v32"
+
+process.GlobalTag.globaltag = "124X_dataRun3_PromptAnalysis_v1"
 
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 isSIMDIGI = bool(False)
@@ -30,8 +32,9 @@ process.source    = cms.Source("PoolSource",
                                noEventSort = cms.untracked.bool(True),
                                duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
                                fileNames = cms.untracked.vstring(
-                                   '/store/data/Run2018B/SingleMuon/RAW-RECO/ZMu-12Nov2019_UL2018-v2/240000/128783F5-CD11-AB49-9CAA-222EC8F82BA9.root',
-                                   '/store/data/Run2018B/SingleMuon/RAW-RECO/ZMu-12Nov2019_UL2018-v2/240000/49A33288-9925-FF43-AED3-C1F3BD2FD640.root'
+                                   '/store/data/Run2022C/SingleMuon/RAW-RECO/ZMu-PromptReco-v1/000/356/381/00000/6513929e-95f2-4528-9b6b-6b0a15a768d4.root',
+                                   '/store/data/Run2022C/SingleMuon/RAW-RECO/ZMu-PromptReco-v1/000/356/378/00000/c6e5cdb2-8369-46e9-8870-08bce43b26a7.root'
+
 #                                   '/store/data/Run2018B/SingleMuon/RAW-RECO/ZMu-12Nov2019_UL2018-v2/270003/5FE6A215-7096-6B41-B499-D12FE193A89B.root',
 #                                   '/store/data/Run2018B/SingleMuon/RAW-RECO/ZMu-12Nov2019_UL2018-v2/270003/A0AE2F0B-740C-B646-BF3B-58EE0943A261.root',
 #                                   '/store/data/Run2018B/SingleMuon/RAW-RECO/ZMu-12Nov2019_UL2018-v2/270003/7E66C6C3-7AEB-C048-8450-58BBD7E70343.root',
