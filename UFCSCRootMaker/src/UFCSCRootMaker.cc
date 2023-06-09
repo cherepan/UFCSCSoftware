@@ -77,7 +77,8 @@
 #include "EventFilter/CSCRawToDigi/interface/CSCCFEBData.h"
 #include "EventFilter/CSCRawToDigi/interface/CSCALCTHeader.h"
 #include "EventFilter/CSCRawToDigi/interface/CSCAnodeData.h"
-#include "EventFilter/CSCRawToDigi/interface/CSCCLCTData.h"
+//#include "EventFilter/CSCRawToDigi/interface/CSCCLCTData.h"   // CMS_12_x and onwards the CSC data format has changed
+#include "EventFilter/CSCRawToDigi/interface/CSCComparatorData.h"
 #include "EventFilter/CSCRawToDigi/interface/CSCDDUEventData.h"
 #include "EventFilter/CSCRawToDigi/interface/CSCTMBData.h"
 #include "EventFilter/CSCRawToDigi/interface/CSCTMBHeader.h"
@@ -2193,9 +2194,11 @@ void UFCSCRootMaker::doLCTDigis( edm::Handle<CSCALCTDigiCollection> alcts, edm::
   	    int nclct = cscData[iCSC].dmbHeader()->nclct();
   	    bool goodTMB=false;
   	    if (nclct&&cscData[iCSC].tmbData()) {
-  	      if (cscData[iCSC].tmbHeader()->check()){
-  		if (cscData[iCSC].clctData()->check()) goodTMB=true; 
-  	      }
+  	      if (cscData[iCSC].tmbHeader()->check())
+		{
+		  //		  if (cscData[iCSC].clctData()->check()) goodTMB=true; //   Run II  data format, CLCTData class changed to comparatorData()
+		  if (cscData[iCSC].comparatorData()->check()) goodTMB=true; 
+		}
   	    }  
       	      
   	    if (goodTMB && goodALCT) { 
