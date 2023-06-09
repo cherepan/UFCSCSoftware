@@ -3,15 +3,15 @@ UF CSC ntuple
 
 ```
 For Run II:
-
 cmsrel CMSSW_10_6_20
 cd CMSSW_10_6_20/src
 cmsenv
 
-For RunIII:
 
-cmsrel CMSSW_12_4_11_patch3
-cd CMSSW_12_4_11_patch3
+
+For RunIII:
+cmsrel CMSSW_12_4_4
+cd CMSSW_12_4_4
 cmsenv
 
 
