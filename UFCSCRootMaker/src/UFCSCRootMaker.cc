@@ -229,6 +229,7 @@ private:
   edm::EDGetTokenT<CSCCorrelatedLCTDigiCollection> corrlctDigiTagSrc;
   edm::EDGetTokenT<edm::PSimHitContainer> simHitTagSrc;
   edm::EDGetTokenT<FEDRawDataCollection> fedRawTagSrc;
+  edm::ESGetToken<CSCGeometry, MuonGeometryRecord> cscGeom_test;
 
   SegmentsTrackAssociator* theSegmentsAssociator;
   edm::ParameterSet parameters;
@@ -247,7 +248,7 @@ private:
 
 
 
-  edm::ESGetToken<CSCGeometry, MuonGeometryRecord> cscGeom_test;
+
 
 
 
@@ -481,6 +482,10 @@ UFCSCRootMaker::UFCSCRootMaker(const edm::ParameterSet& iConfig) :
   corrlctDigiTagSrc(consumes<CSCCorrelatedLCTDigiCollection>(iConfig.getUntrackedParameter<edm::InputTag>("corrlctDigiTagSrc"))),
   simHitTagSrc(consumes<edm::PSimHitContainer>(iConfig.getUntrackedParameter<edm::InputTag>("simHitTagSrc"))),
   fedRawTagSrc(consumes<FEDRawDataCollection>(iConfig.getUntrackedParameter<edm::InputTag>("fedRawTagSrc"))),
+  cscGeom_test(esConsumes<CSCGeometry, MuonGeometryRecord>()),
+
+
+
 
   isFullRECO(iConfig.getUntrackedParameter<bool>("isFullRECO",false)),
   isLocalRECO(iConfig.getUntrackedParameter<bool>("isLocalRECO",false)),
@@ -520,6 +525,8 @@ UFCSCRootMaker::~UFCSCRootMaker()
 // ------------ method called for each event  ------------
 void UFCSCRootMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
+
+
    using namespace edm;
    using namespace std;
    /// Time in seconds since January 1, 1970.
@@ -567,10 +574,11 @@ void UFCSCRootMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 
 
-   edm::ESGetToken<CSCGeometry, MuonGeometryRecord> cscGeom_test2;
+   //     edm::ESGetToken<CSCGeometry, MuonGeometryRecord> cscGeom_test2;
+   //   cscGeom_test2(iConfig.esConsumes<CSCGeometry, MuonGeometryRecord>())
 
-   auto const cscGeom = &iSetup.getData(cscGeom_test2);
 
+   auto const cscGeom = &iSetup.getData(cscGeom_test);
    cout<<" return vector of all chambers ( whatever it is )  "<< cscGeom->chambers().size() << std::endl;
 
      //dSiter
