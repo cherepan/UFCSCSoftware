@@ -569,7 +569,12 @@ void UFCSCRootMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
    edm::ESGetToken<CSCGeometry, MuonGeometryRecord> cscGeom_test2;
 
-   auto const cscGeom = iSetup.getData(cscGeom_test2);
+   auto const cscGeom = &iSetup.getData(cscGeom_test2);
+
+   cout<<" return vector of all chambers ( whatever it is )  "<< cscGeom->chambers().size() << std::endl;
+
+     //dSiter
+  //   const CSCChamber* cscchamber = cscGeom->chamber(id);
 
    //   const CSCGeometry* cscGeom = iSetup.getData(cscGeom_test2);
    //   edm::ESGetToken<SomeProduct, SomeRecord> esToken_; 
