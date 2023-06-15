@@ -28,22 +28,31 @@ addDigiInfo = bool(True)
 addTimeMonitoringInfo = bool(True)
 addCalibrationInfo = bool(False)
 
-maxEvents = -1
+maxEvents = 100
 
-#MCGlobalTag='PH2_1K_FB_V6::All' for DYmumu_PU140
+MCGlobalTag='124X_mcRun3_2022_realistic_v12' #for DYmumu_PU140
 #DataGlobalTag='76X_dataRun2_v19'
 #DataGlobalTag='76X_dataRun2_v15'
 #DataGlobalTag='92X_dataRun2_Prompt_v11'
-DataGlobalTag='106X_dataRun2_v32'
+#DataGlobalTag='106X_dataRun2_v32'
+DataGlobalTag='124X_dataRun3_PromptAnalysis_v1'
+
+
+
+
 doDebug = bool(False)
 ###############################
 
 ### Debug Printing ###
-if not isDATA :
-    print "Sample Type: MC"
-else :
-    print "Sample Type: Data"
+
+#if not isDATA:
+#    print 'Sample Type: MC'
+#else:
+#    print "Sample Type: Data"
                 
+
+
+
 #####################
 process = cms.Process("UFCSCRootMaker")
 
@@ -57,8 +66,9 @@ process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(maxEvents))
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 #process.MessageLogger.cerr.threshold = 'ERROR' # Options: INFO, WARNING, ERROR
 process.MessageLogger.cerr.FwkReport.reportEvery = 1000
-process.MessageLogger.destinations = ['cout', 'cerr']
-process.MessageLogger.suppressWarning.append('classByHitsGlb') # kill stupid RPC hit associator warning
+#process.MessageLogger.destinations = ['cout', 'cerr']
+#process.MessageLogger.suppressWarning.append('classByHitsGlb') # kill stupid RPC hit associator warning
+
 #process.MessageLogger.cerr.FwkJob.limit=1
 #process.MessageLogger.cerr.ERROR = cms.untracked.PSet( limit = cms.untracked.int32(1))
                                                        
@@ -100,7 +110,8 @@ process.out = cms.OutputModule("PoolOutputModule",
 
 process.TFileService = cms.Service("TFileService",
 #                                   fileName = cms.string("DUMMYFILENAME.root")
-                                   fileName = cms.string("CSC_UF_ntuple_UF_SegmentBuilder.root")
+#                                   fileName = cms.string("CSC_UF_ntuple_UF_SegmentBuilder.root")
+                                   fileName = cms.string("run3_data_test.root")
 #                                   fileName = cms.string("test/SingleMuon_RAW-RECO_ZMu-12Nov2019_UL2018_CSCSegmentBuilder_UF_testRun.root")
                                    )
 
@@ -125,7 +136,8 @@ if isDATA:
     process.source.fileNames = cms.untracked.vstring(
 #        'file:/eos/user/c/cherepan/HeavyFiles/SingleMuon_RAW-RECO_ZMu-12Nov2019_UL2018_CSCSegmentBuilder_UF.root'
 #        'file:test/SingleMuon_RAW-RECO_ZMu-12Nov2019_UL2018_CSCSegmentBuilder_UF_testRun.root'
-         'file:/eos/user/c/cherepan/CSC/SingleMuon_RAW-RECO_ZMu-12Nov2019_UL2018_CSCSegmentBuilder_UF_testRun.root'
+#         'file:/eos/user/c/cherepan/CSC/SingleMuon_RAW-RECO_ZMu-12Nov2019_UL2018_CSCSegmentBuilder_UF_testRun.root'
+        '/store/data/Run2022C/SingleMuon/RAW-RECO/ZMu-PromptReco-v1/000/356/381/00000/6513929e-95f2-4528-9b6b-6b0a15a768d4.root'
 #        'file:test/SingleMuon_RAW-RECO_ZMu-12Nov2019_UL2018_CSCSegmentBuilder_UF.root'
 #        '/store/data/Run2018B/SingleMuon/RAW-RECO/ZMu-12Nov2019_UL2018-v2/270003/5FE6A215-7096-6B41-B499-D12FE193A89B.root',
 #        '/store/data/Run2018B/SingleMuon/RAW-RECO/ZMu-12Nov2019_UL2018-v2/270003/A0AE2F0B-740C-B646-BF3B-58EE0943A261.root',
@@ -158,12 +170,12 @@ if isDATA:
 
 )
 else:
-    process.source.fileNames = cms.untracked.vstring(DUMMYFILELIST)
-    process.source.fileNames.extend( [
+    process.source.fileNames = cms.untracked.vstring(
+        '/store/relval/CMSSW_12_4_13/RelValZMM_14/GEN-SIM-DIGI-RECO/124X_mcRun3_2022_realistic_v12_2021_FastSim-v1/2590000/8a48a70c-ddaf-4aa3-91b5-23dcac5a80a2.root'
+#        'file:../8a48a70c-ddaf-4aa3-91b5-23dcac5a80a2.root'
 #        '/store/relval/CMSSW_7_0_0/RelValTTbar/GEN-SIM-DIGI-RECO/START70_V6_FastSim-v2/00000/00743452-B498-E311-AD84-02163E00EAC9.root',
 #        'file:/raid/raid8/mhl/CSC_Run2/CMSSW_dev/outputRoot/test2.root'
 #        'root://cmsxrootd.fnal.gov//store/group/upgrade/muon/ME0GlobalReco/ME0MuonReRun_DY_SLHC23patch1_SegmentReRunFullRun_ForPublish/M-20_TuneZ2star_14TeV_6_2_0_SLHC23patch1_2023/DYToMuMu_M-20_TuneZ2star_14TeV-pythia6-tauola/DYToMuMu_M-20_TuneZ2star_14TeV-pythia6-tauola_2023SHCalNoTaper_PU140_Selectors_RECO/b52ce42d5986c94dc336f39e015d825e/output_100_2_p9i.root'
-        ]
     )
     
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True)
@@ -229,9 +241,10 @@ process.p = cms.Path(
     )
 
 if not isDATA:
-    process.load("GeneratorInterface.GenFilters.TotalKinematicsFilter_cfi")
-    process.totalKinematicsFilter.tolerance=5.0
-    process.p.replace(process.nEventsTotal,process.nEventsTotal*process.totalKinematicsFilter)
+#    process.load("GeneratorInterface.GenFilters.TotalKinematicsFilter_cfi")
+ #   process.totalKinematicsFilter.tolerance=5.0
+    process.p.replace(process.nEventsTotal,process.nEventsTotal)
+#    process.p.replace(process.nEventsTotal,process.nEventsTotal*process.totalKinematicsFilter)
 
 if isDATA:
 #    process.load("CondCore.CondDB.CondDB_cfi")

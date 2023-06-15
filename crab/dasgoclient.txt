@@ -6,3 +6,8 @@ rucio list-file-replicas  cms:/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia
 rucio download cms:<file>
 
 /afs/cern.ch/work/c/cherepan/CSC/Synchronise_10_05/CSC_RU_Seg_Alog/CMSSW_10_6_20/src/UFCSCSoftware/crab/cms/store/mc/RunIISummer20UL18RECO/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/GEN-SIM-RECO/PUForTRKv2_TRKv2_106X_upgrade2018_realistic_v11_L1v1-v2/2530000/2F7C3E79-EED3-E646-A228-99CB16BDEC95.root
+
+
+
+dasgoclient  -query="dataset=/*/*2022*/*DIGI*"
+/store/relval/CMSSW_12_4_13/RelValZMM_14/GEN-SIM-DIGI-RECO/124X_mcRun3_2022_realistic_v12_2021_FastSim-v1/2590000/8a48a70c-ddaf-4aa3-91b5-23dcac5a80a2.root

@@ -163,11 +163,16 @@ private:
   virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
   virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
 
-//  void doMuons(edm::Handle<reco::Muon> muons, edm::Handle<reco::TrackCollection> saMuons, edm::Handle<CSCSegmentCollection> cscSegments, edm::Handle<CSCRecHit2DCollection> recHits,
- //              const reco::Vertex *&PV, const edm::Event& iEvent, const edm::EventSetup& iSetup, edm::ESHandle<GlobalTrackingGeometry> theGeom, edm::ESHandle<CSCGeometry> cscGeom);
+  //  void doMuons(edm::Handle<reco::Muon> muons, edm::Handle<reco::TrackCollection> saMuons, edm::Handle<CSCSegmentCollection> cscSegments, edm::Handle<CSCRecHit2DCollection> recHits,
+  //              const reco::Vertex *&PV, const edm::Event& iEvent, const edm::EventSetup& iSetup, edm::ESHandle<GlobalTrackingGeometry> theGeom, edm::ESHandle<CSCGeometry> cscGeom);
+
+  //  void doMuons(edm::Handle<reco::MuonCollection> muons, edm::Handle<reco::TrackCollection> saMuons, edm::Handle<CSCSegmentCollection> cscSegments, edm::Handle<CSCRecHit2DCollection> recHits,
+  //	       const reco::Vertex *&PV, const edm::Event& iEvent, const edm::EventSetup& iSetup, edm::ESHandle<GlobalTrackingGeometry> theGeom, edm::ESHandle<CSCGeometry> cscGeom); // change format of geometry access
 
   void doMuons(edm::Handle<reco::MuonCollection> muons, edm::Handle<reco::TrackCollection> saMuons, edm::Handle<CSCSegmentCollection> cscSegments, edm::Handle<CSCRecHit2DCollection> recHits,
-	       const reco::Vertex *&PV, const edm::Event& iEvent, const edm::EventSetup& iSetup, edm::ESHandle<GlobalTrackingGeometry> theGeom, edm::ESHandle<CSCGeometry> cscGeom);
+	       const reco::Vertex *&PV, const edm::Event& iEvent, const edm::EventSetup& iSetup, edm::ESHandle<GlobalTrackingGeometry> theGeom, const CSCGeometry* cscGeom);
+
+
   void doTracks(edm::Handle<reco::TrackCollection> genTracks);
   void doRecHits(edm::Handle<CSCRecHit2DCollection> recHits, edm::Handle<edm::PSimHitContainer> simHits, edm::Handle<reco::TrackCollection> saMuons, 
 		 edm::Handle<reco::MuonCollection> muons, edm::ESHandle<CSCGeometry> cscGeom, const edm::Event& iEvent);
@@ -190,9 +195,14 @@ private:
   void doGasGain(const CSCWireDigiCollection& wirecltn,  const CSCStripDigiCollection&   strpcltn, const CSCRecHit2DCollection& rechitcltn);  
   bool withinSensitiveRegion(LocalPoint localPos, const std::array<const double, 4> & layerBounds, int station, int ring, double shiftFromEdge, double shiftFromDeadZone);
 
+  //  std::vector<CSCSegment> findMuonSegments(edm::ESHandle<GlobalTrackingGeometry> theTrackingGeometry, const reco::Track& Track, 
+  //					   edm::Handle<CSCSegmentCollection> cscSegments, edm::Handle<CSCRecHit2DCollection> recHits, 
+  //					   edm::ESHandle<CSCGeometry> cscGeom);
+
+
   std::vector<CSCSegment> findMuonSegments(edm::ESHandle<GlobalTrackingGeometry> theTrackingGeometry, const reco::Track& Track, 
 					   edm::Handle<CSCSegmentCollection> cscSegments, edm::Handle<CSCRecHit2DCollection> recHits, 
-					   edm::ESHandle<CSCGeometry> cscGeom);
+					   const CSCGeometry* cscGeom);
   
 
   // register to the TFileService 
@@ -232,6 +242,14 @@ private:
   int BunchCrossing;
   int nEventsTotal;
   unsigned int timeSecond;
+
+
+
+
+
+  edm::ESGetToken<CSCGeometry, MuonGeometryRecord> cscGeom_test;
+
+
 
   // Luminosity
 /*
@@ -514,14 +532,14 @@ void UFCSCRootMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
    //general tracks
 //   edm::Handle<reco::TrackCollection> genTracks;
 //   if(isFullRECO) iEvent.getByToken("generalTracks",genTracks);
-
+   cout<<" deb1 "<< std::endl;
    //muons
    edm::Handle<reco::MuonCollection> muons;
 //   edm::Handle<reco::Muon> muons;   
    if(isFullRECO) iEvent.getByToken(muonSrc,muons);
 
 
-   //vertex
+   /*   //vertex
    const reco::Vertex *PV = 0;
    edm::Handle<reco::VertexCollection> vertex;
    if(isFullRECO) 
@@ -531,18 +549,37 @@ void UFCSCRootMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
        vertex_nVertex = (int) vertex->size();
      }
 
+   */
+
 
    // get the standalone muon collection
    edm::Handle<reco::TrackCollection> saMuons;
    if(isFullRECO) iEvent.getByToken(standAloneMuonsSrc,saMuons);
+   cout<<" deb2 "<< std::endl;
 
 
-   edm::ESHandle<CSCGeometry> cscGeom;
-   iSetup.get<MuonGeometryRecord>().get(cscGeom);   
+   //   edm::ESGetToken<AnyProduct, SomeOrDependentRecord> token1_;
 
+   //   edm::ESHandle<CSCGeometry> cscGeom;
+   cout<<" deb2.1 "<< std::endl;
+   //   iSetup.get<MuonGeometryRecord>().get(cscGeom);   
+
+
+
+
+   edm::ESGetToken<CSCGeometry, MuonGeometryRecord> cscGeom_test2;
+
+   auto const cscGeom = iSetup.getData(cscGeom_test2);
+
+   //   const CSCGeometry* cscGeom = iSetup.getData(cscGeom_test2);
+   //   edm::ESGetToken<SomeProduct, SomeRecord> esToken_; 
+   //   edm::ESInputTag{cscGeom, "MuonGeometryRecord"};
+
+   cout<<" deb2.2 "<< std::endl;
    edm::ESHandle<GlobalTrackingGeometry> geometry_;
+   cout<<" deb2.3 "<< std::endl;
    iSetup.get<GlobalTrackingGeometryRecord>().get(geometry_);
-   
+   cout<<" deb3 "<< std::endl;
    edm::Handle<CSCRecHit2DCollection> recHits;
    if(isLocalRECO || isFullRECO) iEvent.getByToken(cscRecHitTagSrc,recHits);
 
@@ -585,7 +622,7 @@ void UFCSCRootMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
    LumiSect = iEvent.id().luminosityBlock();
    BunchCrossing = iEvent.bunchCrossing();
 
-
+   cout<<" deb4 "<< std::endl;
    //Lumi Details
 /*   if (isDATA && isFullRECO && LumiDet.isValid()){
      rawbxlumi = LumiDet->lumiValue(LumiDetails::kOCC1,iEvent.bunchCrossing());
@@ -609,8 +646,16 @@ void UFCSCRootMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
  */  
 
 
-   if(addMuons && isFullRECO) doMuons(muons,saMuons,cscSegments,recHits,PV,iEvent,iSetup,geometry_,cscGeom);
+//   if(addMuons && isFullRECO) doMuons(muons,saMuons,cscSegments,recHits,PV,iEvent,iSetup,geometry_,cscGeom);
+
+
+
 //   if(addTracks && isFullRECO) doTracks(genTracks);
+
+
+
+/*
+
    if(addRecHits &&  (isFullRECO || isLocalRECO)) doRecHits(recHits,simHits,saMuons,muons,cscGeom,iEvent);
    if(addSegments && (isFullRECO || isLocalRECO)) doSegments(cscSegments,cscGeom);
 //   if(addTrigger && (isFullRECO || isLocalRECO || isRAW)) doTrigger(pCollection,hlt);
@@ -624,9 +669,11 @@ void UFCSCRootMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
      }
    if(addRecHits && isDIGI && (isLocalRECO || isFullRECO) ) doNonAssociatedRecHits(cscSegments,cscGeom,strips);
    if(addCalibrations && nEventsTotal == 1) doCalibrations(iSetup);
-
+*/
    //Fill the tree
-//cout << "nRHs: " << recHits2D_nRecHits2D << endl;
+
+
+   //cout << "nRHs: " << recHits2D_nRecHits2D << endl;
    if((addRecHits && recHits2D_nRecHits2D > 0 && (isFullRECO || isLocalRECO) ) /*|| !addRecHits*/) {tree->Fill();}
 
 
@@ -763,8 +810,12 @@ void UFCSCRootMaker::endLuminosityBlock(edm::LuminosityBlock const&, edm::EventS
 */
 
 
-void UFCSCRootMaker::doMuons(edm::Handle<reco::MuonCollection> muons, edm::Handle<reco::TrackCollection> saMuons, edm::Handle<CSCSegmentCollection> cscSegments, edm::Handle<CSCRecHit2DCollection> recHits,
-			     const reco::Vertex *&PV, const edm::Event& iEvent, const edm::EventSetup& iSetup, edm::ESHandle<GlobalTrackingGeometry> theGeom, edm::ESHandle<CSCGeometry> cscGeom)
+void UFCSCRootMaker::doMuons(edm::Handle<reco::MuonCollection> muons, 
+			     edm::Handle<reco::TrackCollection> saMuons, 
+			     edm::Handle<CSCSegmentCollection> cscSegments, 
+			     edm::Handle<CSCRecHit2DCollection> recHits, const reco::Vertex *&PV, const edm::Event& iEvent, const edm::EventSetup& iSetup, 
+			     //			     edm::ESHandle<GlobalTrackingGeometry> theGeom, edm::ESHandle<CSCGeometry> cscGeom)
+			     edm::ESHandle<GlobalTrackingGeometry> theGeom, const CSCGeometry* cscGeom)
 {
 
   //Muons
@@ -2752,7 +2803,8 @@ bool UFCSCRootMaker::withinSensitiveRegion(LocalPoint localPos, const std::array
 
 std::vector<CSCSegment> UFCSCRootMaker::findMuonSegments(edm::ESHandle<GlobalTrackingGeometry> theTrackingGeometry, const reco::Track& Track, 
 							 edm::Handle<CSCSegmentCollection> cscSegments, edm::Handle<CSCRecHit2DCollection> recHits, 
-							 edm::ESHandle<CSCGeometry> cscGeom)
+							 const CSCGeometry *cscGeom)
+//							 edm::ESHandle<CSCGeometry> cscGeom)
 {
 
   std::vector<CSCSegment> savedSegments;
