@@ -208,8 +208,9 @@ private:
   //					   edm::Handle<CSCSegmentCollection> cscSegments, edm::Handle<CSCRecHit2DCollection> recHits, 
   //					   const CSCGeometry cscGeom);
 
-  std::vector<CSCSegment> findMuonSegments(const GlobalTrackingGeometry theTrackingGeometry, const reco::Track& Track, 
-					   edm::Handle<CSCSegmentCollection> cscSegments, edm::Handle<CSCRecHit2DCollection> recHits, const CSCGeometry* cscGeom);
+
+
+  std::vector<CSCSegment> findMuonSegments(const reco::Track& Track,edm::Handle<CSCSegmentCollection> cscSegments, edm::Handle<CSCRecHit2DCollection> recHits, const CSCGeometry* cscGeom);
   
 
   // register to the TFileService 
@@ -904,7 +905,7 @@ void UFCSCRootMaker::doMuons(edm::Handle<reco::MuonCollection> muons,
 	  
 	  if(mu->outerTrack().isNonnull() && (mu->isStandAloneMuon() || mu->isGlobalMuon()) )
 	    {
-	      std::vector<CSCSegment> mySavedSegments;// = findMuonSegments(theGeom, *mu->outerTrack(), cscSegments, recHits, cscGeom);
+	      std::vector<CSCSegment> mySavedSegments = findMuonSegments(*mu->outerTrack(), cscSegments, recHits, cscGeom);
 	      for (int j = 0; j < (int)mySavedSegments.size(); j++)
 		{
 		  CSCDetId cscSegId  = (CSCDetId)mySavedSegments[j].cscDetId();
@@ -2830,11 +2831,7 @@ bool UFCSCRootMaker::withinSensitiveRegion(LocalPoint localPos, const std::array
 }
 
 
-std::vector<CSCSegment> UFCSCRootMaker::findMuonSegments(const GlobalTrackingGeometry  theTrackingGeometry, const reco::Track& Track,  edm::Handle<CSCSegmentCollection> cscSegments, edm::Handle<CSCRecHit2DCollection> recHits,  const CSCGeometry* cscGeom)
-
-
-
-//							 edm::ESHandle<CSCGeometry> cscGeom)
+std::vector<CSCSegment> UFCSCRootMaker::findMuonSegments(const reco::Track& Track,  edm::Handle<CSCSegmentCollection> cscSegments, edm::Handle<CSCRecHit2DCollection> recHits,  const CSCGeometry* cscGeom)
 {
 
   std::vector<CSCSegment> savedSegments;
