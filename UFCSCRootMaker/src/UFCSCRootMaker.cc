@@ -179,9 +179,9 @@ private:
 
   void doTracks(edm::Handle<reco::TrackCollection> genTracks);
   void doRecHits(edm::Handle<CSCRecHit2DCollection> recHits, edm::Handle<edm::PSimHitContainer> simHits, edm::Handle<reco::TrackCollection> saMuons, 
-		 edm::Handle<reco::MuonCollection> muons, edm::ESHandle<CSCGeometry> cscGeom, const edm::Event& iEvent);
+		 edm::Handle<reco::MuonCollection> muons, const CSCGeometry* cscGeom, const edm::Event& iEvent);
   double getthisSignal(const CSCStripDigiCollection& stripdigis, CSCDetId idRH, int centerStrip);
-  void doSegments(edm::Handle<CSCSegmentCollection> cscSegments, edm::ESHandle<CSCGeometry> cscGeom);
+  void doSegments(edm::Handle<CSCSegmentCollection> cscSegments, const CSCGeometry* cscGeom);
   void doTrigger(edm::Handle<L1MuGMTReadoutCollection> pCollection, edm::Handle<edm::TriggerResults> hlt);
   void doStripDigis(edm::Handle<CSCStripDigiCollection> strips, edm::ESHandle<CSCGeometry> cscGeom);
   void doWireDigis(edm::Handle<CSCWireDigiCollection> wires, edm::ESHandle<CSCGeometry> cscGeom);
@@ -681,6 +681,10 @@ void UFCSCRootMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 //   if(addTracks && isFullRECO) doTracks(genTracks);
 
 
+   if(addRecHits &&  (isFullRECO || isLocalRECO)) doRecHits(recHits,simHits,saMuons,muons,cscGeom,iEvent);
+   if(addSegments && (isFullRECO || isLocalRECO)) doSegments(cscSegments,cscGeom);
+
+
 
 /*
 
@@ -1059,7 +1063,7 @@ UFCSCRootMaker::doTracks(edm::Handle<reco::TrackCollection> genTracks)
 
 void
 UFCSCRootMaker::doRecHits(edm::Handle<CSCRecHit2DCollection> recHits, edm::Handle<edm::PSimHitContainer> simHits, edm::Handle<reco::TrackCollection> saMuons,  
-			  edm::Handle<reco::MuonCollection> muons, edm::ESHandle<CSCGeometry> cscGeom, const edm::Event& iEvent)
+			  edm::Handle<reco::MuonCollection> muons, const CSCGeometry* cscGeom, const edm::Event& iEvent)
 {
 
   edm::Handle<CSCStripDigiCollection> myStrips;
@@ -1393,7 +1397,7 @@ double UFCSCRootMaker::getthisSignal(const CSCStripDigiCollection& stripdigis, C
 
 
 void
-UFCSCRootMaker::doSegments(edm::Handle<CSCSegmentCollection> cscSegments, edm::ESHandle<CSCGeometry> cscGeom)
+UFCSCRootMaker::doSegments(edm::Handle<CSCSegmentCollection> cscSegments, const CSCGeometry* cscGeom)
 {
   
    // CSC Segments
