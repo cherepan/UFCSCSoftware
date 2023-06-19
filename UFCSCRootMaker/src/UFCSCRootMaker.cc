@@ -169,8 +169,12 @@ private:
   //  void doMuons(edm::Handle<reco::MuonCollection> muons, edm::Handle<reco::TrackCollection> saMuons, edm::Handle<CSCSegmentCollection> cscSegments, edm::Handle<CSCRecHit2DCollection> recHits,
   //	       const reco::Vertex *&PV, const edm::Event& iEvent, const edm::EventSetup& iSetup, edm::ESHandle<GlobalTrackingGeometry> theGeom, edm::ESHandle<CSCGeometry> cscGeom); // change format of geometry access
 
+  //  void doMuons(edm::Handle<reco::MuonCollection> muons, edm::Handle<reco::TrackCollection> saMuons, edm::Handle<CSCSegmentCollection> cscSegments, edm::Handle<CSCRecHit2DCollection> recHits,
+  //	       const reco::Vertex *&PV, const edm::Event& iEvent, const edm::EventSetup& iSetup, edm::ESHandle<GlobalTrackingGeometry> theGeom, const CSCGeometry cscGeom);
+
+
   void doMuons(edm::Handle<reco::MuonCollection> muons, edm::Handle<reco::TrackCollection> saMuons, edm::Handle<CSCSegmentCollection> cscSegments, edm::Handle<CSCRecHit2DCollection> recHits,
-	       const reco::Vertex *&PV, const edm::Event& iEvent, const edm::EventSetup& iSetup, edm::ESHandle<GlobalTrackingGeometry> theGeom, const CSCGeometry* cscGeom);
+	       const reco::Vertex *&PV, const edm::Event& iEvent, const edm::EventSetup& iSetup, const GlobalTrackingGeometry theGeom, const CSCGeometry* cscGeom);
 
 
   void doTracks(edm::Handle<reco::TrackCollection> genTracks);
@@ -200,9 +204,12 @@ private:
   //					   edm::ESHandle<CSCGeometry> cscGeom);
 
 
-  std::vector<CSCSegment> findMuonSegments(edm::ESHandle<GlobalTrackingGeometry> theTrackingGeometry, const reco::Track& Track, 
-					   edm::Handle<CSCSegmentCollection> cscSegments, edm::Handle<CSCRecHit2DCollection> recHits, 
-					   const CSCGeometry* cscGeom);
+  //  std::vector<CSCSegment> findMuonSegments(edm::ESHandle<GlobalTrackingGeometry> theTrackingGeometry, const reco::Track& Track, 
+  //					   edm::Handle<CSCSegmentCollection> cscSegments, edm::Handle<CSCRecHit2DCollection> recHits, 
+  //					   const CSCGeometry cscGeom);
+
+  std::vector<CSCSegment> findMuonSegments(const GlobalTrackingGeometry theTrackingGeometry, const reco::Track& Track, 
+					   edm::Handle<CSCSegmentCollection> cscSegments, edm::Handle<CSCRecHit2DCollection> recHits, const CSCGeometry* cscGeom);
   
 
   // register to the TFileService 
@@ -230,6 +237,9 @@ private:
   edm::EDGetTokenT<edm::PSimHitContainer> simHitTagSrc;
   edm::EDGetTokenT<FEDRawDataCollection> fedRawTagSrc;
   edm::ESGetToken<CSCGeometry, MuonGeometryRecord> cscGeom_test;
+  edm::ESGetToken<GlobalTrackingGeometry, GlobalTrackingGeometryRecord> globalTrackingGeometry;
+
+
 
   SegmentsTrackAssociator* theSegmentsAssociator;
   edm::ParameterSet parameters;
@@ -483,6 +493,7 @@ UFCSCRootMaker::UFCSCRootMaker(const edm::ParameterSet& iConfig) :
   simHitTagSrc(consumes<edm::PSimHitContainer>(iConfig.getUntrackedParameter<edm::InputTag>("simHitTagSrc"))),
   fedRawTagSrc(consumes<FEDRawDataCollection>(iConfig.getUntrackedParameter<edm::InputTag>("fedRawTagSrc"))),
   cscGeom_test(esConsumes<CSCGeometry, MuonGeometryRecord>()),
+  globalTrackingGeometry(esConsumes<GlobalTrackingGeometry, GlobalTrackingGeometryRecord>()),
 
 
 
@@ -572,27 +583,29 @@ void UFCSCRootMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
    //   iSetup.get<MuonGeometryRecord>().get(cscGeom);   
 
 
-
-
    //     edm::ESGetToken<CSCGeometry, MuonGeometryRecord> cscGeom_test2;
    //   cscGeom_test2(iConfig.esConsumes<CSCGeometry, MuonGeometryRecord>())
-
 
    auto const cscGeom = &iSetup.getData(cscGeom_test);
    cout<<" return vector of all chambers ( whatever it is )  "<< cscGeom->chambers().size() << std::endl;
 
-     //dSiter
-  //   const CSCChamber* cscchamber = cscGeom->chamber(id);
-
+   //dSiter
+   //   const CSCChamber* cscchamber = cscGeom->chamber(id);
+   
    //   const CSCGeometry* cscGeom = iSetup.getData(cscGeom_test2);
    //   edm::ESGetToken<SomeProduct, SomeRecord> esToken_; 
    //   edm::ESInputTag{cscGeom, "MuonGeometryRecord"};
-
+   
    cout<<" deb2.2 "<< std::endl;
-   edm::ESHandle<GlobalTrackingGeometry> geometry_;
+   //   edm::ESHandle<GlobalTrackingGeometry> geometry_;
    cout<<" deb2.3 "<< std::endl;
-   iSetup.get<GlobalTrackingGeometryRecord>().get(geometry_);
+   //   iSetup.get<GlobalTrackingGeometryRecord>().get(geometry_);
    cout<<" deb3 "<< std::endl;
+
+
+   auto const geometry_ = &iSetup.getData(globalTrackingGeometry);
+
+
    edm::Handle<CSCRecHit2DCollection> recHits;
    if(isLocalRECO || isFullRECO) iEvent.getByToken(cscRecHitTagSrc,recHits);
 
@@ -614,6 +627,7 @@ void UFCSCRootMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
    edm::Handle<CSCALCTDigiCollection> alcts;
    edm::Handle<CSCCLCTDigiCollection> clcts;
    edm::Handle<CSCCorrelatedLCTDigiCollection> correlatedlcts;
+
    if (isDIGI){
      iEvent.getByToken(wireDigiTagSrc, wires);
      iEvent.getByToken(stripDigiTagSrc, strips);
@@ -828,7 +842,9 @@ void UFCSCRootMaker::doMuons(edm::Handle<reco::MuonCollection> muons,
 			     edm::Handle<CSCSegmentCollection> cscSegments, 
 			     edm::Handle<CSCRecHit2DCollection> recHits, const reco::Vertex *&PV, const edm::Event& iEvent, const edm::EventSetup& iSetup, 
 			     //			     edm::ESHandle<GlobalTrackingGeometry> theGeom, edm::ESHandle<CSCGeometry> cscGeom)
-			     edm::ESHandle<GlobalTrackingGeometry> theGeom, const CSCGeometry* cscGeom)
+			     //			     edm::ESHandle<GlobalTrackingGeometry> theGeom, const CSCGeometry cscGeom)
+			     const GlobalTrackingGeometry  theGeom, const CSCGeometry* cscGeom)
+
 {
 
   //Muons
@@ -888,7 +904,7 @@ void UFCSCRootMaker::doMuons(edm::Handle<reco::MuonCollection> muons,
 	  
 	  if(mu->outerTrack().isNonnull() && (mu->isStandAloneMuon() || mu->isGlobalMuon()) )
 	    {
-	      std::vector<CSCSegment> mySavedSegments = findMuonSegments(theGeom, *mu->outerTrack(), cscSegments, recHits, cscGeom);
+	      std::vector<CSCSegment> mySavedSegments;// = findMuonSegments(theGeom, *mu->outerTrack(), cscSegments, recHits, cscGeom);
 	      for (int j = 0; j < (int)mySavedSegments.size(); j++)
 		{
 		  CSCDetId cscSegId  = (CSCDetId)mySavedSegments[j].cscDetId();
@@ -2814,9 +2830,10 @@ bool UFCSCRootMaker::withinSensitiveRegion(LocalPoint localPos, const std::array
 }
 
 
-std::vector<CSCSegment> UFCSCRootMaker::findMuonSegments(edm::ESHandle<GlobalTrackingGeometry> theTrackingGeometry, const reco::Track& Track, 
-							 edm::Handle<CSCSegmentCollection> cscSegments, edm::Handle<CSCRecHit2DCollection> recHits, 
-							 const CSCGeometry *cscGeom)
+std::vector<CSCSegment> UFCSCRootMaker::findMuonSegments(const GlobalTrackingGeometry  theTrackingGeometry, const reco::Track& Track,  edm::Handle<CSCSegmentCollection> cscSegments, edm::Handle<CSCRecHit2DCollection> recHits,  const CSCGeometry* cscGeom)
+
+
+
 //							 edm::ESHandle<CSCGeometry> cscGeom)
 {
 
