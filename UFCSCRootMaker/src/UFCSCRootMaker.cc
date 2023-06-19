@@ -174,7 +174,7 @@ private:
 
 
   void doMuons(edm::Handle<reco::MuonCollection> muons, edm::Handle<reco::TrackCollection> saMuons, edm::Handle<CSCSegmentCollection> cscSegments, edm::Handle<CSCRecHit2DCollection> recHits,
-	       const reco::Vertex *&PV, const edm::Event& iEvent, const edm::EventSetup& iSetup, const GlobalTrackingGeometry theGeom, const CSCGeometry* cscGeom);
+	       const reco::Vertex *&PV, const edm::Event& iEvent, const edm::EventSetup& iSetup, const GlobalTrackingGeometry* theGeom, const CSCGeometry* cscGeom);
 
 
   void doTracks(edm::Handle<reco::TrackCollection> genTracks);
@@ -558,7 +558,7 @@ void UFCSCRootMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
    if(isFullRECO) iEvent.getByToken(muonSrc,muons);
 
 
-   /*   //vertex
+      //vertex
    const reco::Vertex *PV = 0;
    edm::Handle<reco::VertexCollection> vertex;
    if(isFullRECO) 
@@ -567,8 +567,8 @@ void UFCSCRootMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
        if(!vertex->empty() && vertex->size() > 0) PV = &(vertex->at(0));
        vertex_nVertex = (int) vertex->size();
      }
-
-   */
+   
+   
 
 
    // get the standalone muon collection
@@ -674,7 +674,7 @@ void UFCSCRootMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
  */  
 
 
-//   if(addMuons && isFullRECO) doMuons(muons,saMuons,cscSegments,recHits,PV,iEvent,iSetup,geometry_,cscGeom);
+   if(addMuons && isFullRECO) doMuons(muons,saMuons,cscSegments,recHits,PV,iEvent,iSetup,geometry_,cscGeom);
 
 
 
@@ -844,7 +844,7 @@ void UFCSCRootMaker::doMuons(edm::Handle<reco::MuonCollection> muons,
 			     edm::Handle<CSCRecHit2DCollection> recHits, const reco::Vertex *&PV, const edm::Event& iEvent, const edm::EventSetup& iSetup, 
 			     //			     edm::ESHandle<GlobalTrackingGeometry> theGeom, edm::ESHandle<CSCGeometry> cscGeom)
 			     //			     edm::ESHandle<GlobalTrackingGeometry> theGeom, const CSCGeometry cscGeom)
-			     const GlobalTrackingGeometry  theGeom, const CSCGeometry* cscGeom)
+			     const GlobalTrackingGeometry*  theGeom, const CSCGeometry* cscGeom)
 
 {
 
