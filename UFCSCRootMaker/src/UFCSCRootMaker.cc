@@ -183,16 +183,16 @@ private:
   double getthisSignal(const CSCStripDigiCollection& stripdigis, CSCDetId idRH, int centerStrip);
   void doSegments(edm::Handle<CSCSegmentCollection> cscSegments, const CSCGeometry* cscGeom);
   void doTrigger(edm::Handle<L1MuGMTReadoutCollection> pCollection, edm::Handle<edm::TriggerResults> hlt);
-  void doStripDigis(edm::Handle<CSCStripDigiCollection> strips, edm::ESHandle<CSCGeometry> cscGeom);
-  void doWireDigis(edm::Handle<CSCWireDigiCollection> wires, edm::ESHandle<CSCGeometry> cscGeom);
+  void doStripDigis(edm::Handle<CSCStripDigiCollection> strips, const CSCGeometry* cscGeom);
+  void doWireDigis(edm::Handle<CSCWireDigiCollection> wires, const CSCGeometry* cscGeom);
   void doCompTiming(const CSCComparatorDigiCollection& compars);
   void doLCTDigis(edm::Handle<CSCALCTDigiCollection> alcts, edm::Handle<CSCCLCTDigiCollection> clcts,
 		  edm::Handle<CSCCorrelatedLCTDigiCollection> correlatedlcts,
-		  edm::Handle<L1MuGMTReadoutCollection> pCollection, edm::ESHandle<CSCGeometry> cscGeom, 
+		  edm::Handle<L1MuGMTReadoutCollection> pCollection,const CSCGeometry* cscGeom, 
 		  const edm::EventSetup& eventSetup, const edm::Event &event);
   void doCalibrations(const edm::EventSetup& eventSetup);
   double fitX(CLHEP::HepMatrix points, CLHEP::HepMatrix errors);
-  void doNonAssociatedRecHits(edm::Handle<CSCSegmentCollection> cscSegments, edm::ESHandle<CSCGeometry> cscGeom,  edm::Handle<CSCStripDigiCollection> strips);
+  void doNonAssociatedRecHits(edm::Handle<CSCSegmentCollection> cscSegments,  const CSCGeometry* cscGeom,  edm::Handle<CSCStripDigiCollection> strips);
   int chamberSerial( CSCDetId id );
   int ringSerial( CSCDetId id );
   int getWidth(const CSCStripDigiCollection& stripdigis, CSCDetId idRH, int centerStrip);
@@ -239,7 +239,7 @@ private:
   edm::EDGetTokenT<FEDRawDataCollection> fedRawTagSrc;
   edm::ESGetToken<CSCGeometry, MuonGeometryRecord> cscGeom_test;
   edm::ESGetToken<GlobalTrackingGeometry, GlobalTrackingGeometryRecord> globalTrackingGeometry;
-
+  edm::ESGetToken<CSCCrateMap, CSCCrateMapRcd> hcrate_test;
 
 
   SegmentsTrackAssociator* theSegmentsAssociator;
@@ -495,6 +495,10 @@ UFCSCRootMaker::UFCSCRootMaker(const edm::ParameterSet& iConfig) :
   fedRawTagSrc(consumes<FEDRawDataCollection>(iConfig.getUntrackedParameter<edm::InputTag>("fedRawTagSrc"))),
   cscGeom_test(esConsumes<CSCGeometry, MuonGeometryRecord>()),
   globalTrackingGeometry(esConsumes<GlobalTrackingGeometry, GlobalTrackingGeometryRecord>()),
+  hcrate_test(esConsumes<CSCCrateMap, CSCCrateMapRcd>()),
+//  edm::ESHandle<CSCCrateMap> hcrate;
+//eventSetup.get<CSCCrateMapRcd>().get(hcrate);
+
 
 
 
@@ -580,7 +584,7 @@ void UFCSCRootMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
    //   edm::ESGetToken<AnyProduct, SomeOrDependentRecord> token1_;
 
    //   edm::ESHandle<CSCGeometry> cscGeom;
-   cout<<" deb2.1 "<< std::endl;
+
    //   iSetup.get<MuonGeometryRecord>().get(cscGeom);   
 
 
@@ -588,7 +592,7 @@ void UFCSCRootMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
    //   cscGeom_test2(iConfig.esConsumes<CSCGeometry, MuonGeometryRecord>())
 
    auto const cscGeom = &iSetup.getData(cscGeom_test);
-   cout<<" return vector of all chambers ( whatever it is )  "<< cscGeom->chambers().size() << std::endl;
+
 
    //dSiter
    //   const CSCChamber* cscchamber = cscGeom->chamber(id);
@@ -684,6 +688,20 @@ void UFCSCRootMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
    if(addRecHits &&  (isFullRECO || isLocalRECO)) doRecHits(recHits,simHits,saMuons,muons,cscGeom,iEvent);
    if(addSegments && (isFullRECO || isLocalRECO)) doSegments(cscSegments,cscGeom);
 
+
+
+   if(addDigis && isDIGI)
+     {
+       doStripDigis(strips, cscGeom);
+       doWireDigis(wires, cscGeom);
+       doCompTiming(*compars);
+       if(addTimeMonitoring) doLCTDigis(alcts, clcts, correlatedlcts, pCollection, cscGeom,iSetup, iEvent);
+       if(isLocalRECO) doGasGain(*wires, *strips, *recHits);
+     }
+
+
+   if(addRecHits && isDIGI && (isLocalRECO || isFullRECO) ) doNonAssociatedRecHits(cscSegments,cscGeom,strips);
+   if(addCalibrations && nEventsTotal == 1) doCalibrations(iSetup);
 
 
 /*
@@ -1525,7 +1543,7 @@ UFCSCRootMaker::doSegments(edm::Handle<CSCSegmentCollection> cscSegments, const 
 
 
 
-void UFCSCRootMaker::doNonAssociatedRecHits(edm::Handle<CSCSegmentCollection> cscSegments, edm::ESHandle<CSCGeometry> cscGeom,  edm::Handle<CSCStripDigiCollection> strips){
+void UFCSCRootMaker::doNonAssociatedRecHits(edm::Handle<CSCSegmentCollection> cscSegments,  const CSCGeometry* cscGeom,  edm::Handle<CSCStripDigiCollection> strips){
 
 
   //Add Segments to Map
@@ -1894,7 +1912,7 @@ UFCSCRootMaker::doTrigger(edm::Handle<L1MuGMTReadoutCollection> pCollection, edm
 
 
 void 
-UFCSCRootMaker::doStripDigis(edm::Handle<CSCStripDigiCollection> strips, edm::ESHandle<CSCGeometry> cscGeom)
+UFCSCRootMaker::doStripDigis(edm::Handle<CSCStripDigiCollection> strips, const CSCGeometry* cscGeom)
 {
   int nStripsFired = 0;
   for (CSCStripDigiCollection::DigiRangeIterator dSDiter=strips->begin(); dSDiter!=strips->end(); dSDiter++) {
@@ -1953,7 +1971,7 @@ UFCSCRootMaker::doStripDigis(edm::Handle<CSCStripDigiCollection> strips, edm::ES
 
 
 void 
-UFCSCRootMaker::doWireDigis(edm::Handle<CSCWireDigiCollection> wires, edm::ESHandle<CSCGeometry> cscGeom)
+UFCSCRootMaker::doWireDigis(edm::Handle<CSCWireDigiCollection> wires, const CSCGeometry* cscGeom)
 {
 
   int nWireGroupsTotal = 0;
@@ -2061,7 +2079,7 @@ void UFCSCRootMaker::doCompTiming(const CSCComparatorDigiCollection& compars) {
 
 void UFCSCRootMaker::doLCTDigis( edm::Handle<CSCALCTDigiCollection> alcts, edm::Handle<CSCCLCTDigiCollection> clcts,
 			        edm::Handle<CSCCorrelatedLCTDigiCollection> correlatedlcts,
-			        edm::Handle<L1MuGMTReadoutCollection> pCollection, edm::ESHandle<CSCGeometry> cscGeom, 
+			        edm::Handle<L1MuGMTReadoutCollection> pCollection, const CSCGeometry* cscGeom, 
 			        const edm::EventSetup& eventSetup, const edm::Event &event){
 
 
@@ -2173,9 +2191,14 @@ void UFCSCRootMaker::doLCTDigis( edm::Handle<CSCALCTDigiCollection> alcts, edm::
   // Taking code from EventFilter/CSCRawToDigis/CSCDCCUnpacker.cc
   // *******************************************************************
   
-  edm::ESHandle<CSCCrateMap> hcrate;
-  eventSetup.get<CSCCrateMapRcd>().get(hcrate); 
-  const CSCCrateMap* pcrate = hcrate.product();
+  //  edm::ESHandle<CSCCrateMap> hcrate;
+  //  eventSetup.get<CSCCrateMapRcd>().get(hcrate); 
+
+  auto const hcrate = &eventSetup.getData(hcrate_test);
+
+
+
+  //  const CSCCrateMap* pcrate = hcrate.product();
   
   /// Get a handle to the FED data collection
   edm::Handle<FEDRawDataCollection> rawdata;
@@ -2256,7 +2279,8 @@ void UFCSCRootMaker::doLCTDigis( edm::Handle<CSCALCTDigiCollection> alcts, edm::
   	    int ilayer = 0; /// layer=0 flags entire chamber
   	    
   	    if ((vmecrate>=1)&&(vmecrate<=60) && (dmb>=1)&&(dmb<=10)&&(dmb!=6)) {
-  	      layer = pcrate->detId(vmecrate, dmb,icfeb,ilayer );
+	      //  	      layer = pcrate->detId(vmecrate, dmb,icfeb,ilayer );
+  	      layer = hcrate->detId(vmecrate, dmb,icfeb,ilayer );
   	    } 
   	    else{
 	      LogTrace ("CSCTimingAlignment|CSCDCCUnpacker|CSCRawToDigi") << " detID input out of range!!! ";
