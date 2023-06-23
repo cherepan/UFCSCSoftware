@@ -17,10 +17,12 @@ process.load('Configuration.StandardSequences.Services_cff')
 # --- MATCH GT TO RELEASE AND DATA SAMPLE
 #process.GlobalTag.globaltag = "POSTLS161_V11::All"
 #process.GlobalTag.globaltag = "106X_dataRun2_v32"
+
+
 #process.GlobalTag.globaltag = "124X_dataRun3_PromptAnalysis_v1"
-
-
 process.GlobalTag.globaltag = "124X_mcRun3_2022_realistic_v12"
+
+
 #process.GlobalTag.globaltag = "106X_upgrade2018_realistic_v15_L1v1"
 
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
@@ -35,6 +37,7 @@ process.source    = cms.Source("PoolSource",
                                noEventSort = cms.untracked.bool(True),
                                duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
                                fileNames = cms.untracked.vstring(
+#                                   'file:6513929e-95f2-4528-9b6b-6b0a15a768d4.root'
                                    #'/store/mc/RunIISummer20UL18RECO/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/GEN-SIM-RECO/PUForTRK_106X_upgrade2018_realistic_v11_L1v1-v2/50000/01A742E9-38B3-6448-8003-36BBB8F1E936.root'
 #                                   '/store/mc/RunIISummer20UL18RECO/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/GEN-SIM-RECO/PUForTRK_106X_upgrade2018_realistic_v11_L1v1-v2/50000/01A742E9-38B3-6448-8003-36BBB8F1E936.root'
 #                                   'file:/afs/cern.ch/work/c/cherepan/CSC/Synchronise_10_05/CSC_RU_Seg_Alog/CMSSW_10_6_20/src/UFCSCSoftware/crab/cms/store/mc/RunIISummer20UL18HLT/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/GEN-SIM-DIGI-RAW/PUForTRKv2_TRKv2_102X_upgrade2018_realistic_v15-v2/2530000/94390A02-4C99-A143-B721-BDB0A1C04C03.root'
@@ -44,7 +47,9 @@ process.source    = cms.Source("PoolSource",
 #                                   '/store/data/Run2022C/SingleMuon/RAW-RECO/ZMu-PromptReco-v1/000/356/378/00000/c6e5cdb2-8369-46e9-8870-08bce43b26a7.root'
 
 ########################################## MC
-                                   '/store/relval/CMSSW_12_4_13/RelValZMM_14/GEN-SIM-DIGI-RECO/124X_mcRun3_2022_realistic_v12_2021_FastSim-v1/2590000/8a48a70c-ddaf-4aa3-91b5-23dcac5a80a2.root'
+
+                                   'file:DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8.root'
+#                                   '/store/relval/CMSSW_12_4_13/RelValZMM_14/GEN-SIM-DIGI-RECO/124X_mcRun3_2022_realistic_v12_2021_FastSim-v1/2590000/8a48a70c-ddaf-4aa3-91b5-23dcac5a80a2.root'
 
 
 #'file:./RelValJpsiMM_GEN-SIM-DIGI-RAW-HLTDEBUG_PRE_ST62_V8-v1/7412617A-E2E0-E211-8DB9-003048FEADCC.root',
@@ -73,14 +78,17 @@ process.cscSegments.CSCUseTimingCorrections = cms.bool(False)
 
 
 # Switch input for CSCRecHitD to  s i m u l a t e d  digis  # i assume it is for MC only
+
 process.csc2DRecHits.wireDigiTag  = cms.InputTag("simMuonCSCDigis","MuonCSCWireDigi")
 process.csc2DRecHits.stripDigiTag = cms.InputTag("simMuonCSCDigis","MuonCSCStripDigi")
+
 
 
 process.out = cms.OutputModule("PoolOutputModule",
                                fastCloning = cms.untracked.bool(False),
 #                               fileName = cms.untracked.string('/eos/user/c/cherepan/CSC/UF_tuples/SingleMuon_RAW-RECO_ZMu-12Nov2019_UL2018_CSCSegmentBuilder_UF_testRun.root'),
-                               fileName = cms.untracked.string('RelValZMM_14_RU_CSCSegmentBuilder.root'),
+#                               fileName = cms.untracked.string('RelValZMM_14_RU_CSCSegmentBuilder.root'),
+                               fileName = cms.untracked.string('ZMuSkim4_RU_CSCSegmentBuilder.root'),
 #                               fileName = cms.untracked.string('DYJetsToLL_M-50_RU_CSCSegmentBuilder.root'),
                                outputCommands = cms.untracked.vstring('keep *')
                                )
@@ -120,6 +128,8 @@ process.MessageLogger.cout = cms.untracked.PSet(
 )
 
 
+
+
 process.MessageLogger = cms.Service("MessageLogger",
      destinations  = cms.untracked.vstring(
                                              'detailedInfo'
@@ -129,27 +139,14 @@ process.MessageLogger = cms.Service("MessageLogger",
 )
 
 
-#process.load("FWCore.MessageLogger.MessageLogger_cfi")
-
-# module label is something like "muonCSCDigis"...
-#process.MessageLogger.debugModules = cms.untracked.vstring("CSCRecHitDBuilder","CSCMake2DRecHit")
-#process.MessageLogger.cerr.enable = True
-#process.MessageLogger.files.junk = dict()
-#process.MessageLogger.cout = cms.untracked.PSet(
-#    enable    = cms.untracked.bool(True),
-#    threshold = cms.untracked.string("DEBUG"),
-#    default   = cms.untracked.PSet( limit = cms.untracked.int32(0)  ),
-##    FwkReport = cms.untracked.PSet( limit = cms.untracked.int32(5) ),
-#    CSCRecHit = cms.untracked.PSet( limit = cms.untracked.int32(1) ) 
-#)
-
-
-
-
-
+process.load("SimMuon.CSCDigitizer.muonCSCDigis_cfi")
 # Path and EndPath def
 process.unpack = cms.Path(process.muonCSCDigis * process.gtDigis)
 process.reco = cms.Path(process.csc2DRecHits * process.cscSegments )
+
+
+
+
 #process.reco = cms.Path(process.cscSegments )
 #process.reco = cms.Path(process.reconstruction)
 process.out_step = cms.EndPath(process.out)
@@ -157,5 +154,10 @@ process.out_step = cms.EndPath(process.out)
 # Schedule definition
 process.schedule = cms.Schedule(process.reco, process.out_step)
 
+
+if isSIMDIGI:
+    process.reco.replace(process.csc2DRecHits, process.simMuonCSCDigis* process.gtDigis * process.csc2DRecHits * process.cscSegments )
+
 if isRAW:
-    process.reco.replace(process.csc2DRecHits,process.muonCSCDigis * process.gtDigis * process.csc2DRecHits * process.cscSegments)
+#    process.reco.replace(process.csc2DRecHits, process.muonCSCDigis * process.gtDigis * process.csc2DRecHits * process.cscSegments)
+    process.reco.replace(process.csc2DRecHits, process.muonCSCDigis * process.gtDigis * process.csc2DRecHits * process.cscSegments)

@@ -33,6 +33,9 @@ treename = "cscRootMaker/Events"
 selectorname = "cscSelector.C"
 
 savedir = "DUMMY" #"/home/mhl/public_html/2017/20171017_cscSeg/"
+ 
+print filename
+print treename
 
 f_ = ROOT.TFile.Open(filename)
 t_ = f_.Get(treename)

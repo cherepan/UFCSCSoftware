@@ -96,7 +96,7 @@ Bool_t cscSelector::Process(Long64_t entry)
 
    vector<SegsInChamber> segs;
    segs.clear();
-
+   std::cout<<" at least are we here?? " << std::endl;
    for (int i = 0; i < *cscSegments_nSegments; i++) {
 
      int endcap = cscSegments_ID_endcap[i];

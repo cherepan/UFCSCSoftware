@@ -137,7 +137,10 @@ if isDATA:
 #        'file:/eos/user/c/cherepan/HeavyFiles/SingleMuon_RAW-RECO_ZMu-12Nov2019_UL2018_CSCSegmentBuilder_UF.root'
 #        'file:test/SingleMuon_RAW-RECO_ZMu-12Nov2019_UL2018_CSCSegmentBuilder_UF_testRun.root'
 #         'file:/eos/user/c/cherepan/CSC/SingleMuon_RAW-RECO_ZMu-12Nov2019_UL2018_CSCSegmentBuilder_UF_testRun.root'
-        '/store/data/Run2022C/SingleMuon/RAW-RECO/ZMu-PromptReco-v1/000/356/381/00000/6513929e-95f2-4528-9b6b-6b0a15a768d4.root'
+        'file:../crab/ZMuSkim4_RU_CSCSegmentBuilder.root'
+#        '/store/data/Run2022C/SingleMuon/RAW-RECO/ZMu-PromptReco-v1/000/356/381/00000/6513929e-95f2-4528-9b6b-6b0a15a768d4.root'
+
+
 #        'file:test/SingleMuon_RAW-RECO_ZMu-12Nov2019_UL2018_CSCSegmentBuilder_UF.root'
 #        '/store/data/Run2018B/SingleMuon/RAW-RECO/ZMu-12Nov2019_UL2018-v2/270003/5FE6A215-7096-6B41-B499-D12FE193A89B.root',
 #        '/store/data/Run2018B/SingleMuon/RAW-RECO/ZMu-12Nov2019_UL2018-v2/270003/A0AE2F0B-740C-B646-BF3B-58EE0943A261.root',
