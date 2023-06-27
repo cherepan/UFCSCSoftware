@@ -1,0 +1,61 @@
+rucio list-dataset-replicas --deep cms:/RelValZMM_14/CMSSW_12_4_0-124X_mcRun3_2022_realistic_v5-v1/GEN-SIM-DIGI-RAW
+rucio list-dataset-replicas --deep cms:/RelValZMM_14/CMSSW_12_4_0-124X_mcRun4_realistic_v6_2026D88noPU-v1/GEN-SIM-DIGI-RAW
+rucio list-dataset-replicas --deep cms:/RelValZMM_14/CMSSW_12_4_0-PU_124X_mcRun3_2022_realistic_v5-v1/GEN-SIM-DIGI-RAW
+rucio list-dataset-replicas --deep cms:/RelValZMM_14/CMSSW_12_4_0_pre2-123X_mcRun3_2021_realistic_v12-v1/GEN-SIM-DIGI-RAW
+rucio list-dataset-replicas --deep cms:/RelValZMM_14/CMSSW_12_4_0_pre2-123X_mcRun3_2021_realistic_v12_M100PPCTEST-v2/GEN-SIM-DIGI-RAW
+rucio list-dataset-replicas --deep cms:/RelValZMM_14/CMSSW_12_4_0_pre2-123X_mcRun3_2021_realistic_v12_TEST_alma-v2/GEN-SIM-DIGI-RAW
+rucio list-dataset-replicas --deep cms:/RelValZMM_14/CMSSW_12_4_0_pre2-123X_mcRun3_2021_realistic_v12_TEST_alma_resubtest-v1/GEN-SIM-DIGI-RAW
+rucio list-dataset-replicas --deep cms:/RelValZMM_14/CMSSW_12_4_0_pre2-123X_mcRun4_realistic_v9_2026D77noPU-v1/GEN-SIM-DIGI-RAW
+rucio list-dataset-replicas --deep cms:/RelValZMM_14/CMSSW_12_4_0_pre2-123X_mcRun4_realistic_v9_2026D88noPU-v1/GEN-SIM-DIGI-RAW
+rucio list-dataset-replicas --deep cms:/RelValZMM_14/CMSSW_12_4_0_pre2-PU_123X_mcRun3_2021_realistic_v12-v2/GEN-SIM-DIGI-RAW
+rucio list-dataset-replicas --deep cms:/RelValZMM_14/CMSSW_12_4_0_pre2-PU_123X_mcRun3_2021_realistic_v12_M100PPCTEST-v5/GEN-SIM-DIGI-RAW
+rucio list-dataset-replicas --deep cms:/RelValZMM_14/CMSSW_12_4_0_pre2-PU_123X_mcRun3_2021_realistic_v12_M100PPCTEST-v6/GEN-SIM-DIGI-RAW
+rucio list-dataset-replicas --deep cms:/RelValZMM_14/CMSSW_12_4_0_pre2-PU_123X_mcRun3_2021_realistic_v12_TEST_alma-v3/GEN-SIM-DIGI-RAW
+rucio list-dataset-replicas --deep cms:/RelValZMM_14/CMSSW_12_4_0_pre2-PU_123X_mcRun4_realistic_v9_2026D88PU200-v1/GEN-SIM-DIGI-RAW
+rucio list-dataset-replicas --deep cms:/RelValZMM_14/CMSSW_12_4_0_pre3-123X_mcRun3_2021_realistic_v14-v1/GEN-SIM-DIGI-RAW
+rucio list-dataset-replicas --deep cms:/RelValZMM_14/CMSSW_12_4_0_pre3-123X_mcRun4_realistic_v11_2026D88noPU-v1/GEN-SIM-DIGI-RAW
+rucio list-dataset-replicas --deep cms:/RelValZMM_14/CMSSW_12_4_0_pre3-123X_mcRun4_realistic_v11_2026D88noPU_DD4HEP-v1/GEN-SIM-DIGI-RAW
+rucio list-dataset-replicas --deep cms:/RelValZMM_14/CMSSW_12_4_0_pre3-123X_mcRun4_realistic_v11_2026D88noPU_DDD-v1/GEN-SIM-DIGI-RAW
+rucio list-dataset-replicas --deep cms:/RelValZMM_14/CMSSW_12_4_0_pre3-PU_123X_mcRun3_2021_realistic_v14-v1/GEN-SIM-DIGI-RAW
+rucio list-dataset-replicas --deep cms:/RelValZMM_14/CMSSW_12_4_0_pre3-PU_123X_mcRun4_realistic_v11_2026D88PU200-v1/GEN-SIM-DIGI-RAW
+rucio list-dataset-replicas --deep cms:/RelValZMM_14/CMSSW_12_4_0_pre4-124X_mcRun3_2021_realistic_v1-v1/GEN-SIM-DIGI-RAW
+rucio list-dataset-replicas --deep cms:/RelValZMM_14/CMSSW_12_4_0_pre4-124X_mcRun4_realistic_v2_2026D88noPU-v1/GEN-SIM-DIGI-RAW
+rucio list-dataset-replicas --deep cms:/RelValZMM_14/CMSSW_12_4_0_pre4-PU_124X_mcRun3_2021_realistic_v1-v1/GEN-SIM-DIGI-RAW
+rucio list-dataset-replicas --deep cms:/RelValZMM_14/CMSSW_12_4_0_pre4-PU_124X_mcRun4_realistic_v2_2026D88PU200-v1/GEN-SIM-DIGI-RAW
+rucio list-dataset-replicas --deep cms:/RelValZMM_14/CMSSW_12_4_13-124X_mcRun3_2022_realistic_v12_2021-v1/GEN-SIM-DIGI-RAW
+rucio list-dataset-replicas --deep cms:/RelValZMM_14/CMSSW_12_4_13-PU_124X_mcRun3_2022_realistic_v12-v1/GEN-SIM-DIGI-RAW
+rucio list-dataset-replicas --deep cms:/RelValZMM_14/CMSSW_12_4_6-124X_mcRun3_2022_realistic_v10-v2/GEN-SIM-DIGI-RAW
+rucio list-dataset-replicas --deep cms:/RelValZMM_14/CMSSW_12_4_6-124X_mcRun3_2022_realistic_v10-v3/GEN-SIM-DIGI-RAW
+rucio list-dataset-replicas --deep cms:/RelValZMM_14/CMSSW_12_4_6-124X_mcRun3_2022_realistic_v10-v4/GEN-SIM-DIGI-RAW
+rucio list-dataset-replicas --deep cms:/RelValZMM_14/CMSSW_12_4_6-124X_mcRun4_realistic_v8_2026D88noPU-v2/GEN-SIM-DIGI-RAW
+rucio list-dataset-replicas --deep cms:/RelValZMM_14/CMSSW_12_4_6-124X_mcRun4_realistic_v8_2026D88noPU-v3/GEN-SIM-DIGI-RAW
+rucio list-dataset-replicas --deep cms:/RelValZMM_14/CMSSW_12_4_9_patch1-124X_mcRun3_2022_design_v7_BS2022-v1/GEN-SIM-DIGI-RAW
+rucio list-dataset-replicas --deep cms:/RelValZMM_14/CMSSW_12_4_9_patch1-124X_mcRun3_2022_realistic_v10_BS2022-v1/GEN-SIM-DIGI-RAW
+rucio list-dataset-replicas --deep cms:/RelValZMM_PU_13p6/CMSSW_12_4_11_patch3-PU_124X_mcRun3_2022_realistic_postEE_forPixelIneff_v1_PDMVRELVALS188-v1/GEN-SIM-DIGI-RAW
+rucio list-dataset-replicas --deep cms:/RelValZMM_PU_13p6/CMSSW_12_4_11_patch3-PU_124X_mcRun3_2022_realistic_postEE_forPixelIneff_v2_PDMVRELVALS188-v1/GEN-SIM-DIGI-RAW
+rucio list-dataset-replicas --deep cms:/RelValZMM_PU_13p6/CMSSW_12_4_11_patch3-PU_124X_mcRun3_2022_realistic_postEE_forPixelIneff_v2_PDMVRELVALS188_flatPU-v1/GEN-SIM-DIGI-RAW
+rucio list-dataset-replicas --deep cms:/RelValZMM_PU_13p6/CMSSW_12_4_11_patch3-PU_124X_mcRun3_2022_realistic_postEE_forPixelIneff_v4_PDMVRELVALS188-v1/GEN-SIM-DIGI-RAW
+rucio list-dataset-replicas --deep cms:/RelValZMM_PU_13p6/CMSSW_12_4_11_patch3-PU_124X_mcRun3_2022_realistic_postEE_forPixelIneff_v4_PDMVRELVALS188-v2/GEN-SIM-DIGI-RAW
+rucio list-dataset-replicas --deep cms:/RelValZMM_PU_13p6/CMSSW_12_4_11_patch3-PU_124X_mcRun3_2022_realistic_postEE_forPixelIneff_v4_PDMVRELVALS188_flatPU-v1/GEN-SIM-DIGI-RAW
+rucio list-dataset-replicas --deep cms:/RelValZMM_PU_13p6/CMSSW_12_4_11_patch3-PU_124X_mcRun3_2022_realistic_postEE_v1_PDMVRELVALS188-v1/GEN-SIM-DIGI-RAW
+rucio list-dataset-replicas --deep cms:/RelValZMM_PU_13p6/CMSSW_12_4_11_patch3-PU_124X_mcRun3_2022_realistic_postEE_v1_PDMVRELVALS188_flatPU-v1/GEN-SIM-DIGI-RAW
+rucio list-dataset-replicas --deep cms:/RelValZMM_PU_13p6/CMSSW_12_4_11_patch3-PU_124X_mcRun3_2022_realistic_postEE_v2_PDMVRELVALS167-v1/GEN-SIM-DIGI-RAW
+rucio list-dataset-replicas --deep cms:/RelValZMM_PU_13p6/CMSSW_12_4_11_patch3-PU_124X_mcRun3_2022_realistic_postEE_v2_PDMVRELVALS167-v2/GEN-SIM-DIGI-RAW
+rucio list-dataset-replicas --deep cms:/RelValZMM_PU_13p6/CMSSW_12_4_11_patch3-PU_124X_mcRun3_2022_realistic_postEE_v2_PDMVRELVALS167-v3/GEN-SIM-DIGI-RAW
+rucio list-dataset-replicas --deep cms:/RelValZMM_PU_13p6/CMSSW_12_4_11_patch3-PU_124X_mcRun3_2022_realistic_v12_PDMVRELVALS167-v1/GEN-SIM-DIGI-RAW
+rucio list-dataset-replicas --deep cms:/RelValZMM_PU_13p6/CMSSW_12_4_12-PU_124X_mcRun3_2022_realistic_postEE_forPixelIneff_v2_PDMVRELVALS188_2023PU-v1/GEN-SIM-DIGI-RAW
+rucio list-dataset-replicas --deep cms:/RelValZMM_PU_13p6/CMSSW_12_4_12-PU_124X_mcRun3_2022_realistic_postEE_forPixelIneff_v4_PDMVRELVALS188_2023PU-v1/GEN-SIM-DIGI-RAW
+rucio list-dataset-replicas --deep cms:/RelValZMM_PU_13p6/CMSSW_12_4_12-PU_124X_mcRun3_2022_realistic_postEE_forPixelIneff_v5_PDMVRELVALS188_HS_2023PU-v1/GEN-SIM-DIGI-RAW
+rucio list-dataset-replicas --deep cms:/RelValZMM_PU_13p6/CMSSW_12_4_12-PU_124X_mcRun3_2022_realistic_postEE_forPixelIneff_v7_PDMVRELVALS188_HS_2023PU-v1/GEN-SIM-DIGI-RAW
+rucio list-dataset-replicas --deep cms:/RelValZMM_PU_13p6/CMSSW_12_4_12-PU_124X_mcRun3_2022_realistic_postEE_v1_PDMVRELVALS188_2023PU-v1/GEN-SIM-DIGI-RAW
+rucio list-dataset-replicas --deep cms:/RelValZMM_PU_13p6/CMSSW_12_4_12-PU_124X_mcRun3_2022_realistic_postEE_v1_PDMVRELVALS188_HS_2023PU-v1/GEN-SIM-DIGI-RAW
+rucio list-dataset-replicas --deep cms:/RelValZMM_PU_13p6/CMSSW_12_4_8-PU_124X_mcRun3_2022_realistic_v11_summer22-v1/GEN-SIM-DIGI-RAW
+
+
+
+
+
+/// accessible 
+file block=/RelValZMM_14/CMSSW_12_4_0_pre2-123X_mcRun4_realistic_v9_2026D88noPU-v1/GEN-SIM-DIGI-RAW#4354999b-4d0e-4001-870b-2fc8b4c60bfe
+
+xrdcp  root://cmsxrootd.fnal.gov//store/relval/CMSSW_12_4_0_pre2/RelValZMM_14/GEN-SIM-DIGI-RAW/123X_mcRun4_realistic_v9_2026D88noPU-v1/10000/012344ab-9b99-48c9-966a-7a6653cc6b69.root .

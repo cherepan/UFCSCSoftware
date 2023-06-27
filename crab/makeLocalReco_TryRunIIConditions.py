@@ -25,7 +25,7 @@ process.GlobalTag.globaltag = "124X_mcRun3_2022_realistic_v12"
 
 #process.GlobalTag.globaltag = "106X_upgrade2018_realistic_v15_L1v1"
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 isSIMDIGI = bool(False)
 isRAW = bool(True)
 ###################################################
@@ -48,7 +48,10 @@ process.source    = cms.Source("PoolSource",
 
 ########################################## MC
 
-                                   'file:DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8.root'
+#                                   'file:DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8.root'
+                                   'file:ZMM_RAW_DIGI_SIM_RECO.root'
+#                                   'file:012344ab-9b99-48c9-966a-7a6653cc6b69.root'
+
 #                                   '/store/relval/CMSSW_12_4_13/RelValZMM_14/GEN-SIM-DIGI-RECO/124X_mcRun3_2022_realistic_v12_2021_FastSim-v1/2590000/8a48a70c-ddaf-4aa3-91b5-23dcac5a80a2.root'
 
 
@@ -88,7 +91,7 @@ process.out = cms.OutputModule("PoolOutputModule",
                                fastCloning = cms.untracked.bool(False),
 #                               fileName = cms.untracked.string('/eos/user/c/cherepan/CSC/UF_tuples/SingleMuon_RAW-RECO_ZMu-12Nov2019_UL2018_CSCSegmentBuilder_UF_testRun.root'),
 #                               fileName = cms.untracked.string('RelValZMM_14_RU_CSCSegmentBuilder.root'),
-                               fileName = cms.untracked.string('ZMuSkim4_RU_CSCSegmentBuilder.root'),
+                               fileName = cms.untracked.string('DY_MUMURelVal_RU_CSCSegmentBuilder.root'),
 #                               fileName = cms.untracked.string('DYJetsToLL_M-50_RU_CSCSegmentBuilder.root'),
                                outputCommands = cms.untracked.vstring('keep *')
                                )

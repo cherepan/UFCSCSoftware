@@ -1,0 +1,40 @@
+ cmsDriver.py --filein DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8.root -s RAW2DIGI,L1Reco,RECO,RECOSIM,EI  --no_exec  --conditions=124X_mcRun3_2022_realistic_v12
+
+ cmsDriver.py --filein DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8.root -s RAW2DIGI,L1Reco,RECO  --no_exec  --conditions=124X_mcRun3_2022_realistic_v12 --mc 
+
+ cmsDriver.py  ProduceReco.py  --filein DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8.root --fileout test.root -s RECO  --no_exec  --conditions=124X_mcRun3_2022_realistic_v12 --mc 
+
+ cmsDriver.py  ProduceReco_v2.py  --filein DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8.root --fileout test.root -s RECO  --no_exec  --conditions=124X_mcRun3_2022_realistic_v12 --mc  --era Run3
+
+
+cmsDriver.py  ProduceReco_v2.py  --filein file:DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8.root --fileout test.root -s RECO  --no_exec  --conditions=124X_mcRun3_2022_realistic_v12 --mc  --era Run3
+
+
+
+RAW2DIGI,L1Reco,RECO,RECOSI
+
+
+cmsDriver.py  ProduceReco_v2.py  --filein file:DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8.root --fileout test.root --step RAW2DIGI,L1Reco,RECO,RECOSIM   --no_exec 
+ --conditions=124X_mcRun3_2022_realistic_v12 --mc  --eventcontent RECO --era Run3 --datatier GEN-SIM-DIGI-RAW   ------ functional reco
+
+
+
+
+cmsDriver.py  ProduceReco_v2.py  --filein file:DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8.root --fileout test.root --step RAW2DIGI,L1Reco,RECO,RECOSIM   --no_exec --conditions=124X_mcRun3_2022_realistic_v12 --mc  --eventcontent RECO --era Run3 --datatier GEN-SIM-DIGI-RAW   ------ functional reco
+
+
+cmsDriver.py  ProduceReco_v2.py  --filein file:DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8.root --fileout test.root --step RAW2DIGI,L1Reco,RECO,RECOSIM   --no_exec 
+--conditions=124X_mcRun3_2022_realistic_v12 --mc  --eventcontent FEVT --era Run3 --datatier GEN-SIM-DIGI-RAW   ----- no sim info
+
+
+
+cmsDriver.py  ProduceReco_sim_raw_reco.py  --filein file:DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8.root --fileout test.root --step RAW2DIGI,L1Reco,RECO,RECOSIM   --no_exec 
+--conditions=124X_mcRun3_2022_realistic_v12 --mc  --eventcontent FEVTSIM  --era Run3 --datatier GEN-SIM-DIGI-RAW  
+
+
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------
+
+
+cmsDriver.py  ProduceReco_v2.py  --filein file:012344ab-9b99-48c9-966a-7a6653cc6b69.root --fileout test.root --step RAW2DIGI,L1Reco,RECO,RECOSIM   --no_exec --conditions=124X_mcRun3_2022_realistic_v12 --mc --eventcontent FEVTDEBUGHLT  --era Run3 --datatier GEN-SIM-DIGI-RAW -n 25
