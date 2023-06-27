@@ -70,6 +70,8 @@
 #include "DataFormats/L1GlobalMuonTrigger/interface/L1MuGMTReadoutRecord.h"
 #include "DataFormats/L1GlobalMuonTrigger/interface/L1MuGMTReadoutCollection.h"
 #include "DataFormats/Common/interface/TriggerResults.h"
+#include "DataFormats/HepMCCandidate/interface/GenParticle.h"
+
 
 #include "EventFilter/CSCRawToDigi/interface/CSCDCCEventData.h"
 #include "EventFilter/CSCRawToDigi/interface/CSCDCCExaminer.h"
@@ -222,6 +224,7 @@ private:
 
   //---- Variables ----//
   edm::EDGetTokenT<reco::MuonCollection> muonSrc;
+  edm::EDGetTokenT<reco::GenParticleCollection> genToken_;
 //  edm::InputTag muonSrc;
   edm::EDGetTokenT<reco::VertexCollection> vertexSrc;
   edm::EDGetTokenT<reco::TrackCollection> standAloneMuonsSrc;
@@ -477,7 +480,7 @@ private:
 UFCSCRootMaker::UFCSCRootMaker(const edm::ParameterSet& iConfig) :
   histContainer_(),
   muonSrc(consumes<reco::MuonCollection>(iConfig.getUntrackedParameter<edm::InputTag>("muonSrc"))),
-
+  genToken_(consumes<reco::GenParticleCollection>(iConfig.getUntrackedParameter<edm::InputTag>("genParticles"))),
 //  muonSrc(iConfig.getUntrackedParameter<edm::InputTag>("muonSrc")),
   vertexSrc(consumes<reco::VertexCollection>(iConfig.getUntrackedParameter<edm::InputTag>("vertexSrc"))),
   standAloneMuonsSrc(consumes<reco::TrackCollection>(iConfig.getUntrackedParameter<edm::InputTag>("standAloneMuonsSrc"))),
@@ -645,6 +648,11 @@ void UFCSCRootMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
    edm::Handle<edm::PSimHitContainer> simHits;
    if (isSIM) iEvent.getByToken(simHitTagSrc, simHits);
 
+
+   if(isGEN)
+     {
+       std::cout<<" gen particles  " << std::endl;
+     }
 
    ////////////////////////////////////////////////////////////////////////////////
    nEventsTotal++;
