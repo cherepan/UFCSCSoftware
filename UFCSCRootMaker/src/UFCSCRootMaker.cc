@@ -8,7 +8,7 @@
 //
 //
 //
-// Original Author:  Matthew Snowball/
+// Original Author:  Matthew Snowball/Vladimir Cherepanov
 //         Created:  Tue Jun 18 10:26:09 EDT 2013
 //
 // Last Updated: Apr. 30, 2014
