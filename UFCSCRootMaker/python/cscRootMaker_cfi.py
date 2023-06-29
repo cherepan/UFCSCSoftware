@@ -3,7 +3,7 @@ import FWCore.ParameterSet.Config as cms
 cscRootMaker = cms.EDAnalyzer('UFCSCRootMaker',
   muonSrc = cms.untracked.InputTag('muons'),
   vertexSrc = cms.untracked.InputTag('offlinePrimaryVertices'),
-  genParticles = cms.InputTag('genParticles'),
+  genParticles = cms.untracked.InputTag('genParticles'),
   standAloneMuonsSrc = cms.untracked.InputTag('standAloneMuons'),
   cscRecHitTagSrc = cms.untracked.InputTag('csc2DRecHits'),
 #  cscSegTagSrc = cms.untracked.InputTag('cscSegments','','reRECO'),   #  UF reco

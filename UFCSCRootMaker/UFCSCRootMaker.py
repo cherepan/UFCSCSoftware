@@ -111,7 +111,7 @@ process.out = cms.OutputModule("PoolOutputModule",
 process.TFileService = cms.Service("TFileService",
 #                                   fileName = cms.string("DUMMYFILENAME.root")
 #                                   fileName = cms.string("CSC_UF_ntuple_UF_SegmentBuilder.root")
-                                   fileName = cms.string("run3_MC_test.root")
+                                   fileName = cms.string("run3_MC_test_UF.root")
 #                                   fileName = cms.string("test/SingleMuon_RAW-RECO_ZMu-12Nov2019_UL2018_CSCSegmentBuilder_UF_testRun.root")
                                    )
 
@@ -137,7 +137,7 @@ if isDATA:
 #        'file:/eos/user/c/cherepan/HeavyFiles/SingleMuon_RAW-RECO_ZMu-12Nov2019_UL2018_CSCSegmentBuilder_UF.root'
 #        'file:test/SingleMuon_RAW-RECO_ZMu-12Nov2019_UL2018_CSCSegmentBuilder_UF_testRun.root'
 #         'file:/eos/user/c/cherepan/CSC/SingleMuon_RAW-RECO_ZMu-12Nov2019_UL2018_CSCSegmentBuilder_UF_testRun.root'
-        'file:../crab/DY_MUMURelVal_RU_CSCSegmentBuilder.root'
+        'file:../crab/DY_MUMURelVal_UF_CSCSegmentBuilder.root'
 #        '/store/data/Run2022C/SingleMuon/RAW-RECO/ZMu-PromptReco-v1/000/356/381/00000/6513929e-95f2-4528-9b6b-6b0a15a768d4.root'
 
 
@@ -175,7 +175,7 @@ if isDATA:
 else:
     process.source.fileNames = cms.untracked.vstring(
 #        '/store/relval/CMSSW_12_4_13/RelValZMM_14/GEN-SIM-DIGI-RECO/124X_mcRun3_2022_realistic_v12_2021_FastSim-v1/2590000/8a48a70c-ddaf-4aa3-91b5-23dcac5a80a2.root'
-        'file:../crab/DY_MUMURelVal_RU_CSCSegmentBuilder.root'
+        'file:../crab/DY_MUMURelVal_UF_CSCSegmentBuilder.root'
 #        'file:../8a48a70c-ddaf-4aa3-91b5-23dcac5a80a2.root'
 #        '/store/relval/CMSSW_7_0_0/RelValTTbar/GEN-SIM-DIGI-RECO/START70_V6_FastSim-v2/00000/00743452-B498-E311-AD84-02163E00EAC9.root',
 #        'file:/raid/raid8/mhl/CSC_Run2/CMSSW_dev/outputRoot/test2.root'

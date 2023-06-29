@@ -91,7 +91,7 @@ process.out = cms.OutputModule("PoolOutputModule",
                                fastCloning = cms.untracked.bool(False),
 #                               fileName = cms.untracked.string('/eos/user/c/cherepan/CSC/UF_tuples/SingleMuon_RAW-RECO_ZMu-12Nov2019_UL2018_CSCSegmentBuilder_UF_testRun.root'),
 #                               fileName = cms.untracked.string('RelValZMM_14_RU_CSCSegmentBuilder.root'),
-                               fileName = cms.untracked.string('DY_MUMURelVal_RU_CSCSegmentBuilder.root'),
+                               fileName = cms.untracked.string('DY_MUMURelVal_UF_CSCSegmentBuilder.root'),
 #                               fileName = cms.untracked.string('DYJetsToLL_M-50_RU_CSCSegmentBuilder.root'),
                                outputCommands = cms.untracked.vstring('keep *')
                                )

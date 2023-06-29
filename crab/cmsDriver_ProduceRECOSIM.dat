@@ -37,4 +37,4 @@ cmsDriver.py  ProduceReco_sim_raw_reco.py  --filein file:DYJetsToLL_M-50_TuneCP5
 ---------------------------------------------------------------------------------------------------------------------------------------------
 
 
-cmsDriver.py  ProduceReco_v2.py  --filein file:012344ab-9b99-48c9-966a-7a6653cc6b69.root --fileout test.root --step RAW2DIGI,L1Reco,RECO,RECOSIM   --no_exec --conditions=124X_mcRun3_2022_realistic_v12 --mc --eventcontent FEVTDEBUGHLT  --era Run3 --datatier GEN-SIM-DIGI-RAW -n 25
+cmsDriver.py  ProduceReco_v2.py  --filein file:012344ab-9b99-48c9-966a-7a6653cc6b69.root --fileout ZMM_RAW_DIGI_SIM_RECO.root --step RAW2DIGI,L1Reco,RECO,RECOSIM   --no_exec --conditions=124X_mcRun3_2022_realistic_v12 --mc --eventcontent FEVTDEBUGHLT  --era Run3 --datatier GEN-SIM-DIGI-RAW -n 25

@@ -558,7 +558,7 @@ void UFCSCRootMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
    //general tracks
 //   edm::Handle<reco::TrackCollection> genTracks;
 //   if(isFullRECO) iEvent.getByToken("generalTracks",genTracks);
-   cout<<" deb1 "<< std::endl;
+//   cout<<" deb1 "<< std::endl;
    //muons
    edm::Handle<reco::MuonCollection> muons;
 //   edm::Handle<reco::Muon> muons;   
@@ -581,7 +581,7 @@ void UFCSCRootMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
    // get the standalone muon collection
    edm::Handle<reco::TrackCollection> saMuons;
    if(isFullRECO) iEvent.getByToken(standAloneMuonsSrc,saMuons);
-   cout<<" deb2 "<< std::endl;
+   //   cout<<" deb2 "<< std::endl;
 
 
    //   edm::ESGetToken<AnyProduct, SomeOrDependentRecord> token1_;
@@ -604,11 +604,11 @@ void UFCSCRootMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
    //   edm::ESGetToken<SomeProduct, SomeRecord> esToken_; 
    //   edm::ESInputTag{cscGeom, "MuonGeometryRecord"};
    
-   cout<<" deb2.2 "<< std::endl;
+   //   cout<<" deb2.2 "<< std::endl;
    //   edm::ESHandle<GlobalTrackingGeometry> geometry_;
-   cout<<" deb2.3 "<< std::endl;
+   //   cout<<" deb2.3 "<< std::endl;
    //   iSetup.get<GlobalTrackingGeometryRecord>().get(geometry_);
-   cout<<" deb3 "<< std::endl;
+   //   cout<<" deb3 "<< std::endl;
 
 
    auto const geometry_ = &iSetup.getData(globalTrackingGeometry);
@@ -662,7 +662,7 @@ void UFCSCRootMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
    LumiSect = iEvent.id().luminosityBlock();
    BunchCrossing = iEvent.bunchCrossing();
 
-   cout<<" deb4 "<< std::endl;
+   //   cout<<" deb4 "<< std::endl;
    //Lumi Details
 /*   if (isDATA && isFullRECO && LumiDet.isValid()){
      rawbxlumi = LumiDet->lumiValue(LumiDetails::kOCC1,iEvent.bunchCrossing());
@@ -922,7 +922,48 @@ void UFCSCRootMaker::doMuons(edm::Handle<reco::MuonCollection> muons,
 	muons_globalTrackNormalizedChi2[counter] = -999;
 	muons_globalTrackNumberOfValidMuonHits[counter] = -999;
       }
-      if(mu->track().isNonnull())
+
+      std::cout<<" mu->track().isNonnull()   " << mu->track().isNonnull() << std::endl;
+      std::cout<<" is global muon  " << mu->isGlobalMuon()<< std::endl;
+
+
+      const reco::Track& Track_test =  *mu->outerTrack();
+	//      Track_test = *mu->outerTrack();
+      for(trackingRecHit_iterator recHit =  Track_test.recHitsBegin(); recHit != Track_test.recHitsEnd(); ++recHit)
+	{
+	  std::cout<<"  findMuonSegments  1     "  << std::endl;
+
+	  DetId idRivHit = (*recHit)->geographicalId();
+	  std::cout<< 	  (*recHit)->localPosition().x() << "   loczl X    "<< idRivHit.det() << " idRivHit.det()  " <<std::endl;
+	}
+
+ 
+
+      
+      std::vector<CSCSegment> mySavedSegments = findMuonSegments(*mu->outerTrack(), cscSegments, recHits, cscGeom);
+      std::cout<< "    mySavedSegments.size()  " << mySavedSegments.size()  << std::endl;
+      for (int j = 0; j < (int)mySavedSegments.size(); j++)
+	{
+	  CSCDetId cscSegId  = (CSCDetId)mySavedSegments[j].cscDetId();
+	  //	  tmpSegCounter++;
+	  cscSegmentRecord_nRecHits.push_back(mySavedSegments[j].recHits().size());
+	  cscSegmentRecord_ring.push_back(cscSegId.ring());
+	  cscSegmentRecord_station.push_back(cscSegId.station());
+	  cscSegmentRecord_chamber.push_back(cscSegId.chamber());
+	  cscSegmentRecord_endcap.push_back(cscSegId.endcap());
+	  LocalPoint localP = mySavedSegments[j].localPosition();
+	  cscSegmentRecord_localY.push_back(localP.y());
+	  cscSegmentRecord_localX.push_back(localP.x());
+	  std::cout<<"   local X " << localP.y() << std::endl;
+	  //	  tmpRHCounter += mySavedSegments[j].recHits().size();
+	}
+
+      
+
+
+      
+      if(mu->track().isNonnull())//  this is valid for data
+      //      if(Track_test.outerOk() )//  try for MC
 	{
 	  muons_trackNumberOfValidHits[counter] = mu->track()->numberOfValidHits();
 	  muons_trackNumberOfLostHits[counter] = mu->track()->numberOfLostHits();  
@@ -933,9 +974,12 @@ void UFCSCRootMaker::doMuons(edm::Handle<reco::MuonCollection> muons,
 	  muons_numberOfSegments[counter] = 0;
 	  int tmpRHCounter = 0, tmpSegCounter = 0;
 	  
-	  if(mu->outerTrack().isNonnull() && (mu->isStandAloneMuon() || mu->isGlobalMuon()) )
+	  std::cout<<" mu->outerTrack().isNonnull() && (mu->isStandAloneMuon() || mu->isGlobalMuon())   " 
+		   <<  ( mu->outerTrack().isNonnull() && (mu->isStandAloneMuon() || mu->isGlobalMuon()) ) << std::endl;
+	  //	  if(mu->outerTrack().isNonnull() && (mu->isStandAloneMuon() || mu->isGlobalMuon()) )
 	    {
 	      std::vector<CSCSegment> mySavedSegments = findMuonSegments(*mu->outerTrack(), cscSegments, recHits, cscGeom);
+	      std::cout<< "    mySavedSegments.size()  " << mySavedSegments.size()  << std::endl;  
 	      for (int j = 0; j < (int)mySavedSegments.size(); j++)
 		{
 		  CSCDetId cscSegId  = (CSCDetId)mySavedSegments[j].cscDetId();
@@ -956,6 +1000,7 @@ void UFCSCRootMaker::doMuons(edm::Handle<reco::MuonCollection> muons,
 	  muons_nRecHits[counter] = tmpRHCounter;
 	  muons_numberOfSegments[counter] = tmpSegCounter;
 	}
+
       else
 	{
 	  muons_trackNumberOfValidHits[counter] = -999;
@@ -963,6 +1008,11 @@ void UFCSCRootMaker::doMuons(edm::Handle<reco::MuonCollection> muons,
 	  muons_dxy[counter] = -999;
 	  muons_dz[counter] = -999;
 	}
+
+
+
+
+
       if(mu->isPFIsolationValid())
 	{
 	  muons_isoNH03[counter] = mu->pfIsolationR03().sumNeutralHadronEt;
@@ -976,6 +1026,9 @@ void UFCSCRootMaker::doMuons(edm::Handle<reco::MuonCollection> muons,
 	  muons_isoPU04[counter] = mu->pfIsolationR04().sumPUPt;
 	}
       counter++;
+    
+
+      std::cout<<"--------------------  "<< cscSegmentRecord_nRecHits.size() << "              muons_cscSegmentRecord_nRecHits  " << muons_cscSegmentRecord_nRecHits.size() <<std::endl;
 
       muons_cscSegmentRecord_nRecHits.push_back(cscSegmentRecord_nRecHits);
       muons_cscSegmentRecord_ring.push_back(cscSegmentRecord_ring); 
@@ -2870,12 +2923,12 @@ bool UFCSCRootMaker::withinSensitiveRegion(LocalPoint localPos, const std::array
 std::vector<CSCSegment> UFCSCRootMaker::findMuonSegments(const reco::Track& Track,  edm::Handle<CSCSegmentCollection> cscSegments, edm::Handle<CSCRecHit2DCollection> recHits,  const CSCGeometry* cscGeom)
 {
 
-  std::vector<CSCSegment> savedSegments;
+  std::vector<CSCSegment>  savedSegments;
   std::vector<GlobalPoint> savedPoints;
 
   for(trackingRecHit_iterator recHit =  Track.recHitsBegin(); recHit != Track.recHitsEnd(); ++recHit)
     {
-      
+      std::cout<<"  findMuonSegments  1     "  << std::endl;
       if(!(*recHit)->isValid()) continue;
 
       //cout << "Valid RH from Track" << endl;
