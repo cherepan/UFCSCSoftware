@@ -21,13 +21,14 @@ tag2 = args.tag2
 plotdir = args.plotdir
 
 
-histnames = ["nSegPerChamebr","nRHPerSeg","chi2PerDOF","nSegmentsPerChamber","nSegmentsPerMuonChamber"]
-xmins = [0,2,0,0,0]
-xmaxs = [6,7,100,6,6]
-ymins = [0.1,0.1,0.1,0.1,0.1]
+#histnames = ["nSegPerChamebr","nRHPerSeg","chi2PerDOF","nSegmentsPerChamber","nSegmentsPerMuonChamber"]
+histnames = ["nChambers_crossedbyMuon","nSegmentsPerMuonChamber","TwoMuons_mass","TwoMuons_mass_wide","nSegmentsPerMuonChamber_notBelongingToMuon","nSegmentsPerChamber","nRHPerSeg","nRHPerNonMuonSegment","nMuon_perEvent"]
+xmins = [0,0,60,60,-0.5,0,0,0,0]
+xmaxs = [6,5,120,120,6,6,7,7,5]
+ymins = [0,1,0,0,0,0,0,0,0]
 #ymaxs = [10000,10000,10000,10000]
-ymaxs = [10000,5000,3000,50000,20000]
-xtitles = ["#Segments per chamber","# RecHits per Segment","chi2/DOF","# Segments per Chamber (new)","# Segments per chamber w/ #mu"]
+ymaxs = [1000,5000,5000,300,5000,40000,1500,200,5000]
+xtitles = ["# chambers crossed by Muon","# segments per chamber with muon","M, GeV","M, GeV","# non muon segments","# segments per chamber","# RH per muon segment","# RH per non muon segment","# muons per event"]
 
 for i in range(len(histnames)):
 
@@ -49,7 +50,7 @@ for i in range(len(histnames)):
 
     plotter.AddPlot(tmpHists, drawOps, colors, styles, sizes)
 
-    comments = ["Recent SegmentBuilder","UF "]
+    comments = ["RU","UF "]
 
     canvasCord = [xmins[i],xmaxs[i],ymins[i],ymaxs[i]]  
     legendCord = [0.4,0.75,0.9,0.9]
