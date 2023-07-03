@@ -13,9 +13,9 @@ void cscSelector::MuonsHelper()
 
    // keep muons with the following selection : 
    for (int i = 0; i < *muons_nMuons; i++) {
-     if (!(muons_isPFMuon[i] || muons_isGlobalMuon[i] || muons_isTrackerMuon[i]) ) continue;
+     //     if (!(muons_isPFMuon[i] || muons_isGlobalMuon[i] || muons_isTrackerMuon[i]) ) continue;
      if (!(abs(muons_eta[i]) < 2.4 && abs(muons_eta[i]) < 2.4)) continue;
-     if (!(abs(muons_dz[i]) < 1 && abs(muons_dxy[i]) < 0.5)) continue;
+     //     if (!(abs(muons_dz[i]) < 1 && abs(muons_dxy[i]) < 0.5)) continue;
      if (muons_pt[i] < 5) continue;
      Muons_Index.push_back(i);
    }

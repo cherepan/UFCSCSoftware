@@ -65,7 +65,7 @@ process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(maxEvents))
 # initialize MessageLogger and output report
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 #process.MessageLogger.cerr.threshold = 'ERROR' # Options: INFO, WARNING, ERROR
-process.MessageLogger.cerr.FwkReport.reportEvery = 1000
+process.MessageLogger.cerr.FwkReport.reportEvery = -1
 #process.MessageLogger.destinations = ['cout', 'cerr']
 #process.MessageLogger.suppressWarning.append('classByHitsGlb') # kill stupid RPC hit associator warning
 
@@ -111,7 +111,9 @@ process.out = cms.OutputModule("PoolOutputModule",
 process.TFileService = cms.Service("TFileService",
 #                                   fileName = cms.string("DUMMYFILENAME.root")
 #                                   fileName = cms.string("CSC_UF_ntuple_UF_SegmentBuilder.root")
-                                   fileName = cms.string("run3_MC_test_UF.root")
+#                                   fileName = cms.string("run3_MC_test_UF.root")
+                                   fileName = cms.string("run3_MC_RU.root")
+
 #                                   fileName = cms.string("test/SingleMuon_RAW-RECO_ZMu-12Nov2019_UL2018_CSCSegmentBuilder_UF_testRun.root")
                                    )
 
@@ -137,7 +139,9 @@ if isDATA:
 #        'file:/eos/user/c/cherepan/HeavyFiles/SingleMuon_RAW-RECO_ZMu-12Nov2019_UL2018_CSCSegmentBuilder_UF.root'
 #        'file:test/SingleMuon_RAW-RECO_ZMu-12Nov2019_UL2018_CSCSegmentBuilder_UF_testRun.root'
 #         'file:/eos/user/c/cherepan/CSC/SingleMuon_RAW-RECO_ZMu-12Nov2019_UL2018_CSCSegmentBuilder_UF_testRun.root'
-        'file:../crab/DY_MUMURelVal_UF_CSCSegmentBuilder.root'
+#        'file:/afs/cern.ch/work/c/cherepan/CSC/Run3/UFSegementBuilder/CMSSW_12_4_4/src/UFCSCSoftware/crab/DY_MUMURelVal_RU_CSCSegmentBuilder.root'
+        'file:../crab/DY_MUMURelVal_RU_CSCSegmentBuilder.root'
+
 #        '/store/data/Run2022C/SingleMuon/RAW-RECO/ZMu-PromptReco-v1/000/356/381/00000/6513929e-95f2-4528-9b6b-6b0a15a768d4.root'
 
 

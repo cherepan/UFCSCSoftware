@@ -1419,7 +1419,7 @@ UFCSCRootMaker::doRecHits(edm::Handle<CSCRecHit2DCollection> recHits, edm::Handl
 	   simHits_momentum[counter] = (*dSHsimIter).pabs();
 	   simHits_phi[counter] = (*dSHsimIter).phiAtEntry();
 	   simHits_theta[counter] = (*dSHsimIter).thetaAtEntry();
-	   
+	   std::cout<<" simHits_ID_chamber   "<<sId.chamber() <<std::endl;
 	   counter++;
 	 }
      }
@@ -3100,6 +3100,8 @@ UFCSCRootMaker::bookTree(TTree *tree)
   tree->Branch("tracks_p",  tracks_p,  "tracks_p[tracks_nTracks]/D");
   tree->Branch("tracks_eta",  tracks_eta,  "tracks_eta[tracks_nTracks]/D");
   tree->Branch("tracks_phi",  tracks_phi,  "tracks_phi[tracks_nTracks]/D");
+  */
+
   // SimHits
   tree->Branch("simHits_nSimHits", &simHits_nSimHits, "simHits_nSimHits/I");
   tree->Branch("simHits_particleType", simHits_particleType,  "simHits_particleType[simHits_nSimHits]/I");
@@ -3118,7 +3120,6 @@ UFCSCRootMaker::bookTree(TTree *tree)
   tree->Branch("simHits_momentum", simHits_momentum,  "simHits_momentum[simHits_nSimHits]/D");
   tree->Branch("simHits_phi", simHits_phi,  "simHits_phi[simHits_nSimHits]/D");
   tree->Branch("simHits_theta", simHits_theta,  "simHits_theta[simHits_nSimHits]/D");
-*/
 
   // CSCRecHits2D
   tree->Branch("recHits2D_nRecHits2D", &recHits2D_nRecHits2D,"recHits2D_nRecHits2D/I");

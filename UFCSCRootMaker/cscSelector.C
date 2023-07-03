@@ -96,7 +96,7 @@ Bool_t cscSelector::Process(Long64_t entry)
 
    vector<SegsInChamber> segs;
    segs.clear();
-   std::cout<<" at least are we here?? " << std::endl;
+
    for (int i = 0; i < *cscSegments_nSegments; i++) {
 
      int endcap = cscSegments_ID_endcap[i];
@@ -153,23 +153,75 @@ Bool_t cscSelector::Process(Long64_t entry)
      {
        std::vector<int> allsegments_in_a_chamber =   allSegmentsInChamber(chamber);
        nSegmentsPerChamber->Fill(allsegments_in_a_chamber.size());
+
+     }
+
+   nMuons_perEvent->Fill(Muons_Index.size());
+   if(Muons_Index.size()==2)
+     {
+       //       std::cout<<" >>>>>>>>>>>> mass  "<< (Muon_P4(0) + Muon_P4(1)).M()<< std::endl;
+       float Mass = (Muon_P4(0) + Muon_P4(1)).M();
+       TwoMuons_mass_wide->Fill((Muon_P4(0) + Muon_P4(1)).M());
+
+       if(Mass > 88 && Mass < 94 )
+	 {
+
+	   TwoMuons_mass->Fill((Muon_P4(0) + Muon_P4(1)).M());
+	   //	   nSegments_Muon1->Fill(allSegments_belonging_toMuon(Muons_Index.at(0)).size());
+	   //	   nSegments_Muon2->Fill(allSegments_belonging_toMuon(Muons_Index.at(1)).size());
+
+	   Muon1_PT->Fill(Muon_P4(0).Pt());
+	   Muon2_PT->Fill(Muon_P4(1).Pt());
+
+	   for(unsigned int imu=0; imu < Muons_Index.size(); imu++)
+	     {
+
+	       int muon_index = Muons_Index.at(imu);
+	       std::vector<int>  SegementsMuon = allSegments_belonging_toMuon(Muons_Index.at(imu));
+	       nSegments_Muon->Fill(allSegments_belonging_toMuon(Muons_Index.at(imu)).size());
+	       for(auto iseg : SegementsMuon)
+		 {
+		   int nrechit = allrechits_of_segment(iseg).size();
+		   nRHPerSeg->Fill(nrechit);
+		 }
+
+
+	       std::vector<int> list_of_chambers_crossed_by_muon = Chambers_crossedByMuon( muon_index  );
+	       //	       std::cout<< 	   list_of_chambers_crossed_by_muon.size()<< std::endl;
+	       if(list_of_chambers_crossed_by_muon.size()!=0)	       nChambers_crossedbyMuon->Fill(list_of_chambers_crossed_by_muon.size());
+	       for(auto  ch : list_of_chambers_crossed_by_muon)
+		 {
+		   std::vector<int> allsegments_in_a_chamber_crossed_by_muon =   allSegmentsInChamber(ch);
+		   nSegmentsPerMuonChamber->Fill(allsegments_in_a_chamber_crossed_by_muon.size());
+		   nSegmentsPerMuonChamber_notBelongingToMuon->Fill(allSegments_inChamber_NOT_belonging_toMuon(ch, muon_index).size());
+
+
+		   for(auto ifalseseg : allSegments_inChamber_NOT_belonging_toMuon(ch, muon_index))
+		     {
+		       int nrechit = allrechits_of_segment(ifalseseg).size();
+		       nRHPerNonMuonSegment->Fill(nrechit);
+		     }
+
+		 }
+	     }
+	 }
      }
 
    for(unsigned int imu=0; imu < Muons_Index.size(); imu++)
      {
 
        std::vector<int>  MuonSegments = allSegments_belonging_toMuon(Muons_Index.at(imu));
-       std::vector<int> list_of_chambers_crossed_by_muon = Chambers_crossedByMuon(Muons_Index.at(imu));
+       std::vector<int>  list_of_chambers_crossed_by_muon = Chambers_crossedByMuon(Muons_Index.at(imu));
        for(auto  ch : list_of_chambers_crossed_by_muon)
 	 {
 	   std::vector<int> allsegments_in_a_chamber_crossed_by_muon =   allSegmentsInChamber(ch);
-	   nSegmentsPerMuonChamber->Fill(allsegments_in_a_chamber_crossed_by_muon.size());
+	   //	   nSegmentsPerMuonChamber->Fill(allsegments_in_a_chamber_crossed_by_muon.size());
 	 }
 
        for(auto iseg : MuonSegments)
 	 {
 	   int nrechit = allrechits_of_segment(iseg).size();
-	   nRHPerSeg->Fill(nrechit); 
+	   //	   nRHPerSeg->Fill(nrechit); 
 	   
 	 }
 
@@ -218,7 +270,7 @@ Bool_t cscSelector::Process(Long64_t entry)
 
        if (!(muons_isPFMuon[i] || muons_isGlobalMuon[i] || muons_isTrackerMuon[i]) ) continue;
        if (!(abs(muons_eta[i]) < 2.4)) continue;
-       if (!(abs(muons_dz[i])  < 1 && abs(muons_dxy[i]) < 0.5)) continue;
+       //       if (!(abs(muons_dz[i])  < 1 && abs(muons_dxy[i]) < 0.5)) continue;
        //       std::cout<<"   muon #  "<< i << std::endl;
        //       for(auto j : Chambers_crossedByMuon(i)) std::cout<<"   Chambers  "<< j << std::endl;
        if (muons_pt[i] < 5) continue;
@@ -228,7 +280,9 @@ Bool_t cscSelector::Process(Long64_t entry)
      }
 
 
-   nMuons_perEvent->Fill(Selected_Muons.size());
+   //   if(Selected_Muons.size()!=0) std::cout<<"  Run/Event  "<< *Run <<  "  /  "<<   *Event << std::endl;
+
+   //   nMuons_perEvent->Fill(Selected_Muons.size());
    //   std::cout<<"   loop over all muons   "<<endcapL.size() << std::endl;
    for (int i = 0; i < int(endcapL.size()); i++) 
      {
@@ -679,8 +733,18 @@ void cscSelector::Terminate()
 
   nSegPerChamber->SetMaximum(2000);
   nRHPerSeg->SetMaximum(2000);
-  nSegPerChamber->Write();
+  //  nSegPerChamber->Write();
+  TwoMuons_mass->Write();
+  TwoMuons_mass_wide->Write();
+  nSegments_Muon->Write();
+
+
+  Muon1_PT->Write();
+  Muon2_PT->Write();
+  nChambers_crossedbyMuon->Write();
+  nSegmentsPerMuonChamber_notBelongingToMuon->Write();
   nRHPerSeg->Write();
+  nRHPerNonMuonSegment->Write();
   chi2PerDOF->SetMinimum(0.1);
   chi2PerDOF->Write();
    

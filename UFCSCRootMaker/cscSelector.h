@@ -477,7 +477,8 @@ public :
    TH1F* nHitsPerCLCT_wide = new TH1F("nHitsPerCLCT_wide","",7,0,7);
    TH1F* nHitsPerCLCT_narrow = new TH1F("nHitsPerCLCT_narrow","",7,0,7);
 
-
+   TH1F* TwoMuons_mass = new TH1F("TwoMuons_mass","",200,40,140);
+   TH1F* TwoMuons_mass_wide = new TH1F("TwoMuons_mass_wide","",200,40,140);
 
    TH1F* nMuons_perEvent= new TH1F("nMuon_perEvent","",8,-0.5,7.5);
 
@@ -517,7 +518,19 @@ public :
    TH1F* nSegmentsPerChamber     = new TH1F("nSegmentsPerChamber","",5,-0.5,4.5);  
    TH1F* nSegmentsPerMuonChamber = new TH1F("nSegmentsPerMuonChamber","",5,-0.5,4.5);
 
+
+   TH1F*    nSegments_Muon = new TH1F("nSegments_Muon","",11,-0.5,10.5);
+
+
+   TH1F* Muon1_PT = new TH1F("Muon1_PT","",70,10,80);
+   TH1F* Muon2_PT = new TH1F("Muon2_PT","",70,10,80);
+
+   TH1F* nChambers_crossedbyMuon = new TH1F("nChambers_crossedbyMuon","",6,-0.5,5);
+   TH1F* nSegmentsPerMuonChamber_notBelongingToMuon= new TH1F("nSegmentsPerMuonChamber_notBelongingToMuon","",6,-0.5,5);
+
+
    TH1F* nRHPerSeg = new TH1F("nRHPerSeg","",5,2.5,7.5);
+   TH1F* nRHPerNonMuonSegment= new TH1F("nRHPerNonMuonSegment","",5,2.5,7.5);
    TH1F* chi2PerDOF = new TH1F("chi2PerDOF","",100,0,200);
 
    TH2F* nWireDigi_Layer = new TH2F("nWireDigi_Layer","",10,0,10,6,1,7);
