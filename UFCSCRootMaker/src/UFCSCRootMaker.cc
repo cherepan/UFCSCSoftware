@@ -135,6 +135,8 @@
 
 #include "DataFormats/Luminosity/interface/LumiDetails.h"
 #include "DataFormats/Luminosity/interface/LumiSummary.h"
+
+#include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 //#include "RecoLuminosity/LumiProducer/interface/LumiCorrectionParam.h"
 
 #include "TFile.h"
@@ -178,6 +180,8 @@ private:
   void doMuons(edm::Handle<reco::MuonCollection> muons, edm::Handle<reco::TrackCollection> saMuons, edm::Handle<CSCSegmentCollection> cscSegments, edm::Handle<CSCRecHit2DCollection> recHits,
 	       const reco::Vertex *&PV, const edm::Event& iEvent, const edm::EventSetup& iSetup, const GlobalTrackingGeometry* theGeom, const CSCGeometry* cscGeom);
 
+
+  void doGenMuons(edm::Handle<reco::GenParticleCollection>& genParticles);
 
   void doTracks(edm::Handle<reco::TrackCollection> genTracks);
   void doRecHits(edm::Handle<CSCRecHit2DCollection> recHits, edm::Handle<edm::PSimHitContainer> simHits, edm::Handle<reco::TrackCollection> saMuons, 
@@ -302,13 +306,14 @@ private:
   int vertex_nVertex;
   
   // Muons
-  int       muons_nMuons;
+  int       muons_nMuons, gen_muons_nMuons;
   bool      muons_isStandAloneMuon[1000], muons_isGlobalMuon[1000], muons_isPFMuon[1000], muons_isCaloMuon[1000], muons_isTrackerMuon[1000];
   bool      muons_isEnergyValid[1000];
   int       muons_numberOfChambers[1000], muons_numberOfMatches[1000], muons_numberOfSegments[1000];
   double    muons_calEnergyTower[1000], muons_calEnergyEm[1000], muons_calEnergyHad[1000];
-  int       muons_charge[1000], muons_nRecHits[1000];
+  int       muons_charge[1000], gen_muons_charge[1000],  muons_nRecHits[1000];
   double    muons_energy[1000],  muons_px[1000], muons_py[1000], muons_pz[1000], muons_pt[1000];
+  double    gen_muons_energy[1000],  gen_muons_px[1000], gen_muons_py[1000], gen_muons_pz[1000];
   double    muons_et[1000], muons_p[1000], muons_phi[1000], muons_eta[1000], muons_theta[1000];
   double    muons_vx[1000], muons_vy[1000], muons_vz[1000];
   double    muons_globalTrackNormalizedChi2[1000];
@@ -545,7 +550,7 @@ UFCSCRootMaker::~UFCSCRootMaker()
 void UFCSCRootMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
 
-
+  std::cout<<"   even ===================================   gen is called first  " << std::endl;
    using namespace edm;
    using namespace std;
    /// Time in seconds since January 1, 1970.
@@ -648,10 +653,11 @@ void UFCSCRootMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
    edm::Handle<edm::PSimHitContainer> simHits;
    if (isSIM) iEvent.getByToken(simHitTagSrc, simHits);
 
-
+   edm::Handle<reco::GenParticleCollection> genParticles;
    if(isGEN)
      {
-       std::cout<<" gen particles  " << std::endl;
+       if ( iEvent.getByToken(genToken_, genParticles))  doGenMuons(genParticles);
+
      }
 
    ////////////////////////////////////////////////////////////////////////////////
@@ -868,6 +874,37 @@ void UFCSCRootMaker::endLuminosityBlock(edm::LuminosityBlock const&, edm::EventS
 */
 
 
+void 
+UFCSCRootMaker::doGenMuons(edm::Handle<reco::GenParticleCollection>& genParticles)
+{
+  counter =0;
+  for (reco::GenParticleCollection::const_iterator itr = genParticles->begin(); itr != genParticles->end(); ++itr) 
+    {
+
+      if(abs(itr->pdgId()) == 13 && itr->status() == 1 )
+	{
+
+	  std::cout<<"gen    muon px:  "<<  itr->p4().Px() <<std::endl;
+
+	  gen_muons_charge[counter] = itr->charge();
+	  gen_muons_px[counter] = itr->p4().Px();
+	  gen_muons_py[counter] = itr->p4().Py();
+	  gen_muons_pz[counter] = itr->p4().Pz();
+	  gen_muons_energy[counter] = sqrt(itr->p4().Px()*itr->p4().Px() + itr->p4().Py()*itr->p4().Py() + itr->p4().Pz()*itr->p4().Pz() + 0.102*0.102 );
+
+	  counter++;
+
+
+	}
+
+    }
+  gen_muons_nMuons = counter;
+
+}
+
+
+
+
 void UFCSCRootMaker::doMuons(edm::Handle<reco::MuonCollection> muons, 
 			     edm::Handle<reco::TrackCollection> saMuons, 
 			     edm::Handle<CSCSegmentCollection> cscSegments, 
@@ -896,19 +933,19 @@ void UFCSCRootMaker::doMuons(edm::Handle<reco::MuonCollection> muons,
       muons_calEnergyHad[counter] = mu->calEnergy().had;
       muons_charge[counter] = mu->charge();
       muons_energy[counter] = mu->energy();
-      muons_px[counter] = mu->px();
-      muons_py[counter] = mu->py();
-      muons_pz[counter] = mu->pz();
-      muons_pt[counter] = mu->pt();
-      muons_et[counter] = mu->et();
-      muons_p[counter] = mu->p();
+      muons_px[counter]  = mu->px();
+      muons_py[counter]  = mu->py();
+      muons_pz[counter]  = mu->pz();
+      muons_pt[counter]  = mu->pt();
+      muons_et[counter]  = mu->et();
+      muons_p[counter]   = mu->p();
       muons_phi[counter] = mu->phi();
       muons_eta[counter] = mu->eta();
       muons_theta[counter] = mu->theta();
       muons_vx[counter] = mu->vx();
       muons_vy[counter] = mu->vy();
       muons_vz[counter] = mu->vz();
-
+      std::cout<<"  reco muons  px  " << mu->px() << std::endl;
       std::vector<double> cscSegmentRecord_nRecHits, cscSegmentRecord_ring, cscSegmentRecord_station, cscSegmentRecord_chamber, cscSegmentRecord_endcap;
       std::vector<double> cscSegmentRecord_localY, cscSegmentRecord_localX, cscSegmentRecord_theta;
 
@@ -923,25 +960,25 @@ void UFCSCRootMaker::doMuons(edm::Handle<reco::MuonCollection> muons,
 	muons_globalTrackNumberOfValidMuonHits[counter] = -999;
       }
 
-      std::cout<<" mu->track().isNonnull()   " << mu->track().isNonnull() << std::endl;
-      std::cout<<" is global muon  " << mu->isGlobalMuon()<< std::endl;
+      //      //      std::cout<<" mu->track().isNonnull()   " << mu->track().isNonnull() << std::endl;
+      //      std::cout<<" is global muon  " << mu->isGlobalMuon()<< std::endl;
 
 
-      const reco::Track& Track_test =  *mu->outerTrack();
+      //      const reco::Track& Track_test =  *mu->outerTrack();
 	//      Track_test = *mu->outerTrack();
-      for(trackingRecHit_iterator recHit =  Track_test.recHitsBegin(); recHit != Track_test.recHitsEnd(); ++recHit)
-	{
-	  std::cout<<"  findMuonSegments  1     "  << std::endl;
+      //      for(trackingRecHit_iterator recHit =  Track_test.recHitsBegin(); recHit != Track_test.recHitsEnd(); ++recHit)
+      //	{
+	  //	  std::cout<<"  findMuonSegments  1     "  << std::endl;
 
-	  DetId idRivHit = (*recHit)->geographicalId();
-	  std::cout<< 	  (*recHit)->localPosition().x() << "   loczl X    "<< idRivHit.det() << " idRivHit.det()  " <<std::endl;
-	}
+//	  DetId idRivHit = (*recHit)->geographicalId();
+	  //	  std::cout<< 	  (*recHit)->localPosition().x() << "   loczl X    "<< idRivHit.det() << " idRivHit.det()  " <<std::endl;
+      //	}
 
  
 
       
       std::vector<CSCSegment> mySavedSegments = findMuonSegments(*mu->outerTrack(), cscSegments, recHits, cscGeom);
-      std::cout<< "    mySavedSegments.size()  " << mySavedSegments.size()  << std::endl;
+      //      std::cout<< "    mySavedSegments.size()  " << mySavedSegments.size()  << std::endl;
       for (int j = 0; j < (int)mySavedSegments.size(); j++)
 	{
 	  CSCDetId cscSegId  = (CSCDetId)mySavedSegments[j].cscDetId();
@@ -954,7 +991,7 @@ void UFCSCRootMaker::doMuons(edm::Handle<reco::MuonCollection> muons,
 	  LocalPoint localP = mySavedSegments[j].localPosition();
 	  cscSegmentRecord_localY.push_back(localP.y());
 	  cscSegmentRecord_localX.push_back(localP.x());
-	  std::cout<<"   local X " << localP.y() << std::endl;
+	  //	  std::cout<<"   local X " << localP.y() << std::endl;
 	  //	  tmpRHCounter += mySavedSegments[j].recHits().size();
 	}
 
@@ -979,7 +1016,7 @@ void UFCSCRootMaker::doMuons(edm::Handle<reco::MuonCollection> muons,
 	  //	  if(mu->outerTrack().isNonnull() && (mu->isStandAloneMuon() || mu->isGlobalMuon()) )
 	    {
 	      std::vector<CSCSegment> mySavedSegments = findMuonSegments(*mu->outerTrack(), cscSegments, recHits, cscGeom);
-	      std::cout<< "    mySavedSegments.size()  " << mySavedSegments.size()  << std::endl;  
+	      //	      std::cout<< "    mySavedSegments.size()  " << mySavedSegments.size()  << std::endl;  
 	      for (int j = 0; j < (int)mySavedSegments.size(); j++)
 		{
 		  CSCDetId cscSegId  = (CSCDetId)mySavedSegments[j].cscDetId();
@@ -1027,8 +1064,8 @@ void UFCSCRootMaker::doMuons(edm::Handle<reco::MuonCollection> muons,
 	}
       counter++;
     
-
-      std::cout<<"--------------------  "<< cscSegmentRecord_nRecHits.size() << "              muons_cscSegmentRecord_nRecHits  " << muons_cscSegmentRecord_nRecHits.size() <<std::endl;
+    
+      //      std::cout<<"--------------------  "<< cscSegmentRecord_nRecHits.size() << "              muons_cscSegmentRecord_nRecHits  " << muons_cscSegmentRecord_nRecHits.size() <<std::endl;
 
       muons_cscSegmentRecord_nRecHits.push_back(cscSegmentRecord_nRecHits);
       muons_cscSegmentRecord_ring.push_back(cscSegmentRecord_ring); 
@@ -1041,7 +1078,6 @@ void UFCSCRootMaker::doMuons(edm::Handle<reco::MuonCollection> muons,
 
 
   muons_nMuons = counter;
-
 
   // Standalone Muon RecHits
   counter = 0;
@@ -1419,7 +1455,7 @@ UFCSCRootMaker::doRecHits(edm::Handle<CSCRecHit2DCollection> recHits, edm::Handl
 	   simHits_momentum[counter] = (*dSHsimIter).pabs();
 	   simHits_phi[counter] = (*dSHsimIter).phiAtEntry();
 	   simHits_theta[counter] = (*dSHsimIter).thetaAtEntry();
-	   std::cout<<" simHits_ID_chamber   "<<sId.chamber() <<std::endl;
+	   
 	   counter++;
 	 }
      }
@@ -2928,7 +2964,7 @@ std::vector<CSCSegment> UFCSCRootMaker::findMuonSegments(const reco::Track& Trac
 
   for(trackingRecHit_iterator recHit =  Track.recHitsBegin(); recHit != Track.recHitsEnd(); ++recHit)
     {
-      std::cout<<"  findMuonSegments  1     "  << std::endl;
+      //      std::cout<<"  findMuonSegments  1     "  << std::endl;
       if(!(*recHit)->isValid()) continue;
 
       //cout << "Valid RH from Track" << endl;
@@ -3100,8 +3136,6 @@ UFCSCRootMaker::bookTree(TTree *tree)
   tree->Branch("tracks_p",  tracks_p,  "tracks_p[tracks_nTracks]/D");
   tree->Branch("tracks_eta",  tracks_eta,  "tracks_eta[tracks_nTracks]/D");
   tree->Branch("tracks_phi",  tracks_phi,  "tracks_phi[tracks_nTracks]/D");
-  */
-
   // SimHits
   tree->Branch("simHits_nSimHits", &simHits_nSimHits, "simHits_nSimHits/I");
   tree->Branch("simHits_particleType", simHits_particleType,  "simHits_particleType[simHits_nSimHits]/I");
@@ -3120,6 +3154,7 @@ UFCSCRootMaker::bookTree(TTree *tree)
   tree->Branch("simHits_momentum", simHits_momentum,  "simHits_momentum[simHits_nSimHits]/D");
   tree->Branch("simHits_phi", simHits_phi,  "simHits_phi[simHits_nSimHits]/D");
   tree->Branch("simHits_theta", simHits_theta,  "simHits_theta[simHits_nSimHits]/D");
+*/
 
   // CSCRecHits2D
   tree->Branch("recHits2D_nRecHits2D", &recHits2D_nRecHits2D,"recHits2D_nRecHits2D/I");
@@ -3242,6 +3277,14 @@ UFCSCRootMaker::bookTree(TTree *tree)
   tree->Branch("muons_cscSegmentRecord_localY", &muons_cscSegmentRecord_localY);
   tree->Branch("muons_cscSegmentRecord_localX", &muons_cscSegmentRecord_localX);
 
+
+
+  tree->Branch("gen_muons_nMuons", &gen_muons_nMuons, "gen_muons_nMuons/I");
+  tree->Branch("gen_muons_charge",   gen_muons_charge,   "gen_muons_charge[gen_muons_nMuons]/I");
+  tree->Branch("gen_muons_energy",   gen_muons_energy,   "gen_muons_energy[gen_muons_nMuons]/D");
+  tree->Branch("gen_muons_px",   gen_muons_px,   "gen_muons_px[gen_muons_nMuons]/D");
+  tree->Branch("gen_muons_py",   gen_muons_py,   "gen_muons_py[gen_muons_nMuons]/D");
+  tree->Branch("gen_muons_pz",   gen_muons_pz,   "gen_muons_pz[gen_muons_nMuons]/D");
 
 /*
   // L1 GMT

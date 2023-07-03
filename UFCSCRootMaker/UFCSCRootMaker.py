@@ -179,7 +179,7 @@ if isDATA:
 else:
     process.source.fileNames = cms.untracked.vstring(
 #        '/store/relval/CMSSW_12_4_13/RelValZMM_14/GEN-SIM-DIGI-RECO/124X_mcRun3_2022_realistic_v12_2021_FastSim-v1/2590000/8a48a70c-ddaf-4aa3-91b5-23dcac5a80a2.root'
-        'file:../crab/DY_MUMURelVal_UF_CSCSegmentBuilder.root'
+        'file:../crab/DY_MUMURelVal_RU_CSCSegmentBuilder.root'
 #        'file:../8a48a70c-ddaf-4aa3-91b5-23dcac5a80a2.root'
 #        '/store/relval/CMSSW_7_0_0/RelValTTbar/GEN-SIM-DIGI-RECO/START70_V6_FastSim-v2/00000/00743452-B498-E311-AD84-02163E00EAC9.root',
 #        'file:/raid/raid8/mhl/CSC_Run2/CMSSW_dev/outputRoot/test2.root'
