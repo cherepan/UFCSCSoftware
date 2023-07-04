@@ -142,6 +142,7 @@ public :
    TTreeReaderArray<Int_t> cscSegments_Resolution_residual = {fReader, "cscSegments_Resolution_residual"};
    TTreeReaderArray<Int_t> cscSegments_Resolution_pull = {fReader, "cscSegments_Resolution_pull"};
    TTreeReaderValue<Int_t> muons_nMuons = {fReader, "muons_nMuons"};
+   TTreeReaderValue<Int_t> gen_muons_nMuons = {fReader, "gen_muons_nMuons"};
    TTreeReaderArray<Bool_t> muons_isPFMuon = {fReader, "muons_isPFMuon"};
    TTreeReaderArray<Bool_t> muons_isCaloMuon = {fReader, "muons_isCaloMuon"};
    TTreeReaderArray<Bool_t> muons_isTrackerMuon = {fReader, "muons_isTrackerMuon"};
@@ -159,6 +160,12 @@ public :
    TTreeReaderArray<Double_t> muons_px = {fReader, "muons_px"};
    TTreeReaderArray<Double_t> muons_py = {fReader, "muons_py"};
    TTreeReaderArray<Double_t> muons_pz = {fReader, "muons_pz"};
+
+   TTreeReaderArray<Double_t> gen_muons_energy = {fReader, "gen_muons_energy"};
+   TTreeReaderArray<Double_t> gen_muons_px = {fReader, "gen_muons_px"};
+   TTreeReaderArray<Double_t> gen_muons_py = {fReader, "gen_muons_py"};
+   TTreeReaderArray<Double_t> gen_muons_pz = {fReader, "gen_muons_pz"};
+
    TTreeReaderArray<Double_t> muons_pt = {fReader, "muons_pt"};
    TTreeReaderArray<Double_t> muons_et = {fReader, "muons_et"};
    TTreeReaderArray<Double_t> muons_p = {fReader, "muons_p"};
@@ -440,6 +447,8 @@ public :
 
 
    TLorentzVector  Muon_P4(unsigned int i);
+   TLorentzVector  gen_matchedMuon_P4(unsigned int muon);
+
    std::vector<int> Chambers_crossedByMuon(unsigned int i);
    int ChamberID(int endcap, int station, int ring, int chamber);
    bool CheckCommon( std::vector< int > inVectorA, std::vector< int > inVectorB );
@@ -524,6 +533,8 @@ public :
 
    TH1F* Muon1_PT = new TH1F("Muon1_PT","",70,10,80);
    TH1F* Muon2_PT = new TH1F("Muon2_PT","",70,10,80);
+
+   TH1F* muons_pt_resolution= new TH1F("muons_pt_resolution","",70,-10,10);
 
    TH1F* nChambers_crossedbyMuon = new TH1F("nChambers_crossedbyMuon","",6,-0.5,5);
    TH1F* nSegmentsPerMuonChamber_notBelongingToMuon= new TH1F("nSegmentsPerMuonChamber_notBelongingToMuon","",6,-0.5,5);

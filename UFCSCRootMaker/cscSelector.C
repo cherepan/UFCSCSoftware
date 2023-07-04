@@ -274,8 +274,11 @@ Bool_t cscSelector::Process(Long64_t entry)
        //       std::cout<<"   muon #  "<< i << std::endl;
        //       for(auto j : Chambers_crossedByMuon(i)) std::cout<<"   Chambers  "<< j << std::endl;
        if (muons_pt[i] < 5) continue;
-
        Selected_Muons.push_back(i);
+
+       muons_pt_resolution->Fill(gen_matchedMuon_P4(i).Pt() - Muon_P4(i).Pt());
+
+
 
      }
 
@@ -741,6 +744,9 @@ void cscSelector::Terminate()
 
   Muon1_PT->Write();
   Muon2_PT->Write();
+
+  muons_pt_resolution->Write();
+
   nChambers_crossedbyMuon->Write();
   nSegmentsPerMuonChamber_notBelongingToMuon->Write();
   nRHPerSeg->Write();
@@ -880,7 +886,8 @@ void cscSelector::SetInputs(int nEntry_, TString tag_)//, TString savedir_, bool
 
 }
 
-TLorentzVector  cscSelector::Muon_P4(unsigned int i)
+TLorentzVector  
+cscSelector::Muon_P4(unsigned int i)
 {
   return TLorentzVector(muons_px[i],muons_py[i],muons_pz[i],muons_energy[i]);
 }
@@ -1406,6 +1413,39 @@ cscSelector::allSegments_inChamber_NOT_belonging_toMuon(unsigned int idchamber, 
 
 
 
+    }
+  return out;
+}
+
+
+
+
+
+
+
+
+
+
+
+TLorentzVector
+cscSelector::gen_matchedMuon_P4(unsigned int muon)
+{
+
+  TLorentzVector out(0,0,0,0);
+  int mc_index =-1;
+  double dR =999.;
+  for (unsigned int igen = 0; igen < *gen_muons_nMuons; igen++)
+    {
+      TLorentzVector igenLV(gen_muons_px[igen],gen_muons_py[igen],gen_muons_pz[igen],muons_energy[igen]);
+      if(igenLV.DeltaR(Muon_P4(muon)) < dR)
+	{
+	  dR =  igenLV.DeltaR(Muon_P4(muon));
+	  mc_index = igen;
+	}
+    }
+  if(mc_index !=-1)
+    {
+      out.SetPxPyPzE(gen_muons_px[mc_index],gen_muons_py[mc_index],gen_muons_pz[mc_index],muons_energy[mc_index]);
     }
   return out;
 }
