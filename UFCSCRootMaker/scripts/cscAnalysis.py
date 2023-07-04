@@ -1,7 +1,9 @@
 #!/usr/bin/python
+
 import sys, os, pwd, commands
 import optparse, shlex, re
 import math
+from numpy import sqrt 
 from ROOT import *
 import ROOT
 from array import array
@@ -19,7 +21,7 @@ def parseOptions():
     parser.add_option('-f','--file', dest='file', type='string', default='cscRootMaker.root' ,help='file default:blank')
     parser.add_option('-n','--maxEvents', dest='maxEvents', type='int', default=1000 ,help='maxEvents default:100000')
     parser.add_option('-d','--outDir', dest='outDir', type='string',
-                      default='/home/msnowball/public_html/CSC/CMSSW6XY/DYToMuMu_14TeV_PU140Bx25_STAR17_61_V1A/' ,help='out directory default:CSC')
+                      default='/afs/cern.ch/work/c/cherepan/CSC/Synchronise_10_05/CMSSW_10_6_20/src/UFCSCSoftware/UFCSCRootMaker/scripts/output' ,help='out directory default:CSC')
     parser.add_option('-j','--jobName',dest='jobName',type='string', default='cscAna',help='name of job and output files')
 
     parser.add_option('--isDigi', dest='isDigi', type='int', default=1 ,help='isDigi default:1')
@@ -397,7 +399,7 @@ class Analysis():
             if x == 599:
                 eff = float(self.simHitsOverallEffNum)/self.simHitsOverallEffDen
 
-            #print x,  self.simHitsEffDen[x], self.simHitsEffNum[x], eff, self.simHitsOverallEffDen, self.simHitsOverallEffDen
+            print x,  self.simHitsEffDen[x], self.simHitsEffNum[x], eff, self.simHitsOverallEffDen, self.simHitsOverallEffDen
             self.hists1D['simHitsRecoEfficiency'].SetBinContent(x+1,eff)
             for y in range(0,6):
                 eff = 0

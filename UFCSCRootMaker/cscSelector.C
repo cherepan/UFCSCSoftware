@@ -256,19 +256,11 @@ Bool_t cscSelector::Process(Long64_t entry)
      }
 
 
-   //   std::cout<<"   CSC with muons    "<< endcapL.size() << std::endl;
-   // if no CSC contains a muon segment, skip this event
-   if (int(endcapL.size()) == 0) return kTRUE;
-
-   CountObjectsInCSCs(true,true,true,true,true,false,false,false); //RH,Seg,Wire,Strip,Comparator,ALCT,CLCT,CLT
-
-   // SOMEHOW CANNOT PROCESS ALL DIGIS TOGHETHER !!!
-
    std::vector<int> Selected_Muons;
    for (int i = 0; i < *muons_nMuons; i++)
      {
 
-       if (!(muons_isPFMuon[i] || muons_isGlobalMuon[i] || muons_isTrackerMuon[i]) ) continue;
+       //       if (!(muons_isPFMuon[i] || muons_isGlobalMuon[i] || muons_isTrackerMuon[i]) ) continue;
        if (!(abs(muons_eta[i]) < 2.4)) continue;
        //       if (!(abs(muons_dz[i])  < 1 && abs(muons_dxy[i]) < 0.5)) continue;
        //       std::cout<<"   muon #  "<< i << std::endl;
@@ -278,9 +270,17 @@ Bool_t cscSelector::Process(Long64_t entry)
 
        muons_pt_resolution->Fill(gen_matchedMuon_P4(i).Pt() - Muon_P4(i).Pt());
 
-
-
      }
+
+   //   std::cout<<"   CSC with muons    "<< endcapL.size() << std::endl;
+   // if no CSC contains a muon segment, skip this event
+   if (int(endcapL.size()) == 0) return kTRUE;
+
+   CountObjectsInCSCs(true,true,true,true,true,false,false,false); //RH,Seg,Wire,Strip,Comparator,ALCT,CLCT,CLT
+
+   // SOMEHOW CANNOT PROCESS ALL DIGIS TOGHETHER !!!
+
+
 
 
    //   if(Selected_Muons.size()!=0) std::cout<<"  Run/Event  "<< *Run <<  "  /  "<<   *Event << std::endl;
@@ -390,7 +390,7 @@ Bool_t cscSelector::Process(Long64_t entry)
 
        /*       
 
-		bool allBelongsToRank_1_2 = true;
+
 		bool allBelongsToRank_1_2_3 = true;
 		bool allBelongsToRank_4_5 = true;
 		bool allBelongsToLayer_6 = true;
@@ -1419,14 +1419,6 @@ cscSelector::allSegments_inChamber_NOT_belonging_toMuon(unsigned int idchamber, 
 
 
 
-
-
-
-
-
-
-
-
 TLorentzVector
 cscSelector::gen_matchedMuon_P4(unsigned int muon)
 {
@@ -1443,6 +1435,7 @@ cscSelector::gen_matchedMuon_P4(unsigned int muon)
 	  mc_index = igen;
 	}
     }
+  std::cout<<"minimal dR   "<<  dR   <<std::endl;
   if(mc_index !=-1)
     {
       out.SetPxPyPzE(gen_muons_px[mc_index],gen_muons_py[mc_index],gen_muons_pz[mc_index],muons_energy[mc_index]);
