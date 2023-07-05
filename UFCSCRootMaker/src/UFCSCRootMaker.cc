@@ -550,7 +550,7 @@ UFCSCRootMaker::~UFCSCRootMaker()
 void UFCSCRootMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
 
-  std::cout<<"   even ===================================   gen is called first  " << std::endl;
+  //  std::cout<<"   even ===================================   gen is called first  " << std::endl;
    using namespace edm;
    using namespace std;
    /// Time in seconds since January 1, 1970.
@@ -884,7 +884,7 @@ UFCSCRootMaker::doGenMuons(edm::Handle<reco::GenParticleCollection>& genParticle
       if(abs(itr->pdgId()) == 13 && itr->status() == 1 )
 	{
 
-	  std::cout<<"gen    muon px:  "<<  itr->p4().Px() <<std::endl;
+	  //	  std::cout<<"gen    muon px:  "<<  itr->p4().Px() <<std::endl;
 
 	  gen_muons_charge[counter] = itr->charge();
 	  gen_muons_px[counter] = itr->p4().Px();
@@ -945,7 +945,7 @@ void UFCSCRootMaker::doMuons(edm::Handle<reco::MuonCollection> muons,
       muons_vx[counter] = mu->vx();
       muons_vy[counter] = mu->vy();
       muons_vz[counter] = mu->vz();
-      std::cout<<"  reco muons  px  " << mu->px() << std::endl;
+      //      std::cout<<"  reco muons  px  " << mu->px() << std::endl;
       std::vector<double> cscSegmentRecord_nRecHits, cscSegmentRecord_ring, cscSegmentRecord_station, cscSegmentRecord_chamber, cscSegmentRecord_endcap;
       std::vector<double> cscSegmentRecord_localY, cscSegmentRecord_localX, cscSegmentRecord_theta;
 
