@@ -146,6 +146,15 @@ Bool_t cscSelector::Process(Long64_t entry)
    MuonsHelper();
 
 
+   std::cout<<"  How many sim hits  "<< *simHits_nSimHits <<  "  and selected muons    "<<  Muons_Index.size() <<std::endl;
+   for(unsigned int iSimHit =0 ;  iSimHit < *simHits_nSimHits; iSimHit ++ )
+     {
+
+     std::cout<< "#hit   "<< iSimHit << "  in chamber   "<< ChamberID(simHits_ID_endcap[iSimHit],simHits_ID_station[iSimHit],simHits_ID_ring[iSimHit],simHits_ID_chamber[iSimHit])   <<std::endl;
+
+     }
+   
+
 
 
    std::vector<int>    allChambersWithSegments =   allChambersWithASegment();
@@ -189,8 +198,12 @@ Bool_t cscSelector::Process(Long64_t entry)
 	       std::vector<int> list_of_chambers_crossed_by_muon = Chambers_crossedByMuon( muon_index  );
 	       //	       std::cout<< 	   list_of_chambers_crossed_by_muon.size()<< std::endl;
 	       if(list_of_chambers_crossed_by_muon.size()!=0)	       nChambers_crossedbyMuon->Fill(list_of_chambers_crossed_by_muon.size());
+	       std::cout<<" chambers crossed by reco muon #"<< imu<< std::endl;
+
 	       for(auto  ch : list_of_chambers_crossed_by_muon)
 		 {
+		   std::cout<<"   "<< ch<< std::endl;
+
 		   std::vector<int> allsegments_in_a_chamber_crossed_by_muon =   allSegmentsInChamber(ch);
 		   nSegmentsPerMuonChamber->Fill(allsegments_in_a_chamber_crossed_by_muon.size());
 		   nSegmentsPerMuonChamber_notBelongingToMuon->Fill(allSegments_inChamber_NOT_belonging_toMuon(ch, muon_index).size());

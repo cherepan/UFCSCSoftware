@@ -1,12 +1,11 @@
 #!/usr/bin/python
-
 import sys, os, pwd, commands
 import optparse, shlex, re
 import math
-from numpy import sqrt 
 from ROOT import *
 import ROOT
 from array import array
+from numpy import sqrt 
 ROOT.gStyle.SetTitleYOffset(1.5)
 
 
@@ -21,8 +20,8 @@ def parseOptions():
     parser.add_option('-f','--file', dest='file', type='string', default='cscRootMaker.root' ,help='file default:blank')
     parser.add_option('-n','--maxEvents', dest='maxEvents', type='int', default=1000 ,help='maxEvents default:100000')
     parser.add_option('-d','--outDir', dest='outDir', type='string',
-                      default='/afs/cern.ch/work/c/cherepan/CSC/Synchronise_10_05/CMSSW_10_6_20/src/UFCSCSoftware/UFCSCRootMaker/scripts/output' ,help='out directory default:CSC')
-    parser.add_option('-j','--jobName',dest='jobName',type='string', default='cscAna',help='name of job and output files')
+                      default='output/' ,help='out directory default:CSC')
+    parser.add_option('-j','--jobName',dest='jobName',type='string', default='cscOverview.root',help='name of job and output files')
 
     parser.add_option('--isDigi', dest='isDigi', type='int', default=1 ,help='isDigi default:1')
     parser.add_option('--isLocalReco', dest='isLocalReco', type='int', default=1 ,help='isLocalReco default:1')
@@ -42,8 +41,6 @@ class Analysis():
         self.hists2D = {}
         self.totalEvents = 0
 
-
-
         self.simHitsOverallEffDen = 0
         self.simHitsOverallEffNum = 0
         self.simHitsEffDen = [0] * 600
@@ -53,6 +50,8 @@ class Analysis():
 
         self.simHitsChamberEffNum = [[[[[0 for dim1 in range(6)] for dim2 in range(36)] for dim3 in range(4)] for dim4 in range(4)] for dim5 in range(2)]
         self.simHitsChamberEffDen = [[[[[0 for dim1 in range(6)] for dim2 in range(36)] for dim3 in range(4)] for dim4 in range(4)] for dim5 in range(2)]
+
+
 
         self.stationRings = ['ME-1/4','ME-1/3','ME-4/2','ME-3/2','ME-2/2','ME-1/2','ME-4/1','ME-3/1','ME-2/1','ME-1/1',
                              'ME+1/1','ME+2/1','ME+3/1','ME+4/1','ME+1/2','ME+2/2','ME+3/2','ME+4/2','ME+1/3','ME+1/4']
@@ -80,11 +79,11 @@ class Analysis():
         self.nChambers['ME+4/2'] = 36
 
         self.nRecHitsPerStation = {}
+        self.nRecHitsPerLayer   = [[[[[0 for dim1 in range(6)] for dim2 in range(36)] for dim3 in range(4)] for dim4 in range(4)] for dim5 in range(2)]
         for key in self.stationRings:
             self.nRecHitsPerStation[key] = 0
 
         self.defineHistos()
-
 
 
 
@@ -104,7 +103,6 @@ class Analysis():
 
         if not tree:
             raise RunTimeError,"Tree not found!"
-        
 
 
         #Analysis Loop
@@ -122,6 +120,7 @@ class Analysis():
                 #Muons
                 #AvgRH/Seg
                 for n in range(tree.muons_nMuons):
+#                    if tree.muons_isStandAloneMuon[n]:
                     if tree.muons_isStandAloneMuon[n]:
                         segmentCounter = 0
                         recHitsCounter = 0
@@ -129,9 +128,11 @@ class Analysis():
                             self.hists1D['recHitsPerSegment_saMuon_Norm'].Fill(tree.muons_cscSegmentRecord_nRecHits[n][m])
                             segmentCounter += 1
                             recHitsCounter += tree.muons_cscSegmentRecord_nRecHits[n][m]
+#                        print 'muon |eta|  ', abs(tree.muons_eta[n]), '  nSegments:  ',segmentCounter
                         self.hists1D['segmentsPerSaMuon_Norm'].Fill(segmentCounter)
                         self.hists2D['recHitsVSp'].Fill(tree.muons_p[n],tree.muons_nRecHits[n])
                         self.hists2D['recHitsVSpT'].Fill(tree.muons_pt[n],tree.muons_nRecHits[n])
+                        self.hists2D['recHitsVSEta'].Fill(tree.muons_eta[n],tree.muons_nRecHits[n])
                         avgRHpSeg = -1
                         if segmentCounter > 0:
                             avgRHpSeg = recHitsCounter/float(segmentCounter)
@@ -183,12 +184,15 @@ class Analysis():
                     sLayer   = str(tree.recHits2D_ID_layer[n])
                     sRing    = str(tree.recHits2D_ID_ring[n])
                     #Average 2D per station
-                    string = 'ME'+sEndcap+sStation+'/'+sRing
+                    string   = 'ME'+sEndcap+sStation+'/'+sRing
                     self.nRecHitsPerStation[string] += 1
 
+                    self.nRecHitsPerLayer[tree.recHits2D_ID_endcap[n]-1][tree.recHits2D_ID_station[n]-1][tree.recHits2D_ID_ring[n]-1][tree.recHits2D_ID_chamber[n]-1][tree.recHits2D_ID_layer[n]-1] += 1
+
                     #locations
-                    x = tree.recHits2D_localX[n]
-                    y = tree.recHits2D_localY[n]
+                    x  = tree.recHits2D_localX[n]
+                    y  = tree.recHits2D_localY[n]
+
                     gx = tree.recHits2D_globalX[n]
                     gy = tree.recHits2D_globalY[n]
                     
@@ -197,6 +201,7 @@ class Analysis():
                     string = 'ME'+sEndcap+sStation+'_recHits2D'
                     self.hists2D[string].Fill(gx,gy)
 
+#                print '================ rechitsPer layer ', self.nRecHitsPerLayer
                 #2DSimHits
                 if opt.isMC:
                     for n in range(0,tree.simHits_nSimHits):
@@ -207,8 +212,8 @@ class Analysis():
                         sChamber = str(tree.simHits_ID_chamber[n])
                         sLayer   = str(tree.simHits_ID_layer[n])
                         sRing    = str(tree.simHits_ID_ring[n])
-                        x = tree.simHits_localX[n]
-                        y = tree.simHits_localY[n]
+                        x  = tree.simHits_localX[n]
+                        y  = tree.simHits_localY[n]
                         gx = tree.simHits_globalX[n]
                         gy = tree.simHits_globalY[n]
                         
@@ -219,11 +224,11 @@ class Analysis():
 
                         if abs(tree.simHits_particleType[n]) == 13:
                             shChamberSerial = tree.simHits_ID_chamberSerial[n]
-                            shLayer = tree.simHits_ID_layer[n]
-                            shChamber = tree.simHits_ID_chamber[n]
-                            shRing = tree.simHits_ID_ring[n]
-                            shStation = tree.simHits_ID_station[n]
-                            shEndcap = tree.simHits_ID_endcap[n]
+                            shLayer         = tree.simHits_ID_layer[n]
+                            shChamber       = tree.simHits_ID_chamber[n]
+                            shRing          = tree.simHits_ID_ring[n]
+                            shStation       = tree.simHits_ID_station[n]
+                            shEndcap        = tree.simHits_ID_endcap[n]
                             
                             self.simHitsOverallEffDen += 1
                             self.simHitsEffDen[shChamberSerial] += 1
@@ -233,9 +238,9 @@ class Analysis():
                             for m in range(0,tree.recHits2D_nRecHits2D):
                                 if tree.recHits2D_ID_chamberSerial[m] != shChamberSerial: continue
                                 if tree.recHits2D_ID_layer[m] != shLayer: continue
-                                xLow = tree.recHits2D_localX[m] - sqrt(tree.recHits2D_localXXerr[m])
+                                xLow  = tree.recHits2D_localX[m] - sqrt(tree.recHits2D_localXXerr[m])
                                 xHigh = tree.recHits2D_localX[m] + sqrt(tree.recHits2D_localXXerr[m])
-                                yLow = tree.recHits2D_localY[m] - sqrt(tree.recHits2D_localYYerr[m])
+                                yLow  = tree.recHits2D_localY[m] - sqrt(tree.recHits2D_localYYerr[m])
                                 yHigh = tree.recHits2D_localY[m] + sqrt(tree.recHits2D_localYYerr[m])
                                 if (x < xLow or x > xHigh) and (y < yLow or y > yHigh): continue
                                 self.simHitsOverallEffNum += 1
@@ -250,7 +255,7 @@ class Analysis():
                 #ACLT/CLTC
                 alctCounter = [0] * 600
                 clctCounter = [0] * 600
-                lctCounter = [0] * 600
+                lctCounter  = [0] * 600
                 for i in range(tree.alct_nAlcts):
                     alctCounter[tree.alct_ID_chamberSerial[i]] +=1
                 for j in range(tree.clct_nClcts):
@@ -263,6 +268,17 @@ class Analysis():
                         self.hists1D['FourLctChambers_nSegments_Norm'].Fill(CSC_SegmentCounter[k])
                         self.hists1D['FourLctChambers_nCorrelLcts_Norm'].Fill(lctCounter[k])
 
+
+            for ec in range(0,2):
+                for st in range(0,4):
+                    for rg in range(0,4):
+                        if st+1 > 1 and rg+1 > 2: continue
+                        for ch in range(0,36):
+                            if st+1 > 1 and rg+1 == 1 and ch+1 > 18: continue
+                            for lr in range(0,6):
+#                                print '  EC  ', ec,'  st:  ', st ,' rg:  ', rg, ' ch:  ', ch,'  layer:  ',lr, '   nRecHits:  ',self.nRecHitsPerLayer[ec][st][rg][ch][lr] 
+                                string = 'nrecHitsPerLayer_allChambers'
+                                self.hists1D[string].Fill(self.nRecHitsPerLayer[ec][st][rg][ch][lr])
 
 
 
@@ -283,7 +299,7 @@ class Analysis():
         self.hists1D['FourLctChambers_nCorrelLcts_Norm'] = ROOT.TH1F("4LctChambers_nCorrelLcts","; N Correlated LCTs; Fractions of Events", 8,-0.5,7.5)
 
         #SimHits
-        self.hists1D['simHitsRecoEfficiency'] = ROOT.TH1F("simHitsRecoEfficiency", "; Chamber Serial; RECO Efficiency for Muons", 700, 0, 700)
+        self.hists1D['simHitsRecoEfficiency']    = ROOT.TH1F("simHitsRecoEfficiency", ";    Chamber Serial; RECO Efficiency for Muons", 700, 0, 700)
         self.hists1D['simHitsRecoEfficiency_l1'] = ROOT.TH1F("simHitsRecoEfficiency_l1", "; Chamber Serial; RECO Efficiency for Muons", 700, 0, 700)
         self.hists1D['simHitsRecoEfficiency_l2'] = ROOT.TH1F("simHitsRecoEfficiency_l2", "; Chamber Serial; RECO Efficiency for Muons", 700, 0, 700)
         self.hists1D['simHitsRecoEfficiency_l3'] = ROOT.TH1F("simHitsRecoEfficiency_l3", "; Chamber Serial; RECO Efficiency for Muons", 700, 0, 700)
@@ -306,6 +322,7 @@ class Analysis():
 
         self.hists2D['recHitsVSp'] = ROOT.TH2F("recHitsVSp","; P (GeV); N RecHits",1000, 0, 800, 100, 0, 60)
         self.hists2D['recHitsVSpT'] = ROOT.TH2F("recHitsVSpT","; pT (GeV); N RecHits",1000, 0, 800, 100, 0, 60)
+        self.hists2D['recHitsVSEta'] = ROOT.TH2F("recHitsVSEta","; eta; N RecHits",1000, -2.5, 2.5, 100, 0, 60)
         self.hists2D['recHitsPerSegVSp'] = ROOT.TH2F("recHitsPerSegVSp","; P (GeV); N RecHits/Segment", 1000, 0, 800, 8, 0, 8)
         self.hists2D['recHitsPerSegVSpT'] = ROOT.TH2F("recHitsPerSegVSpT","; pT (GeV); N RecHits/Segment", 1000, 0, 800, 8, 0, 8)
 
@@ -338,7 +355,9 @@ class Analysis():
                         string = 'ME'+str(EC[i])+str(ST[j])+'-'+str(RG[k])+'_l'+str(LR[m])
                         string3 = string+'_simHitEfficiency'
                         self.hists1D[string3] = ROOT.TH1F(string3,"; Chamber; RECO Efficiency for Muons",40,0,40)
+        # Per Event
 
+        self.hists1D['nrecHitsPerLayer_allChambers'] = ROOT.TH1F("nrecHitsPerLayer_allChambers", "; N RecHits per Layer", 11, -0.5, 10.5)
 
 
     def writeHistos(self,Histos1D,Histos2D):
@@ -355,7 +374,7 @@ class Analysis():
             if Efficiency:
                 Histos1D[key].GetYaxis().SetRangeUser(0.5,1.05)
             Histos1D[key].Draw("HIST")
-            c.SaveAs(opt.outDir+'/'+str(Histos1D[key].GetName())+'.eps')
+#            c.SaveAs(opt.outDir+'/'+str(Histos1D[key].GetName())+'.eps')
             c.SaveAs(opt.outDir+'/'+str(Histos1D[key].GetName())+'.png')
             c.Clear()
 
@@ -363,7 +382,7 @@ class Analysis():
         for key in Histos2D:
             c1.cd()
             Histos2D[key].Draw()
-            c1.SaveAs(opt.outDir+'/'+str(Histos2D[key].GetName())+'.eps')
+#            c1.SaveAs(opt.outDir+'/'+str(Histos2D[key].GetName())+'.eps')
             c1.SaveAs(opt.outDir+'/'+str(Histos2D[key].GetName())+'.png')
             c1.Clear()
 
@@ -399,7 +418,7 @@ class Analysis():
             if x == 599:
                 eff = float(self.simHitsOverallEffNum)/self.simHitsOverallEffDen
 
-            print x,  self.simHitsEffDen[x], self.simHitsEffNum[x], eff, self.simHitsOverallEffDen, self.simHitsOverallEffDen
+            #print x,  self.simHitsEffDen[x], self.simHitsEffNum[x], eff, self.simHitsOverallEffDen, self.simHitsOverallEffDen
             self.hists1D['simHitsRecoEfficiency'].SetBinContent(x+1,eff)
             for y in range(0,6):
                 eff = 0
@@ -434,12 +453,14 @@ class Analysis():
                     string = 'ME'+EC+str(st+1)+'/'+str(rg+1)+'\n'
                     myEffFile.write(string)
                     myEffFile.write('--------------------\n')
+
                     for ch in range(0,36):
                         if st+1 > 1 and rg+1 == 1 and ch+1 > 18: continue
                         num = 0
                         den = 0
                         effAr = [0] * 6
                         for lr in range(0,6):
+
                             eff = 0
                             if self.simHitsChamberEffDen[ec][st][rg][ch][lr] > 0:
                                 eff = float(self.simHitsChamberEffNum[ec][st][rg][ch][lr])/self.simHitsChamberEffDen[ec][st][rg][ch][lr]
@@ -463,10 +484,12 @@ class Analysis():
 
                     
         myEffFile.close()
-
+        
         if self.totalEvents > 0:
             if singleFile:
+                
                 self.writeHistos(self.hists1D,self.hists2D)
+                self.writeHistosToRoot(self.hists1D,self.hists2D)
             else:
                 self.writeHistosToRoot(self.hists1D,self.hists2D)
         

@@ -975,7 +975,7 @@ void UFCSCRootMaker::doMuons(edm::Handle<reco::MuonCollection> muons,
       //	}
 
  
-
+      ////////////////////////////////////////////////////////////////   This peaice of code is for running over SIM  
       
       std::vector<CSCSegment> mySavedSegments = findMuonSegments(*mu->outerTrack(), cscSegments, recHits, cscGeom);
       //      std::cout<< "    mySavedSegments.size()  " << mySavedSegments.size()  << std::endl;
@@ -994,29 +994,45 @@ void UFCSCRootMaker::doMuons(edm::Handle<reco::MuonCollection> muons,
 	  //	  std::cout<<"   local X " << localP.y() << std::endl;
 	  //	  tmpRHCounter += mySavedSegments[j].recHits().size();
 	}
-
+      //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
       
 
-
+      std::cout<<" mu->outerTrack().isNonnull() && (mu->isStandAloneMuon() || mu->isGlobalMuon())   " 
+	       <<  ( mu->outerTrack().isNonnull() && (mu->isStandAloneMuon() || mu->isGlobalMuon()) ) << std::endl;     
       
-      if(mu->track().isNonnull())//  this is valid for data
+      bool isGoodMuon = ( mu->outerTrack().isNonnull() && (mu->isStandAloneMuon() || mu->isGlobalMuon()  ) );
+
+
+      //      std::cout<<" nvalidhits    "<< mu->bestTrack()->numberOfValidHits() << std::endl;
+      //      if(mu->track().isNonnull())//  this is valid for data
+      //      if(mu->bestTrack()->isNonnull())//  this is valid for MC, i dont understand the difference
+		
+      if(isGoodMuon) // this should  work for MC/Data
+		  //      if(mu->bestTrack()->charge())//  this is valid for MC, i dont understand the difference
       //      if(Track_test.outerOk() )//  try for MC
 	{
-	  muons_trackNumberOfValidHits[counter] = mu->track()->numberOfValidHits();
-	  muons_trackNumberOfLostHits[counter] = mu->track()->numberOfLostHits();  
-	  muons_dxy[counter] = mu->track()->dxy(PV->position());
-	  muons_dz[counter] = mu->track()->dz(PV->position());
+	  //	  muons_trackNumberOfValidHits[counter] = mu->track()->numberOfValidHits();
+	  //	  muons_trackNumberOfLostHits[counter] = mu->track()->numberOfLostHits();  
+	  //	  muons_dxy[counter] = mu->track()->dxy(PV->position());
+	  //	  muons_dz[counter] = mu->track()->dz(PV->position());
+
+
+	  muons_trackNumberOfValidHits[counter] = mu->bestTrack()->numberOfValidHits();
+	  muons_trackNumberOfLostHits[counter] = mu->bestTrack()->numberOfLostHits();  
+	  muons_dxy[counter] = mu->bestTrack()->dxy(PV->position());
+	  muons_dz[counter] = mu->bestTrack()->dz(PV->position());
 
 	  muons_nRecHits[counter] = -1;
 	  muons_numberOfSegments[counter] = 0;
 	  int tmpRHCounter = 0, tmpSegCounter = 0;
 	  
-	  std::cout<<" mu->outerTrack().isNonnull() && (mu->isStandAloneMuon() || mu->isGlobalMuon())   " 
-		   <<  ( mu->outerTrack().isNonnull() && (mu->isStandAloneMuon() || mu->isGlobalMuon()) ) << std::endl;
-	  //	  if(mu->outerTrack().isNonnull() && (mu->isStandAloneMuon() || mu->isGlobalMuon()) )
+
+
+
+	  if(mu->outerTrack().isNonnull() || (mu->isStandAloneMuon() || mu->isGlobalMuon()) )
 	    {
 	      std::vector<CSCSegment> mySavedSegments = findMuonSegments(*mu->outerTrack(), cscSegments, recHits, cscGeom);
-	      //	      std::cout<< "    mySavedSegments.size()  " << mySavedSegments.size()  << std::endl;  
+	      std::cout<< "    mySavedSegments.size()  " << mySavedSegments.size()  << std::endl;  
 	      for (int j = 0; j < (int)mySavedSegments.size(); j++)
 		{
 		  CSCDetId cscSegId  = (CSCDetId)mySavedSegments[j].cscDetId();
@@ -1243,12 +1259,12 @@ UFCSCRootMaker::doRecHits(edm::Handle<CSCRecHit2DCollection> recHits, edm::Handl
 			 LocalPoint rhitlocalSA = (*hit)->localPosition();
 			 
 			 //cout << saMuCounter << endl
-			 //<< "x : " << rhitlocal.x() << "  " << rhitlocalSA.x() << endl
-			 //<< "y : " << rhitlocal.y() << "  " << rhitlocalSA.y() << endl
-			 //<< "ec: " << idrec.endcap() << "  " << cscId.endcap() << endl
-			 //<< "rg: " << idrec.ring() << "  " << cscId.ring() << endl
+			 //<< "x : " << rhitlocal.x()   << "  " << rhitlocalSA.x() << endl
+			 //<< "y : " << rhitlocal.y()   << "  " << rhitlocalSA.y() << endl
+			 //<< "ec: " << idrec.endcap()  << "  " << cscId.endcap() << endl
+			 //<< "rg: " << idrec.ring()    << "  " << cscId.ring() << endl
 			 //<< "cb: " << idrec.chamber() << "  " << cscId.chamber() << endl
-			 //<< "lr: " << idrec.layer() << "  " << cscId.layer() << endl
+			 //<< "lr: " << idrec.layer()   << "  " << cscId.layer() << endl
 			 //<< "st: " << idrec.station() << "  " << cscId.station() << endl
 			 //<< "found : " << found << endl;
 			 
@@ -1694,9 +1710,9 @@ void UFCSCRootMaker::doNonAssociatedRecHits(edm::Handle<CSCSegmentCollection> cs
 	  {
 	    
 	    LocalPoint lposRH = (segRHit->second).localPosition();
-	    double xpos = lposRH.x();
-	    double ypos = lposRH.y();
-	    double zpos = lposRH.z();
+	    double      xpos = lposRH.x();
+	    double      ypos = lposRH.y();
+	    double      zpos = lposRH.z();
 	    
 	    if ( xrec == xpos && yrec == ypos && zrec == zpos){foundmatch = true;}
 	    d = sqrt(pow(xrec-xpos,2)+pow(yrec-ypos,2)+pow(zrec-zpos,2));
@@ -1872,9 +1888,6 @@ void UFCSCRootMaker::doNonAssociatedRecHits(edm::Handle<CSCSegmentCollection> cs
   AllRechits.clear();
   SegRechits.clear();
   NonAssociatedRechits.clear();
-
-
-
 }
 
 
@@ -2002,9 +2015,6 @@ UFCSCRootMaker::doTrigger(edm::Handle<L1MuGMTReadoutCollection> pCollection, edm
       }
     }
   hltTrigger_nBits = counter;
-
-
-
 }
 
 
@@ -2072,41 +2082,43 @@ UFCSCRootMaker::doWireDigis(edm::Handle<CSCWireDigiCollection> wires, const CSCG
 {
 
   int nWireGroupsTotal = 0;
-  for (CSCWireDigiCollection::DigiRangeIterator dWDiter=wires->begin(); dWDiter!=wires->end(); dWDiter++) {
-    CSCDetId id = (CSCDetId)(*dWDiter).first;
-    const CSCLayer* csclayer = cscGeom->layer( id );
-    CSCLayerGeometry *thegeom = const_cast<CSCLayerGeometry*>(csclayer->geometry());
-    std::vector<CSCWireDigi>::const_iterator wireIter = (*dWDiter).second.first;
-    std::vector<CSCWireDigi>::const_iterator lWire = (*dWDiter).second.second;
-    for( ; wireIter != lWire; ++wireIter) {
-      int myWire = wireIter->getWireGroup();
-      int myTBin = wireIter->getTimeBin();
-      firedWireDigis_ID_endcap[nWireGroupsTotal] = id.endcap();
-      firedWireDigis_ID_station[nWireGroupsTotal] = id.station();
-      firedWireDigis_ID_ring[nWireGroupsTotal] = id.ring();
-      firedWireDigis_ID_layer[nWireGroupsTotal] = id.layer();
-      firedWireDigis_ID_chamber[nWireGroupsTotal] = id.chamber();
+  for (CSCWireDigiCollection::DigiRangeIterator dWDiter=wires->begin(); dWDiter!=wires->end(); dWDiter++) 
+    {
+      CSCDetId id = (CSCDetId)(*dWDiter).first;
+      const CSCLayer* csclayer = cscGeom->layer( id );
+      CSCLayerGeometry *thegeom = const_cast<CSCLayerGeometry*>(csclayer->geometry());
+      std::vector<CSCWireDigi>::const_iterator wireIter = (*dWDiter).second.first;
+      std::vector<CSCWireDigi>::const_iterator lWire = (*dWDiter).second.second;
+      for( ; wireIter != lWire; ++wireIter) 
+	{
+	  int myWire = wireIter->getWireGroup();
+	  int myTBin = wireIter->getTimeBin();
+	  firedWireDigis_ID_endcap[nWireGroupsTotal] = id.endcap();
+	  firedWireDigis_ID_station[nWireGroupsTotal] = id.station();
+	  firedWireDigis_ID_ring[nWireGroupsTotal] = id.ring();
+	  firedWireDigis_ID_layer[nWireGroupsTotal] = id.layer();
+	  firedWireDigis_ID_chamber[nWireGroupsTotal] = id.chamber();
+	  
+	  firedWireDigis_ID_wire[nWireGroupsTotal] = myWire;
+	  firedWireDigis_timeBin[nWireGroupsTotal] = myTBin;
+	  firedWireDigis_chamberSerial[nWireGroupsTotal] = chamberSerial(id);
+	  firedWireDigis_localY[nWireGroupsTotal] = thegeom->yOfWireGroup(myWire);
 
-      firedWireDigis_ID_wire[nWireGroupsTotal] = myWire;
-      firedWireDigis_timeBin[nWireGroupsTotal] = myTBin;
-      firedWireDigis_chamberSerial[nWireGroupsTotal] = chamberSerial(id);
-      firedWireDigis_localY[nWireGroupsTotal] = thegeom->yOfWireGroup(myWire);
 
-
-      //AFEB Timing
-      int nmbwiretbin = wireIter->getTimeBinsOn().size();
-      int afeb = 3*((myWire-1)/8)+(id.layer()+1)/2;
-      firedWireDigis_numberWireTimeBins[nWireGroupsTotal] = nmbwiretbin;
-      firedWireDigis_AFEB[nWireGroupsTotal] = afeb;
-
-      nWireGroupsTotal++;
-    }
-  } // end wire loop
-
+	  //AFEB Timing
+	  int nmbwiretbin = wireIter->getTimeBinsOn().size();
+	  int afeb = 3*((myWire-1)/8)+(id.layer()+1)/2;
+	  firedWireDigis_numberWireTimeBins[nWireGroupsTotal] = nmbwiretbin;
+	  firedWireDigis_AFEB[nWireGroupsTotal] = afeb;
+	  
+	  nWireGroupsTotal++;
+	}
+    } // end wire loop
+  
   // this way you can zero suppress but still store info on # events with no digis
   if (nWireGroupsTotal == 0) nWireGroupsTotal = -1;
   firedWireDigis_nWireDigis = nWireGroupsTotal;
-//cout << "nwire: " << nWireGroupsTotal << endl;
+  //cout << "nwire: " << nWireGroupsTotal << endl;
 }
 
 
@@ -2422,17 +2434,17 @@ void UFCSCRootMaker::doLCTDigis( edm::Handle<CSCALCTDigiCollection> alcts, edm::
 
   	      const CSCTMBHeader *tmbHead = cscData[iCSC].tmbHeader();
 
-	      tmb_BXNCount[counter] = tmbHead->BXNCount();
-	      tmb_ALCTMatchTime[counter] = tmbHead->ALCTMatchTime();
-	      tmb_ID_chamberID[counter] = layer.chamberId();
-	      tmb_ID_chamber[counter] = layer.chamber();
-	      tmb_ID_endcap[counter] = layer.endcap();
-	      tmb_ID_station[counter] = layer.station();
-	      tmb_ID_ring[counter] = layer.ring();
-	      tmb_ID_layer[counter] = layer.layer();
+	      tmb_BXNCount[counter]         = tmbHead->BXNCount();
+	      tmb_ALCTMatchTime[counter]    = tmbHead->ALCTMatchTime();
+	      tmb_ID_chamberID[counter]     = layer.chamberId();
+	      tmb_ID_chamber[counter]       = layer.chamber();
+	      tmb_ID_endcap[counter]        = layer.endcap();
+	      tmb_ID_station[counter]       = layer.station();
+	      tmb_ID_ring[counter]          = layer.ring();
+	      tmb_ID_layer[counter]         = layer.layer();
 	      tmb_ID_chamberSerial[counter] = chamberSerial(layer.chamberId());
-	      tmb_ID_ringSerial[counter] = ringSerial(layer.chamberId());
-	      tmb_alct0key[counter] = ALCT0Key;
+	      tmb_ID_ringSerial[counter]    = ringSerial(layer.chamberId());
+	      tmb_alct0key[counter]         = ALCT0Key;
 
 	      //Attempt to make a few sum plots
 	      int TMB_ALCT_rel_L1A = tmbHead->BXNCount()-(CLCTPretrigger+2+tmbHead->ALCTMatchTime());
@@ -2537,8 +2549,8 @@ void UFCSCRootMaker::doGasGain(const CSCWireDigiCollection& wirecltn,  const CSC
     m_wire_hvsegm.clear();
     std::map<int,std::vector<int> >::iterator intvecIt;
     //                    ME1a ME1b ME1/2 ME1/3 ME2/1 ME2/2 ME3/1 ME3/2 ME4/1 ME4/2 
-    int csctype[10]=     {1,   2,   3,    4,    5,    6,    7,    8,    9,    10};
-    int hvsegm_layer[10]={1,   1,   3,    3,    3,    5,    3,    5,    3,    5};
+    int csctype[10]=       {1,   2,   3,    4,    5,    6,    7,    8,    9,    10};
+    int hvsegm_layer[10]=  {1,   1,   3,    3,    3,    5,    3,    5,    3,    5};
     int id;
     nmbhvsegm.clear();
     for(int i=0;i<10;i++) nmbhvsegm.push_back(hvsegm_layer[i]);
