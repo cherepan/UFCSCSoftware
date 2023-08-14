@@ -106,7 +106,9 @@ class Analysis():
 
 
         #Analysis Loop
+
         for i in range( tree.GetEntries() ):
+            print('======================================================================== ')
             tree.GetEntry(i)
 
             if i%1000 == 0:
@@ -119,8 +121,11 @@ class Analysis():
 
                 #Muons
                 #AvgRH/Seg
+
                 for n in range(tree.muons_nMuons):
-#                    if tree.muons_isStandAloneMuon[n]:
+                    if tree.muons_isStandAloneMuon[n]:
+                        recoMuon = TLorentzVector(tree.muons_energy[n], tree.muons_px[n], tree.muons_py[n], tree.muons_pz[n])
+                        recoMuon.Print()
                     if tree.muons_isStandAloneMuon[n]:
                         segmentCounter = 0
                         recHitsCounter = 0
@@ -184,9 +189,8 @@ class Analysis():
                     sLayer   = str(tree.recHits2D_ID_layer[n])
                     sRing    = str(tree.recHits2D_ID_ring[n])
                     #Average 2D per station
-                    string   = 'ME'+sEndcap+sStation+'/'+sRing
+                    string   = 'ME' + sEndcap + sStation + '/' + sRing
                     self.nRecHitsPerStation[string] += 1
-
                     self.nRecHitsPerLayer[tree.recHits2D_ID_endcap[n]-1][tree.recHits2D_ID_station[n]-1][tree.recHits2D_ID_ring[n]-1][tree.recHits2D_ID_chamber[n]-1][tree.recHits2D_ID_layer[n]-1] += 1
 
                     #locations
@@ -204,6 +208,14 @@ class Analysis():
 #                print '================ rechitsPer layer ', self.nRecHitsPerLayer
                 #2DSimHits
                 if opt.isMC:
+                    print('------------- generated muons  ')
+                    for im in range(0, tree.gen_muons_nMuons):
+                        muon = TLorentzVector(tree.gen_muons_energy[im],
+                                             tree.gen_muons_px[im],
+                                             tree.gen_muons_py[im],
+                                             tree.gen_muons_pz[im])
+                        muon.Print()
+
                     for n in range(0,tree.simHits_nSimHits):
                         sEndcap = tree.simHits_ID_endcap[n]
                         if sEndcap == 2: sEndcap = '-'
@@ -360,7 +372,7 @@ class Analysis():
         self.hists1D['nrecHitsPerLayer_allChambers'] = ROOT.TH1F("nrecHitsPerLayer_allChambers", "; N RecHits per Layer", 11, -0.5, 10.5)
 
 
-    def writeHistos(self,Histos1D,Histos2D):
+    def writeHistos(self, Histos1D, Histos2D):
         
         ROOT.gROOT.ProcessLine(".L tdrstyle.cc")
         setTDRStyle(False)

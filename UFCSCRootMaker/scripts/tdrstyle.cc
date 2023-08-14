@@ -49,15 +49,15 @@ void setTDRStyle(bool force) {
   gStyle->SetFrameFillStyle(0);
   gStyle->SetFrameLineColor(1);
   gStyle->SetFrameLineStyle(1);
-  gStyle->SetFrameLineWidth(1);
+  gStyle->SetFrameLineWidth(2);
 
 // For the histo:
-  if (force) {
+  if (true) {
       // gStyle->SetHistFillColor(1);
       // gStyle->SetHistFillStyle(0);
       gStyle->SetHistLineColor(1);
-      gStyle->SetHistLineStyle(0);
-      gStyle->SetHistLineWidth(1);
+      gStyle->SetHistLineStyle(1);
+      gStyle->SetHistLineWidth(3);
       // gStyle->SetLegoInnerR(Float_t rad = 0.5);
       // gStyle->SetNumberContours(Int_t number = 20);
   }
