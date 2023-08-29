@@ -21,7 +21,7 @@ def parseOptions():
     parser.add_option('-n','--maxEvents', dest='maxEvents', type='int', default=1000 ,help='maxEvents default:100000')
     parser.add_option('-d','--outDir', dest='outDir', type='string',
                       default='output/' ,help='out directory default:CSC')
-    parser.add_option('-j','--jobName',dest='jobName',type='string', default='cscOverview.root',help='name of job and output files')
+    parser.add_option('-j','--jobName',dest='jobName',type='string', default='cscOverview',help='name of job and output files')
 
     parser.add_option('--isDigi', dest='isDigi', type='int', default=1 ,help='isDigi default:1')
     parser.add_option('--isLocalReco', dest='isLocalReco', type='int', default=1 ,help='isLocalReco default:1')
@@ -108,7 +108,7 @@ class Analysis():
         #Analysis Loop
 
         for i in range( tree.GetEntries() ):
-            print('======================================================================== ')
+#            print('======================================================================== ')
             tree.GetEntry(i)
 
             if i%1000 == 0:
@@ -224,6 +224,7 @@ class Analysis():
                         sChamber = str(tree.simHits_ID_chamber[n])
                         sLayer   = str(tree.simHits_ID_layer[n])
                         sRing    = str(tree.simHits_ID_ring[n])
+
                         x  = tree.simHits_localX[n]
                         y  = tree.simHits_localY[n]
                         gx = tree.simHits_globalX[n]
@@ -241,25 +242,37 @@ class Analysis():
                             shRing          = tree.simHits_ID_ring[n]
                             shStation       = tree.simHits_ID_station[n]
                             shEndcap        = tree.simHits_ID_endcap[n]
-                            
+
+#                            print("======== sim hits: ")
+#                            print(tree.simHits_momentum[n],"   eta:   ",tree.simHits_theta[n], "   phi   ", tree.simHits_phi[n] )
+                              
                             self.simHitsOverallEffDen += 1
                             self.simHitsEffDen[shChamberSerial] += 1
                             self.simHitsLayerEffDen[shChamberSerial][shLayer-1] += 1
                             self.simHitsChamberEffDen[shEndcap-1][shStation-1][shRing-1][shChamber-1][shLayer-1] += 1
                             #SimHit Reco Efficiency
                             for m in range(0,tree.recHits2D_nRecHits2D):
-                                if tree.recHits2D_ID_chamberSerial[m] != shChamberSerial: continue
-                                if tree.recHits2D_ID_layer[m] != shLayer: continue
-                                xLow  = tree.recHits2D_localX[m] - sqrt(tree.recHits2D_localXXerr[m])
-                                xHigh = tree.recHits2D_localX[m] + sqrt(tree.recHits2D_localXXerr[m])
-                                yLow  = tree.recHits2D_localY[m] - sqrt(tree.recHits2D_localYYerr[m])
-                                yHigh = tree.recHits2D_localY[m] + sqrt(tree.recHits2D_localYYerr[m])
-                                if (x < xLow or x > xHigh) and (y < yLow or y > yHigh): continue
-                                self.simHitsOverallEffNum += 1
-                                self.simHitsEffNum[shChamberSerial] += 1
-                                self.simHitsLayerEffNum[shChamberSerial][shLayer-1] += 1
-                                self.simHitsChamberEffNum[shEndcap-1][shStation-1][shRing-1][shChamber-1][shLayer-1] += 1
-                                break
+                                print("sim Hit particle type  ,  is from SA Muon,  is from Muon",tree.recHits2D_simHit_particleTypeID[m], tree.recHits2D_belongsToSaMuon[m],tree.recHits2D_belongsToMuon[m])
+
+                                if abs(tree.recHits2D_simHit_particleTypeID[m]) == 13:
+                                    if tree.recHits2D_ID_chamberSerial[m] != shChamberSerial: continue
+                                    if tree.recHits2D_ID_layer[m] != shLayer: continue
+                                    xLow  = tree.recHits2D_localX[m] - sqrt(tree.recHits2D_localXXerr[m])
+                                    xHigh = tree.recHits2D_localX[m] + sqrt(tree.recHits2D_localXXerr[m])
+                                    yLow  = tree.recHits2D_localY[m] - sqrt(tree.recHits2D_localYYerr[m])
+                                    yHigh = tree.recHits2D_localY[m] + sqrt(tree.recHits2D_localYYerr[m])
+
+                                    print("recHit   x,y  ",tree.recHits2D_localX[m],tree.recHits2D_localY[m])
+                                    print("simHIt that belongs to this rechit   x,y  ", tree.recHits2D_simHit_localX[m], tree.recHits2D_simHit_localY[m] )
+                                    #                                for n in range(tree.muons_nMuons):
+
+
+                                    if (x < xLow or x > xHigh) and (y < yLow or y > yHigh): continue
+                                    self.simHitsOverallEffNum += 1
+                                    self.simHitsEffNum[shChamberSerial] += 1
+                                    self.simHitsLayerEffNum[shChamberSerial][shLayer-1] += 1
+                                    self.simHitsChamberEffNum[shEndcap-1][shStation-1][shRing-1][shChamber-1][shLayer-1] += 1
+                                    break
 
 
                                     

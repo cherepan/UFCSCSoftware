@@ -1432,7 +1432,6 @@ UFCSCRootMaker::doRecHits(edm::Handle<CSCRecHit2DCollection> recHits, edm::Handl
 	 }
        }
      
-     
      counter++;
    }
    recHits2D_nRecHits2D = counter;
@@ -1455,6 +1454,7 @@ UFCSCRootMaker::doRecHits(edm::Handle<CSCRecHit2DCollection> recHits, edm::Handl
 	   simHits_localY[counter] = sHitlocal.y();
 	   
 	   const CSCLayer* shlayer = cscGeom->layer( sId );
+
 	   GlobalPoint shitglobal= shlayer->toGlobal(sHitlocal);
 	   simHits_globalX[counter]   =  shitglobal.x();
 	   simHits_globalY[counter]   =  shitglobal.y();
@@ -1471,13 +1471,11 @@ UFCSCRootMaker::doRecHits(edm::Handle<CSCRecHit2DCollection> recHits, edm::Handl
 	   simHits_momentum[counter] = (*dSHsimIter).pabs();
 	   simHits_phi[counter] = (*dSHsimIter).phiAtEntry();
 	   simHits_theta[counter] = (*dSHsimIter).thetaAtEntry();
-	   
+	   //	   std::cout<<" simhit     track id   " << (*dSHsimIter).trackId() <<"   particle type    " <<   (*dSHsimIter).particleType()   <<  std::endl;
 	   counter++;
 	 }
      }
    simHits_nSimHits = counter;
-   
-
 }
 
 
