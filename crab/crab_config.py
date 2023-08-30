@@ -2,8 +2,8 @@ from WMCore.Configuration import Configuration
 config = Configuration()
 
 config.section_("General")
-config.General.requestName = 'RAW2DIGI_L1Reco_RECO_RECOSIM_v2'
-config.General.workArea =  'crab_area_v2'
+config.General.requestName = 'RAW2DIGI_L1Reco_RECO_RECOSIM_v3'
+config.General.workArea =  'crab_area_v3'
 config.General.transferLogs = True
 
 
@@ -25,9 +25,14 @@ config.Data.totalUnits  = 60
 #config.Data.lumiMask = 'Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON.txt'
 config.Data.publication = True
 config.Data.outLFNDirBase = '/store/user/cherepan'
-config.Data.outputDatasetTag = 'RelValZMM_14_CMSSW_12_4_0RAW2DIGI_L1Reco_RECO_RECOSIM_v2'
+config.Data.outputDatasetTag = 'RelValZMM_14_CMSSW_12_4_0RAW2DIGI_L1Reco_RECO_RECOSIM_v3'
+
 
 config.section_("Site")
-#config.Site.whitelist = ['T2_US_Wisconsin','T2_US_Purdue','T1_US_FNAL']
-#config.Data.ignoreLocality = True
+##config.Site.whitelist = ['T2_US_Wisconsin','T2_US_Purdue','T1_US_FNAL']
+##config.Data.ignoreLocality = True
+#config.Site.storageSite = 'T2_US_Florida'
+config.Site.whitelist = ['T2_US_Florida','T2_US_Wisconsin','T2_US_Purdue','T1_US_FNAL']
+config.Data.ignoreLocality = True
 config.Site.storageSite = 'T2_US_Florida'
+
