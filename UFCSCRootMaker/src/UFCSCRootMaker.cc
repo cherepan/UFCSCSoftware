@@ -144,6 +144,8 @@
 #include "TFile.h"
 #include "TTree.h"
 #include "TSystem.h"
+#include "TLorentzVector.h"
+
 
 using namespace std;
 
@@ -185,8 +187,11 @@ private:
 
   void doGenMuons(edm::Handle<reco::GenParticleCollection>& genParticles);
 
+
+  void SimHitSimTkDebug(edm::Handle<reco::GenParticleCollection>& genParticles,edm::Handle<edm::PSimHitContainer> simHits, edm::Handle<edm::SimTrackContainer> simTk);
+
   void doTracks(edm::Handle<reco::TrackCollection> genTracks);
-  void doRecHits(edm::Handle<CSCRecHit2DCollection> recHits, edm::Handle<edm::PSimHitContainer> simHits, edm::Handle<edm::SimTrackContainer> simTk,  edm::Handle<reco::TrackCollection> saMuons, 
+  void doRecHits(edm::Handle<CSCRecHit2DCollection> recHits, edm::Handle<edm::PSimHitContainer> simHits, edm::Handle<edm::SimTrackContainer> simTk, edm::Handle<reco::GenParticleCollection>& genParticles, edm::Handle<reco::TrackCollection> saMuons, 
 		 edm::Handle<reco::MuonCollection> muons, const CSCGeometry* cscGeom, const edm::Event& iEvent);
   double getthisSignal(const CSCStripDigiCollection& stripdigis, CSCDetId idRH, int centerStrip);
   void doSegments(edm::Handle<CSCSegmentCollection> cscSegments, const CSCGeometry* cscGeom);
@@ -314,7 +319,7 @@ private:
   bool      muons_isEnergyValid[1000];
   int       muons_numberOfChambers[1000], muons_numberOfMatches[1000], muons_numberOfSegments[1000];
   double    muons_calEnergyTower[1000], muons_calEnergyEm[1000], muons_calEnergyHad[1000];
-  int       muons_charge[1000], gen_muons_charge[1000],  muons_nRecHits[1000];
+  int       muons_charge[1000], gen_muons_charge[1000], gen_muons_genindex[1000], muons_nRecHits[1000];
   double    muons_energy[1000],  muons_px[1000], muons_py[1000], muons_pz[1000], muons_pt[1000];
   double    gen_muons_energy[1000],  gen_muons_px[1000], gen_muons_py[1000], gen_muons_pz[1000];
   double    muons_et[1000], muons_p[1000], muons_phi[1000], muons_eta[1000], muons_theta[1000];
@@ -341,7 +346,7 @@ private:
 
   // SimHits
   int simHits_nSimHits;
-  int simHits_particleType[10000];
+  int simHits_particleType[10000],simHits_genmuonindex[10000];
   double simHits_localX[10000], simHits_localY[10000], simHits_globalX[10000], simHits_globalY[10000];
   int    simHits_ID_endcap[10000], simHits_ID_ring[10000], simHits_ID_station[10000], simHits_ID_chamber[10000], simHits_ID_layer[10000];
   int    simHits_ID_chamberSerial[10000], simHits_ID_ringSerial[10000], simHits_ID_processType[10000];
@@ -674,6 +679,9 @@ void UFCSCRootMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
      }
 
+
+   //   if(isGEN and isSIM)
+   //     SimHitSimTkDebug(genParticles,simHits,simTk);
    ////////////////////////////////////////////////////////////////////////////////
    nEventsTotal++;
 
@@ -713,7 +721,7 @@ void UFCSCRootMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 //   if(addTracks && isFullRECO) doTracks(genTracks);
 
 
-   if(addRecHits &&  (isFullRECO || isLocalRECO)) doRecHits(recHits,simHits, simTk ,saMuons,muons,cscGeom,iEvent);
+   if(addRecHits &&  (isFullRECO || isLocalRECO)) doRecHits(recHits,simHits, simTk, genParticles, saMuons,muons,cscGeom,iEvent);
    if(addSegments && (isFullRECO || isLocalRECO)) doSegments(cscSegments,cscGeom);
 
 
@@ -888,25 +896,197 @@ void UFCSCRootMaker::endLuminosityBlock(edm::LuminosityBlock const&, edm::EventS
 */
 
 
+
+
+
+
+
+
+void UFCSCRootMaker::SimHitSimTkDebug(edm::Handle<reco::GenParticleCollection>& genParticles,edm::Handle<edm::PSimHitContainer> simHits,edm::Handle<edm::SimTrackContainer> simTk)
+{
+
+
+  //  const edm::View<pat::PackedCandidate>* cands = pfCandHandle.product();
+  std::cout<<"   nSim Hits   "<< simHits->size()  << "   nSimTk   " <<simTk->size() << " ngenPart  " << genParticles->size()<<std::endl;
+
+  for(unsigned int isimHit = 0 ; isimHit < simHits->size(); isimHit++)
+    {
+      const PSimHit &hit = simHits->at(isimHit);
+      CSCDetId sId = (CSCDetId)hit.detUnitId();
+      //      simHits_ID_endcap[counter]  = sId.endcap();
+      //      simHits_ID_ring[counter]    = sId.ring();
+      //      simHits_ID_station[counter] = sId.station();
+      //      simHits_ID_chamber[counter] = sId.chamber();
+      int Chamber  = 10000*sId.endcap() + 1000*sId.station() + 100*sId.ring() + sId.chamber();
+      if(abs(hit.particleType())== 13 )
+	{
+
+	  std::cout<<" hit #     simTk index   "<< isimHit  << " ,  "<<  hit.trackId() << std::endl;
+	    //		   <<"   chamber/layer   " << Chamber <<" /   "<<sId.layer()  <<std::endl;
+
+	
+	  int gen_index(-1);
+	  if(hit.trackId() < simTk->size() )
+	    {
+	      //	      gen_index= simTk->at(hit.trackId()).genpartIndex();
+	      
+	      TLorentzVector SimTkP4_AtBoundary(simTk->at(hit.trackId()).getMomentumAtBoundary().Px(),
+						simTk->at(hit.trackId()).getMomentumAtBoundary().Py(),
+						simTk->at(hit.trackId()).getMomentumAtBoundary().Pz(),
+						simTk->at(hit.trackId()).getMomentumAtBoundary().E());
+	      
+	      TLorentzVector SimTkP4_Surface(simTk->at(hit.trackId()).trackerSurfaceMomentum().Px(),
+					     simTk->at(hit.trackId()).trackerSurfaceMomentum().Py(),
+					     simTk->at(hit.trackId()).trackerSurfaceMomentum().Pz(),
+					     simTk->at(hit.trackId()).trackerSurfaceMomentum().E());
+
+	      //	      std::cout<<"  SimTk P4  At Boundary : "; SimTkP4_AtBoundary.Print();
+	      //	      std::cout<<"  SimTk P4  At Surface : "; SimTkP4_Surface.Print();
+	      
+	      //	  std::cout<<" gen_index from simTk  "<< gen_index << "  simTk pT    " << SimTkP4_AtBoundary.Pt() <<std::endl;
+	      std::cout<<" hit Track ID  "<< hit.trackId() << "  simTk pT    " << SimTkP4_AtBoundary.Pt() <<std::endl;
+	      
+	      //	  const reco::GenParticle &gen_part = genParticles->at(gen_index);
+	      int selected_gen_index(-1);
+	      //	  if(gen_index!=-1)
+	      {
+		//		  if(abs(gen_part.pdgId() ) == 13 ) 
+		//		    {
+		//		      selected_gen_index = gen_index;
+		//		    }
+		//		  else
+		//		    {
+		double dPt(999.);
+		for (unsigned int igenparticle=0; igenparticle < genParticles->size(); igenparticle++)
+		  {
+		    const reco::GenParticle &g = genParticles->at(igenparticle);
+		    TLorentzVector gen_mu(g.p4().Px(),g.p4().Py(),g.p4().Pz(),g.p4().E());
+		    if(SimTkP4_AtBoundary.Pt() !=0 )
+		      {
+			//			      if(gen_mu.DeltaR(SimTkP4_AtBoundary) < dR)
+			if(fabs(gen_mu.Pt() - SimTkP4_AtBoundary.Pt()) < dPt)
+			  {
+			    //				  dPt = gen_mu.DeltaR(SimTkP4_AtBoundary);
+			    dPt = fabs(gen_mu.Pt() - SimTkP4_AtBoundary.Pt());
+			    selected_gen_index = igenparticle;
+			  }
+		      }
+		  }
+		
+		//		    }
+		
+	      }
+	      
+	      
+	      //  std::cout<<" genindex from SimTk and dR  matched selected_gen_particle_index:   "<< gen_index <<"  " <<selected_gen_index << std::endl;
+	      std::cout<<" matched selected_gen_particle_index:   " <<selected_gen_index <<std::endl;
+	      //	      if(gen_index)	      const reco::GenParticle &gen_part1 = genParticles->at(gen_index);
+	      if(selected_gen_index!=-1)
+		{
+		  const reco::GenParticle &gen_part2 = genParticles->at(selected_gen_index);
+		  std::cout<<" --------------   GenParticle is :     "<< gen_part2.pdgId() <<  " pT  " <<  sqrt(gen_part2.p4().Px()*gen_part2.p4().Px() + 
+														gen_part2.p4().Py()*gen_part2.p4().Py() )<<std::endl;
+		}
+	    }
+	  
+	  
+	  
+	}
+    }
+      //      for(unsigned int isimTrack = 0; isimTrack < simTk->size(); isimTrack++)
+      //	{
+      //	  const SimTrack &simtr = simTk->at(isimTrack);
+      //	}
+      
+
+
+
+  //  edm::PSimHitContainer::const_iterator dSHsimIter;
+  //  for (dSHsimIter = simHits->begin(); dSHsimIter != simHits->end(); dSHsimIter++)
+  //    {
+
+  //      std::cout<<"  huy  " << std::endl;
+
+  //    }
+      /*
+      std::cout<<" trakdID    " << (*dSHsimIter).trackId() << std::endl;
+
+      unsigned int simTk_index(0);
+      for ( edm::SimTrackContainer::const_iterator itk=simTk->begin(); itk!=simTk->end(); ++itk, simTk_index++ )
+	{
+	  if(simTk_index == (*dSHsimIter).trackId())
+	    std::cout<<"   simTk  Index   genParticle index    " << simTk_index  <<"    "   <<  (*itk).genpartIndex()<< "  simHit particle type   " << (*dSHsimIter).particleType() <<std::endl;
+
+	}
+    }
+
+
+      */
+  counter =0;
+  unsigned int gen_counter(0);
+
+  for (unsigned int itr=0; itr < genParticles->size(); itr++, gen_counter++)
+    {
+
+      const reco::GenParticle &g_part = genParticles->at(itr);
+
+      if(abs(g_part.pdgId()) == 13)// && g_part.status() == 1 )
+        {
+
+
+
+	  TLorentzVector mu(gen_muons_px[counter],gen_muons_py[counter], gen_muons_pz[counter],gen_muons_energy[counter]);
+	  //	  if(mu.Pt()> 10 && fabs(mu.Eta())  < 2.4 && fabs(mu.Eta())  > 1.0 )
+	  std::cout<<":::::::::::::Found Muons:  gen    muon pT/|eta|:  "<<  mu.Pt() << "  /   "<< fabs(mu.Eta())   << "   genIndex=============>:    "<< itr <<std::endl;
+	  //	  std::cout<<"  muon gen counter     "<< gen_counter << std::endl;
+          counter++;
+
+
+        }
+
+    }
+  gen_muons_nMuons = counter;
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
 void 
 UFCSCRootMaker::doGenMuons(edm::Handle<reco::GenParticleCollection>& genParticles)
 {
   counter =0;
   unsigned int gen_counter(0);
-  for (reco::GenParticleCollection::const_iterator itr = genParticles->begin(); itr != genParticles->end(); ++itr, gen_counter++) 
-    {
 
-      if(abs(itr->pdgId()) == 13 && itr->status() == 1 )
+  for (unsigned int igenparticle=0; igenparticle < genParticles->size(); igenparticle++)
+    {
+      const reco::GenParticle &g = genParticles->at(igenparticle);
+
+      //  for (reco::GenParticleCollection::const_iterator itr = genParticles->begin(); itr != genParticles->end(); ++itr, gen_counter++) 
+      //    {
+
+      if(abs(g.pdgId()) == 13 && g.status() == 1 )
 	{
 
-	  //	  std::cout<<"gen    muon px:  "<<  itr->p4().Px() <<std::endl;
+	  gen_muons_charge[counter] = g.charge();
+	  gen_muons_px[counter]     = g.p4().Px();
+	  gen_muons_py[counter]     = g.p4().Py();
+	  gen_muons_pz[counter]     = g.p4().Pz();
+	  gen_muons_energy[counter] = sqrt(g.p4().Px()*g.p4().Px() + g.p4().Py()*g.p4().Py() + g.p4().Pz()*g.p4().Pz() + 0.102*0.102 );
+	  gen_muons_genindex[counter] = igenparticle;
 
-	  gen_muons_charge[counter] = itr->charge();
-	  gen_muons_px[counter] = itr->p4().Px();
-	  gen_muons_py[counter] = itr->p4().Py();
-	  gen_muons_pz[counter] = itr->p4().Pz();
-	  gen_muons_energy[counter] = sqrt(itr->p4().Px()*itr->p4().Px() + itr->p4().Py()*itr->p4().Py() + itr->p4().Pz()*itr->p4().Pz() + 0.102*0.102 );
-	  std::cout<<"  muon gen counter     "<< gen_counter << std::endl;
+
+	  //	  std::cout<<"Selected Muon   pT index :  "<<  sqrt(g.p4().Px()*g.p4().Px() + g.p4().Py()*g.p4().Py()) <<"     " << gen_muons_genindex[counter] <<std::endl;
+	  //	  std::cout<<"  muon gen counter     "<< gen_counter << std::endl;
 	  counter++;
 	  
 
@@ -1195,9 +1375,9 @@ UFCSCRootMaker::doTracks(edm::Handle<reco::TrackCollection> genTracks)
 
 
 void
-UFCSCRootMaker::doRecHits(edm::Handle<CSCRecHit2DCollection> recHits, edm::Handle<edm::PSimHitContainer> simHits,edm::Handle<edm::SimTrackContainer> simTk ,edm::Handle<reco::TrackCollection> saMuons, edm::Handle<reco::MuonCollection> muons, const CSCGeometry* cscGeom, const edm::Event& iEvent)
+UFCSCRootMaker::doRecHits(edm::Handle<CSCRecHit2DCollection> recHits, edm::Handle<edm::PSimHitContainer> simHits,edm::Handle<edm::SimTrackContainer> simTk, edm::Handle<reco::GenParticleCollection>& genParticles, edm::Handle<reco::TrackCollection> saMuons, edm::Handle<reco::MuonCollection> muons, const CSCGeometry* cscGeom, const edm::Event& iEvent)
 {
-  std::cout<<"-----------------------   do RecHits   " << std::endl;
+  //  std::cout<<"-----------------------   do RecHits   " << std::endl;
   edm::Handle<CSCStripDigiCollection> myStrips;
   if(isDIGI) iEvent.getByToken(stripDigiTagSrc, myStrips);
 
@@ -1401,7 +1581,7 @@ UFCSCRootMaker::doRecHits(edm::Handle<CSCRecHit2DCollection> recHits, edm::Handl
      recHits2D_simHit_localX[counter] = -999;
      recHits2D_simHit_localY[counter] = -999;
      recHits2D_simHit_particleTypeID[counter] = -1;
-
+   
      if (isSIM)
        {
 
@@ -1455,15 +1635,15 @@ UFCSCRootMaker::doRecHits(edm::Handle<CSCRecHit2DCollection> recHits, edm::Handl
 	 {
 
 
-	     std::cout<<" trakdID    " << (*dSHsimIter).trackId() << std::endl;
+	   //	     std::cout<<" trakdID    " << (*dSHsimIter).trackId() << std::endl;
 
-	     unsigned int simTk_index(0);
-	     for ( edm::SimTrackContainer::const_iterator itk=simTk->begin(); itk!=simTk->end(); ++itk, simTk_index++ )
-	       {
-		 if(simTk_index == (*dSHsimIter).trackId())
-		   std::cout<<"   simTk  Index   genParticle index    "	<< simTk_index  <<"    "   <<  (*itk).genpartIndex()<< "  simHit particle type   " << (*dSHsimIter).particleType() <<std::endl;
+	   //	     unsigned int simTk_index(0);
+//	     for ( edm::SimTrackContainer::const_iterator itk=simTk->begin(); itk!=simTk->end(); ++itk, simTk_index++ )
+//	       {
+//		 if(simTk_index == (*dSHsimIter).trackId())
+//		   std::cout<<"   simTk  Index   genParticle index    "	<< simTk_index  <<"    "   <<  (*itk).genpartIndex()<< "  simHit particle type   " << (*dSHsimIter).particleType() <<std::endl/;
 
-	       }
+//	       }
 
 
 	   // Get DetID for this simHit:
@@ -1492,6 +1672,48 @@ UFCSCRootMaker::doRecHits(edm::Handle<CSCRecHit2DCollection> recHits, edm::Handl
 	   simHits_phi[counter] = (*dSHsimIter).phiAtEntry();
 	   simHits_theta[counter] = (*dSHsimIter).thetaAtEntry();
 	   
+	   // find gen muon index that produced this hit
+	   //============================================
+	   int gen_muon_index(-1);
+	   if(abs((*dSHsimIter).particleType()  == 13 ))
+	     if( (*dSHsimIter).trackId() < simTk->size() ) // hit sometimes return not realistic track index (> 10^5)
+	       {
+		 TLorentzVector SimTkP4_AtBoundary(simTk->at((*dSHsimIter).trackId()).getMomentumAtBoundary().Px(),
+						   simTk->at((*dSHsimIter).trackId()).getMomentumAtBoundary().Py(),
+						   simTk->at((*dSHsimIter).trackId()).getMomentumAtBoundary().Pz(),
+						   simTk->at((*dSHsimIter).trackId()).getMomentumAtBoundary().E());
+		 
+		 double dPt(999.);
+		 for (unsigned int igenparticle=0; igenparticle < genParticles->size(); igenparticle++)
+		   {
+		     const reco::GenParticle &g = genParticles->at(igenparticle);
+		     TLorentzVector gen_mu(g.p4().Px(),g.p4().Py(),g.p4().Pz(),g.p4().E());
+		     if(SimTkP4_AtBoundary.Pt() !=0 )
+		       //if(gen_mu.DeltaR(SimTkP4_AtBoundary) < dR)
+		       if(fabs(gen_mu.Pt() - SimTkP4_AtBoundary.Pt()) < dPt)
+			 {
+			   //dPt = gen_mu.DeltaR(SimTkP4_AtBoundary);
+			   dPt = fabs(gen_mu.Pt() - SimTkP4_AtBoundary.Pt());
+			   gen_muon_index = igenparticle;
+			 }
+		   }
+	       }
+	   
+
+	   simHits_genmuonindex[counter] = gen_muon_index;
+	   
+
+	   /*
+	   std::cout<<"============  gen_muon_index:    "<< gen_muon_index<< std::endl;
+	   if(gen_muon_index!=-1){
+	     const reco::GenParticle &gen_part2 = genParticles->at(gen_muon_index);
+	     std::cout<<" --------------   GenParticle is :     "<< gen_part2.pdgId() <<  " pT  " <<  sqrt(gen_part2.p4().Px()*gen_part2.p4().Px() +
+													   gen_part2.p4().Py()*gen_part2.p4().Py() )<<std::endl;
+	   }
+	   */
+
+
+
 	   counter++;
 	 }
      }
@@ -3179,6 +3401,7 @@ UFCSCRootMaker::bookTree(TTree *tree)
   // SimHits 
   tree->Branch("simHits_nSimHits", &simHits_nSimHits, "simHits_nSimHits/I");
   tree->Branch("simHits_particleType", simHits_particleType,  "simHits_particleType[simHits_nSimHits]/I");
+  tree->Branch("simHits_genmuonindex", simHits_genmuonindex,  "simHits_genmuonindex[simHits_nSimHits]/I");
   tree->Branch("simHits_localX", simHits_localX,  "simHits_localX[simHits_nSimHits]/D");
   tree->Branch("simHits_localY", simHits_localY,  "simHits_localY[simHits_nSimHits]/D");
   tree->Branch("simHits_globalX", simHits_globalX,  "simHits_globalX[simHits_nSimHits]/D");
@@ -3321,6 +3544,7 @@ UFCSCRootMaker::bookTree(TTree *tree)
 
   tree->Branch("gen_muons_nMuons", &gen_muons_nMuons, "gen_muons_nMuons/I");
   tree->Branch("gen_muons_charge",   gen_muons_charge,   "gen_muons_charge[gen_muons_nMuons]/I");
+  tree->Branch("gen_muons_genindex",   gen_muons_genindex,   "gen_muons_genindex[gen_muons_nMuons]/I");
   tree->Branch("gen_muons_energy",   gen_muons_energy,   "gen_muons_energy[gen_muons_nMuons]/D");
   tree->Branch("gen_muons_px",   gen_muons_px,   "gen_muons_px[gen_muons_nMuons]/D");
   tree->Branch("gen_muons_py",   gen_muons_py,   "gen_muons_py[gen_muons_nMuons]/D");
