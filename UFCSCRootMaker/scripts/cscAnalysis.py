@@ -1,4 +1,5 @@
 #!/usr/bin/python
+
 import sys, os, pwd, commands
 import optparse, shlex, re
 import math
@@ -18,7 +19,7 @@ def parseOptions():
     parser.add_option('-b', action='store_true', dest='noX', default=True ,help='no X11 windows')
     parser.add_option('-m','--isMC', dest='isMC', type='int', default=1 ,help='isMC default:0')
     parser.add_option('-f','--file', dest='file', type='string', default='cscRootMaker.root' ,help='file default:blank')
-    parser.add_option('-n','--maxEvents', dest='maxEvents', type='int', default=1000 ,help='maxEvents default:100000')
+    parser.add_option('-n','--maxEvents', dest='maxEvents', type='int', default=10000000 ,help='maxEvents default:100000')
     parser.add_option('-d','--outDir', dest='outDir', type='string',
                       default='output/' ,help='out directory default:CSC')
     parser.add_option('-j','--jobName',dest='jobName',type='string', default='cscOverview',help='name of job and output files')
@@ -56,6 +57,7 @@ class Analysis():
         self.stationRings = ['ME-1/4','ME-1/3','ME-4/2','ME-3/2','ME-2/2','ME-1/2','ME-4/1','ME-3/1','ME-2/1','ME-1/1',
                              'ME+1/1','ME+2/1','ME+3/1','ME+4/1','ME+1/2','ME+2/2','ME+3/2','ME+4/2','ME+1/3','ME+1/4']
         self.stations = ['ME-1','ME-2','ME-3','ME-4','ME+1','ME+2','ME+3','ME+4']
+
         self.nChambers = {}
         self.nChambers['ME-1/1'] = 36
         self.nChambers['ME-1/2'] = 36
@@ -86,6 +88,22 @@ class Analysis():
         self.defineHistos()
 
 
+    def doMatching(self, tree, genMuon):
+        list_dR_muon=[]
+        for n in range(tree.muons_nMuons):
+            recMatchedMuon = TLorentzVector(tree.muons_energy[n], tree.muons_px[n], tree.muons_py[n], tree.muons_pz[n])
+            list_dR_muon.append([recMatchedMuon.DeltaR(genMuon),n, abs(recMatchedMuon.Pt() - genMuon.Pt())])
+        list_dR_muon.sort(key=lambda element : element[0])    
+        if len(list_dR_muon)!=0 and  list_dR_muon[0][2] < 2 :return  list_dR_muon[0][1]
+        return -1
+
+
+    def linked_gen_mu_index(self, tree, i):
+        if i== -1:return -1
+        for im in range(0, tree.gen_muons_nMuons):
+            if tree.gen_muons_genindex[im] == i: return im
+        return -1
+
 
     def doAnalysis(self,file):
         global opt, args
@@ -112,7 +130,7 @@ class Analysis():
             tree.GetEntry(i)
 
             if i%1000 == 0:
-                print "Event ",i
+                 print "Event ",i
             if self.totalEvents > opt.maxEvents:
                 break
             self.totalEvents+=1
@@ -123,9 +141,9 @@ class Analysis():
                 #AvgRH/Seg
 
                 for n in range(tree.muons_nMuons):
-                    if tree.muons_isStandAloneMuon[n]:
-                        recoMuon = TLorentzVector(tree.muons_energy[n], tree.muons_px[n], tree.muons_py[n], tree.muons_pz[n])
-                        recoMuon.Print()
+#                    if tree.muons_isStandAloneMuon[n]:
+#                        recoMuon = TLorentzVector(tree.muons_energy[n], tree.muons_px[n], tree.muons_py[n], tree.muons_pz[n])
+#                        recoMuon.Print()
                     if tree.muons_isStandAloneMuon[n]:
                         segmentCounter = 0
                         recHitsCounter = 0
@@ -205,17 +223,45 @@ class Analysis():
                     string = 'ME'+sEndcap+sStation+'_recHits2D'
                     self.hists2D[string].Fill(gx,gy)
 
-#                print '================ rechitsPer layer ', self.nRecHitsPerLayer
+
                 #2DSimHits
                 if opt.isMC:
-                    print('------------- generated muons  ')
+######################33 to be removed at some point 
+#                    print('------------- generated muons  ')
+                    gen_muons_momentum = []
+                    matchingOk = False
                     for im in range(0, tree.gen_muons_nMuons):
                         muon = TLorentzVector(tree.gen_muons_energy[im],
                                              tree.gen_muons_px[im],
                                              tree.gen_muons_py[im],
                                              tree.gen_muons_pz[im])
-                        muon.Print()
 
+                        if muon.Pt()> 2:gen_muons_momentum.append(muon.P())
+ #                       print('gen Muons  phi and Theta:  ',muon.Phi(), muon.Theta(), muon.P())
+                        recoMuIndex = self.doMatching(tree,muon) 
+                        recoMuon=TLorentzVector(0,0,0,0)
+                        if recoMuIndex !=-1:
+                            matchingOk = True
+                            recoMuon = TLorentzVector(tree.muons_energy[recoMuIndex], 
+                                                      tree.muons_px[recoMuIndex], 
+                                                      tree.muons_py[recoMuIndex], 
+                                                      tree.muons_pz[recoMuIndex])
+                        print('----- reco Muon  ')
+                        recoMuon.Print()
+#                        print("do I have a match  for every gen muon?????   gen,reco Px ", recoMuIndex, muon.Px(), recoMuon.Px())
+                        deltaP_genMuon_simhitMOmenmtum = []
+                        for h in range(0,tree.simHits_nSimHits):
+#                            print(' All Hits  per muon  :  ',h,  tree.simHits_momentum[h])
+                            deltaP_genMuon_simhitMOmenmtum.append(  [  abs(muon.Pt() - tree.simHits_momentum[h] ), h, tree.simHits_particleType[h]])
+                        deltaP_genMuon_simhitMOmenmtum.sort(key=lambda element : element[0], reverse=True)
+                        print('---------- gen Muon P', muon.P())
+#                        print('The full vector   ', deltaP_genMuon_simhitMOmenmtum)
+#                        if len(deltaP_genMuon_simhitMOmenmtum)!=0:
+#                            print('closest  simhit ', deltaP_genMuon_simhitMOmenmtum[0][0], '  hit number  ',deltaP_genMuon_simhitMOmenmtum[0][1], ' hit particle type  ',deltaP_genMuon_simhitMOmenmtum[0][2])
+######################33 to be removed at some point 
+#                        print('Matched reco Muon is:')
+#                        recoMuon.Print()
+#                    print("============================== hits loop ============================= ")
                     for n in range(0,tree.simHits_nSimHits):
                         sEndcap = tree.simHits_ID_endcap[n]
                         if sEndcap == 2: sEndcap = '-'
@@ -224,6 +270,7 @@ class Analysis():
                         sChamber = str(tree.simHits_ID_chamber[n])
                         sLayer   = str(tree.simHits_ID_layer[n])
                         sRing    = str(tree.simHits_ID_ring[n])
+                        chamberID = tree.simHits_ID_endcap[n]*10000 + tree.simHits_ID_station[n]*1000  + tree.simHits_ID_ring[n]*100  + tree.simHits_ID_chamber[n]
 
                         x  = tree.simHits_localX[n]
                         y  = tree.simHits_localY[n]
@@ -234,8 +281,27 @@ class Analysis():
                         self.hists2D[string].Fill(gx,gy)
                         string = 'ME'+sEndcap+sStation+'_simHits2D'
                         self.hists2D[string].Fill(gx,gy)
+#                        print(' All Hits :  ',n,  tree.simHits_momentum[n])
+                        isMuonHit=False
+#                        for p in gen_muons_momentum:
+ #                           print("muons momentum  ",p)
+#                            if abs(tree.simHits_momentum[n] - p) < 0.1:
+#                                print("This simHit is from Muon   ", tree.simHits_momentum[n])
+#                        if abs(tree.simHits_particleType[n]) == 13 and matchingOk:# or abs(tree.simHits_particleType[n]) == 11:
+                        if abs(tree.simHits_particleType[n]) == 13:# and matchingOk:# or abs(tree.simHits_particleType[n]) == 11:
 
-                        if abs(tree.simHits_particleType[n]) == 13:
+                            print('#hit, chamber,  genMuonGenIndex  and total nGenMuons :  ',n, chamberID, tree.simHits_genmuonindex[n], tree.gen_muons_nMuons  )
+                            genmuindex = self.linked_gen_mu_index(tree, tree.simHits_genmuonindex[n])
+                            if genmuindex!=-1:
+                                muon = TLorentzVector(tree.gen_muons_energy[genmuindex],
+                                                      tree.gen_muons_px[genmuindex],
+                                                      tree.gen_muons_py[genmuindex],
+                                                      tree.gen_muons_pz[genmuindex])
+                                print('Well matched MC gen muon')
+                                muon.Print()
+
+#                            print("------>#h,  This simHit is from Muon   ",n, tree.simHits_momentum[n],' Chamber  ', chamberID, '  layer ',sLayer, " (x,y)  ",x,y, matchingOk )
+
                             shChamberSerial = tree.simHits_ID_chamberSerial[n]
                             shLayer         = tree.simHits_ID_layer[n]
                             shChamber       = tree.simHits_ID_chamber[n]
@@ -252,18 +318,19 @@ class Analysis():
                             self.simHitsChamberEffDen[shEndcap-1][shStation-1][shRing-1][shChamber-1][shLayer-1] += 1
                             #SimHit Reco Efficiency
                             for m in range(0,tree.recHits2D_nRecHits2D):
-                                print("sim Hit particle type  ,  is from SA Muon,  is from Muon",tree.recHits2D_simHit_particleTypeID[m], tree.recHits2D_belongsToSaMuon[m],tree.recHits2D_belongsToMuon[m])
+#                                print("sim Hit particle type  ,  is from SA Muon,  is from Muon",tree.recHits2D_simHit_particleTypeID[m], tree.recHits2D_belongsToSaMuon[m],
+#                                      tree.recHits2D_belongsToMuon[m])
 
-                                if abs(tree.recHits2D_simHit_particleTypeID[m]) == 13:
+#                                if abs(tree.recHits2D_simHit_particleTypeID[m]) == 13:
                                     if tree.recHits2D_ID_chamberSerial[m] != shChamberSerial: continue
                                     if tree.recHits2D_ID_layer[m] != shLayer: continue
-                                    xLow  = tree.recHits2D_localX[m] - sqrt(tree.recHits2D_localXXerr[m])
-                                    xHigh = tree.recHits2D_localX[m] + sqrt(tree.recHits2D_localXXerr[m])
-                                    yLow  = tree.recHits2D_localY[m] - sqrt(tree.recHits2D_localYYerr[m])
-                                    yHigh = tree.recHits2D_localY[m] + sqrt(tree.recHits2D_localYYerr[m])
+                                    xLow  = tree.recHits2D_localX[m] - 2*sqrt(tree.recHits2D_localXXerr[m])
+                                    xHigh = tree.recHits2D_localX[m] + 2*sqrt(tree.recHits2D_localXXerr[m])
+                                    yLow  = tree.recHits2D_localY[m] - 2*sqrt(tree.recHits2D_localYYerr[m])
+                                    yHigh = tree.recHits2D_localY[m] + 2*sqrt(tree.recHits2D_localYYerr[m])
 
-                                    print("recHit   x,y  ",tree.recHits2D_localX[m],tree.recHits2D_localY[m])
-                                    print("simHIt that belongs to this rechit   x,y  ", tree.recHits2D_simHit_localX[m], tree.recHits2D_simHit_localY[m] )
+#                                    print("recHit   x,y  ",tree.recHits2D_localX[m],tree.recHits2D_localY[m])
+ #                                   print("simHIt that belongs to this rechit   x,y  ", tree.recHits2D_simHit_localX[m], tree.recHits2D_simHit_localY[m] )
                                     #                                for n in range(tree.muons_nMuons):
 
 
@@ -420,7 +487,7 @@ class Analysis():
         
         for key in Histos1D:
             normalized = 'Norm' in key
-            if normalized:
+            if normalized and Histos1D[key].Integral() > 0:
                 Histos1D[key].Scale(1/Histos1D[key].Integral())
             outFile.cd()
             Histos1D[key].Write()
@@ -438,18 +505,32 @@ class Analysis():
         #Fill Eff Hists
         for x in range(0,600):
             eff = 0
+            err = 0
             if self.simHitsEffDen[x] > 0:
                 eff = float(self.simHitsEffNum[x])/self.simHitsEffDen[x]
+                err_nom   =float( pow( self.simHitsEffNum[x]*self.simHitsEffDen[x]*(self.simHitsEffNum[x] + self.simHitsEffDen[x]) , 0.5 ))
+                err_den   =float( pow(self.simHitsEffDen[x],2))
+                err       = err_nom/err_den
             if x == 599:
                 eff = float(self.simHitsOverallEffNum)/self.simHitsOverallEffDen
-
+                err_nom = float( pow( self.simHitsOverallEffNum*self.simHitsOverallEffDen*(self.simHitsOverallEffNum + self.simHitsOverallEffDen), 0.5)) 
+                err_den = float( pow(self.simHitsOverallEffDen,2))
+                err     = err_nom/err_den
             #print x,  self.simHitsEffDen[x], self.simHitsEffNum[x], eff, self.simHitsOverallEffDen, self.simHitsOverallEffDen
             self.hists1D['simHitsRecoEfficiency'].SetBinContent(x+1,eff)
+            self.hists1D['simHitsRecoEfficiency'].SetBinError(x+1,err)
             for y in range(0,6):
                 eff = 0
+                err = 0
+
                 if self.simHitsLayerEffDen[x][y] > 0:
                     eff = float(self.simHitsLayerEffNum[x][y])/self.simHitsLayerEffDen[x][y]
+                    err_nom =  float( pow( self.simHitsLayerEffNum[x][y]*self.simHitsLayerEffDen[x][y]*(self.simHitsLayerEffNum[x][y] + self.simHitsLayerEffDen[x][y]), 0.5 ))
+                    err_den =  float( pow(self.simHitsLayerEffDen[x][y],2))
+                    err     =  err_nom/err_den
+
                 self.hists1D['simHitsRecoEfficiency_l'+str(y+1)].SetBinContent(x+1,eff)
+                self.hists1D['simHitsRecoEfficiency_l'+str(y+1)].SetBinError(x+1,err)
 
 
 
@@ -487,20 +568,31 @@ class Analysis():
                         for lr in range(0,6):
 
                             eff = 0
+                            err = 0
                             if self.simHitsChamberEffDen[ec][st][rg][ch][lr] > 0:
                                 eff = float(self.simHitsChamberEffNum[ec][st][rg][ch][lr])/self.simHitsChamberEffDen[ec][st][rg][ch][lr]
+                                err_nom = float( pow( self.simHitsChamberEffNum[ec][st][rg][ch][lr]*self.simHitsChamberEffDen[ec][st][rg][ch][lr]*(self.simHitsChamberEffNum[ec][st][rg][ch][lr]+ self.simHitsChamberEffDen[ec][st][rg][ch][lr]),0.5))
+                                err_den = float( pow(self.simHitsChamberEffDen[ec][st][rg][ch][lr],2))
+                                err = err_nom/err_den
                                 effAr[lr] = eff;
                                 num += self.simHitsChamberEffNum[ec][st][rg][ch][lr]
                                 den += self.simHitsChamberEffDen[ec][st][rg][ch][lr]
                             string = 'ME'+EC+str(st+1)+'-'+str(rg+1)+'_l'+str(lr+1)+'_simHitEfficiency'
                             self.hists1D[string].SetBinContent(ch+1,eff)
+                            self.hists1D[string].SetBinError(ch+1,err)
  
 
                         if den > 0:
                             eff = float(num)/den
-                        else: eff = 0
+                            err_nom = float( pow( num*den*(num+den),0.5))
+                            err_den = float( pow(den,2))
+                            err     = err_nom/err_den
+                        else: 
+                            eff = 0
+                            err = 0
                         string = 'ME'+EC+str(st+1)+'-'+str(rg+1)+'_simHitEfficiency'
                         self.hists1D[string].SetBinContent(ch+1,eff)
+                        self.hists1D[string].SetBinError(ch+1,err)
                         #string = '  Chamber '+str(ch+1)+': '+str(effAr[0])+'  '+str(effAr[1])+'  '+str(effAr[2])+'  '+str(effAr[3])+'  '+str(effAr[4])+'  '+str(effAr[5])+'     '+str(eff)+'\n'
                         string = '  Chamber {0}: {1:.3f} {2:.3f} {3:.3f} {4:.3f} {5:.3f}   {6:.3f}\n'.format(ch+1,effAr[0],effAr[1],effAr[2],effAr[3],effAr[4],effAr[5],eff)
                         myEffFile.write(string)
@@ -516,6 +608,7 @@ class Analysis():
                 self.writeHistos(self.hists1D,self.hists2D)
                 self.writeHistosToRoot(self.hists1D,self.hists2D)
             else:
+                self.writeHistos(self.hists1D,self.hists2D)
                 self.writeHistosToRoot(self.hists1D,self.hists2D)
         
 

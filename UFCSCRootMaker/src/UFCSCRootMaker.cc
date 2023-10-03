@@ -681,7 +681,7 @@ void UFCSCRootMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 
    //   if(isGEN and isSIM)
-   //     SimHitSimTkDebug(genParticles,simHits,simTk);
+     //     SimHitSimTkDebug(genParticles,simHits,simTk);
    ////////////////////////////////////////////////////////////////////////////////
    nEventsTotal++;
 
@@ -1085,7 +1085,7 @@ UFCSCRootMaker::doGenMuons(edm::Handle<reco::GenParticleCollection>& genParticle
 	  gen_muons_genindex[counter] = igenparticle;
 
 
-	  //	  std::cout<<"Selected Muon   pT index :  "<<  sqrt(g.p4().Px()*g.p4().Px() + g.p4().Py()*g.p4().Py()) <<"     " << gen_muons_genindex[counter] <<std::endl;
+	  std::cout<<"Selected Muon   pT index :  "<<  sqrt(g.p4().Px()*g.p4().Px() + g.p4().Py()*g.p4().Py()) <<"     " << gen_muons_genindex[counter] <<std::endl;
 	  //	  std::cout<<"  muon gen counter     "<< gen_counter << std::endl;
 	  counter++;
 	  
@@ -1629,7 +1629,7 @@ UFCSCRootMaker::doRecHits(edm::Handle<CSCRecHit2DCollection> recHits, edm::Handl
    //SimHits
    if (isSIM)
      {
-
+       std::cout<<" _____________________________ sim hit loop   "<< std::endl;
        edm::PSimHitContainer::const_iterator dSHsimIter;
        for (dSHsimIter = simHits->begin(); dSHsimIter != simHits->end(); dSHsimIter++)
 	 {
@@ -1675,31 +1675,37 @@ UFCSCRootMaker::doRecHits(edm::Handle<CSCRecHit2DCollection> recHits, edm::Handl
 	   // find gen muon index that produced this hit
 	   //============================================
 	   int gen_muon_index(-1);
-	   if(abs((*dSHsimIter).particleType()  == 13 ))
-	     if( (*dSHsimIter).trackId() < simTk->size() ) // hit sometimes return not realistic track index (> 10^5)
-	       {
-		 TLorentzVector SimTkP4_AtBoundary(simTk->at((*dSHsimIter).trackId()).getMomentumAtBoundary().Px(),
-						   simTk->at((*dSHsimIter).trackId()).getMomentumAtBoundary().Py(),
-						   simTk->at((*dSHsimIter).trackId()).getMomentumAtBoundary().Pz(),
-						   simTk->at((*dSHsimIter).trackId()).getMomentumAtBoundary().E());
-		 
-		 double dPt(999.);
-		 for (unsigned int igenparticle=0; igenparticle < genParticles->size(); igenparticle++)
-		   {
-		     const reco::GenParticle &g = genParticles->at(igenparticle);
-		     TLorentzVector gen_mu(g.p4().Px(),g.p4().Py(),g.p4().Pz(),g.p4().E());
-		     if(SimTkP4_AtBoundary.Pt() !=0 )
-		       //if(gen_mu.DeltaR(SimTkP4_AtBoundary) < dR)
-		       if(fabs(gen_mu.Pt() - SimTkP4_AtBoundary.Pt()) < dPt)
-			 {
-			   //dPt = gen_mu.DeltaR(SimTkP4_AtBoundary);
-			   dPt = fabs(gen_mu.Pt() - SimTkP4_AtBoundary.Pt());
-			   gen_muon_index = igenparticle;
-			 }
-		   }
-	       }
-	   
 
+	   if(abs((*dSHsimIter).particleType())  == 13 )
+
+	       if( (*dSHsimIter).trackId() < simTk->size() ) // hit sometimes return not realistic track index (> 10^5)
+		 {
+		   TLorentzVector SimTkP4_AtBoundary(simTk->at((*dSHsimIter).trackId()).getMomentumAtBoundary().Px(),
+						     simTk->at((*dSHsimIter).trackId()).getMomentumAtBoundary().Py(),
+						     simTk->at((*dSHsimIter).trackId()).getMomentumAtBoundary().Pz(),
+						     simTk->at((*dSHsimIter).trackId()).getMomentumAtBoundary().E());
+		   //		   std::cout<<"::::::::::::: simHit  hit Track ID  "<< (*dSHsimIter).trackId() << "  simTk pT    " << SimTkP4_AtBoundary.Pt() <<std::endl;
+
+		   double dPt(999.);
+		   if(SimTkP4_AtBoundary.Pt() !=0 )
+		     for (unsigned int igenparticle=0; igenparticle < genParticles->size(); igenparticle++)
+		       {
+			 const reco::GenParticle &g = genParticles->at(igenparticle);
+			 TLorentzVector gen_mu(g.p4().Px(),g.p4().Py(),g.p4().Pz(),g.p4().E());
+			 
+			 //if(gen_mu.DeltaR(SimTkP4_AtBoundary) < dR)
+			 if(fabs(gen_mu.Pt() - SimTkP4_AtBoundary.Pt()) < dPt)
+			   {
+			     //dPt = gen_mu.DeltaR(SimTkP4_AtBoundary);
+			     dPt = fabs(gen_mu.Pt() - SimTkP4_AtBoundary.Pt());
+			     gen_muon_index = igenparticle;
+			   }
+		       }
+		 }
+	   
+	   std::cout<<"  recHit  gen_muon_index  "<< gen_muon_index << std::endl;
+	   if(gen_muon_index!=-1)std::cout<<  " gen pT to be stored  " << sqrt(genParticles->at(gen_muon_index).p4().Px()*genParticles->at(gen_muon_index).p4().Px() + 
+									       genParticles->at(gen_muon_index).p4().Py()*genParticles->at(gen_muon_index).p4().Py()) << std::endl;
 	   simHits_genmuonindex[counter] = gen_muon_index;
 	   
 

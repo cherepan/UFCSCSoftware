@@ -15,14 +15,14 @@ from DisplayManager import DisplayManager
 ROOT.gROOT.SetBatch(True)
 ROOT.gStyle.SetOptStat(0)
 
-colours = [1, 2, 3, 6, 8]
+colours = [63, 30, 3, 6, 8]
 styles = [1, 1, 3, 4, 5]
-
+width = [2, 2, 3, 3, 2]
 
 def applyHistStyle(h, i):
     h.SetLineColor(colours[i])
     h.SetLineStyle(styles[i])
-    h.SetLineWidth(3)
+    h.SetLineWidth(2)
     h.SetStats(False)
 
 
@@ -84,7 +84,7 @@ if __name__ == '__main__':
 
     parser = OptionParser(usage=usage)
 
-    parser.add_option('-t', '--titles', type='string', dest='titles', default='UF, Recent', help='Comma-separated list of titles for the N input files (e.g. UF, INFN)')
+    parser.add_option('-t', '--titles', type='string', dest='titles', default='UF, Recent', help='Comma-separated list of titles for the N input files')
     parser.add_option('-r', '--no-ratio', dest='do_ratio', action='store_false', default=True, help='Do not show ratio plots')
 #    parser.add_option('-d', '--diff', dest='do_diff', action='store_true', default=False, help='Print events where single variable differs')
     (options, args) = parser.parse_args()
