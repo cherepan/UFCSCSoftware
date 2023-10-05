@@ -71,7 +71,6 @@ def comparisonPlots(hists, names_to_plot, titles, pname='compare_UF_RecentLR.pdf
                     h.Sumw2()
                     applyHistStyle(h, i)
                     histstocompare.append(h)
-#        print("================", len(histstocompare), len(titles))           
         display.Draw(histstocompare, titles)
 
 

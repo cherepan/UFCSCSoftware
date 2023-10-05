@@ -63,6 +63,10 @@ class DisplayManager(object):
         self.Legend = ROOT.TLegend(0.15, 0.79, 0.5, 0.89)
         applyLegendSettings(self.Legend)
 
+        self.NameLegend = ROOT.TLegend(0.5,0.79,0.9,0.89)
+#        applyLegendSettings(self.NameLegend)
+
+
         self.draw_ratioLegend = ROOT.TLegend(0.15, 0.79, 0.5, 0.89)
         applyLegendSettings(self.draw_ratioLegend)
 
@@ -78,35 +82,45 @@ class DisplayManager(object):
         ymax = max(h.GetMaximum() for h in self.histos)
 
         self.Legend.Clear()
+        self.NameLegend.Clear()
         self.draw_ratioLegend.Clear()
+
 
         for i, h in enumerate(self.histos):
             title = titles[i]
             h.GetYaxis().SetRangeUser(0.1, ymax * 1.3)
+#            print("title, histoName",title, h.GetName())
             if xmax:
                 h.GetXaxis().SetRangeUser(0., xmax)
 #            self.Legend.AddEntry(h, title + ': ' + str(h.Integral()))
+
             self.Legend.AddEntry(h, title)
 
+
             if i == 0:
+                h.SetTitle(h.GetName())
                 h.Draw('HIST E')
             else:
                 h.Draw('SAME HIST E')
 
         self.Legend.Draw()
+#        self.NameLegend.Draw()
 
         pull_histos = []
 
         if self.draw_ratio:
-            self.canvas.cd(2)
 
+            self.canvas.cd(2)
             for ihist in range(1, len(self.histos)):
                 histPull = copy.deepcopy(self.histos[ihist])
+
                 pull_histos.append(histPull)
                 histPull.Divide(self.histos[0])
                 histPull.UseCurrentStyle()
+                histPull.Sumw2()
 
-                histPull.SetLineColor(self.histos[ihist].GetLineColor())
+                histPull.SetLineColor(1)  # keep ratio black
+#                histPull.SetLineColor(self.histos[ihist].GetLineColor())
                 histPull.SetMarkerColor(self.histos[ihist].GetLineColor())
                 histPull.SetLineStyle(self.histos[ihist].GetLineStyle())
                 histPull.SetLineWidth(self.histos[ihist].GetLineWidth())

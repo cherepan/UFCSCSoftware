@@ -87,24 +87,156 @@ class Analysis():
 
         self.defineHistos()
 
+        self.simHits_muonMatched = []
+        self.recHits_muonMatched = []
 
-    def doMatching(self, tree, genMuon):
+    def genMuonLV(self, tree, index):
+        if index > tree.gen_muons_nMuons or index == -1:
+            print("============= >  genMuonLV:  Requested index is out if range or equal to -1, return 0,0,0,0;")
+            return TLorentzVector(0,0,0,0)
+        genMuon = TLorentzVector(tree.gen_muons_energy[index],
+                                 tree.gen_muons_px[index],
+                                 tree.gen_muons_py[index],
+                                 tree.gen_muons_pz[index])
+        return genMuon
+
+
+    def recMuonLV(self, tree, index):
+        if index > tree.muons_nMuons or index == -1:
+            print("============= >recMuonLV:  Requested index is out if range or equal to -1, return 0,0,0,0;")
+            return TLorentzVector(0,0,0,0)
+        recMuon = TLorentzVector(tree.muons_energy[index],
+                                 tree.muons_px[index],
+                                 tree.muons_py[index],
+                                 tree.muons_pz[index])
+        return recMuon
+
+
+
+    def recoMuonMatchedIndex(self, tree, index_genMuon):
         list_dR_muon=[]
+        genMuon = self.genMuonLV(tree, index_genMuon)
+
         for n in range(tree.muons_nMuons):
             recMatchedMuon = TLorentzVector(tree.muons_energy[n], tree.muons_px[n], tree.muons_py[n], tree.muons_pz[n])
             list_dR_muon.append([recMatchedMuon.DeltaR(genMuon),n, abs(recMatchedMuon.Pt() - genMuon.Pt())])
         list_dR_muon.sort(key=lambda element : element[0])    
         if len(list_dR_muon)!=0 and  list_dR_muon[0][2] < 2 :return  list_dR_muon[0][1]
         return -1
+        
 
 
     def linked_gen_mu_index(self, tree, i):
-        if i== -1:return -1
-        for im in range(0, tree.gen_muons_nMuons):
-            if tree.gen_muons_genindex[im] == i: return im
+        if i == -1:return -1
+        for k in range(0, tree.gen_muons_nMuons):
+            if tree.gen_muons_genindex[k] == i: return k
         return -1
 
 
+
+
+    def simHitBelongToMuon(self, tree, isimHit, igenMuon ):
+        simHit_genIndex = tree.simHits_genmuonindex[isimHit]
+        if simHit_genIndex == -1: return False
+        genMuon_genIndex = tree.gen_muons_genindex[igenMuon]
+        if genMuon_genIndex == -1: return False
+        if simHit_genIndex == genMuon_genIndex:return True
+        return False
+
+
+
+
+    def ChamberID(self, endcap, station, ring, chamber):
+        return endcap*10000 + 1000*station + 100*ring + chamber
+
+
+
+
+
+    def allSegments_belonging_toMuon(self, tree, muon_index):
+        muon_segments = []
+        if muon_index > tree.muons_nMuons: 
+            print("==== > allSegments_belonging_toMuon: Muon index out of range, return empty list  ")
+            return muon_segments
+
+        for s in range(tree.cscSegments_nSegments):
+
+            segmentRing          = tree.cscSegments_ID_ring[s]
+            segmentStation       = tree.cscSegments_ID_station[s]
+            segmentEndcap        = tree.cscSegments_ID_endcap[s] 
+            segmentChamber       = tree.cscSegments_ID_chamber[s]
+
+            segmenLocalX         = tree.cscSegments_localX[s]
+            segmenLocalY         = tree.cscSegments_localY[s]
+
+            segmentChamberID     = self.ChamberID(segmentEndcap, segmentStation, segmentRing, segmentChamber )
+
+            for ms in range(0, len(tree.muons_cscSegmentRecord_endcap[muon_index])):
+                 muon_segment_endcap     = tree.muons_cscSegmentRecord_endcap[muon_index][ms];
+                 muon_segment_station    = tree.muons_cscSegmentRecord_station[muon_index][ms];
+                 muon_segment_ring       = tree.muons_cscSegmentRecord_ring[muon_index][ms];
+                 muon_segment_chamber    = tree.muons_cscSegmentRecord_chamber[muon_index][ms];
+                 muon_segment_localX     = tree.muons_cscSegmentRecord_localX[muon_index][ms];
+                 muon_segment_localY     = tree.muons_cscSegmentRecord_localY[muon_index][ms];
+
+                 muonsegmentChamberID = self.ChamberID(muon_segment_endcap,muon_segment_station,muon_segment_ring,muon_segment_chamber)
+
+                 if (muonsegmentChamberID == segmentChamberID and  
+                     segmenLocalX == muon_segment_localX      and  
+                     segmenLocalY == muon_segment_localY): muon_segments.append(s)
+        return muon_segments
+                     
+
+
+    def allRechits_of_segment(self, tree, segment_index):
+
+        segment_rechits = []
+        print("allRechits_of_segment:   ", segment_index, tree.cscSegments_nSegments)
+        if segment_index > tree.cscSegments_nSegments:
+            print("==== > allRechits_of_segment: Segment index out of range, return empty list  ")
+            return segment_rechits
+
+        segment_endcap     = tree.cscSegments_ID_endcap[segment_index]
+        segment_station    = tree.cscSegments_ID_station[segment_index]
+        segment_ring       = tree.cscSegments_ID_ring[segment_index]
+        segment_chamber    = tree.cscSegments_ID_chamber[segment_index]
+        chamber_of_segment = self.ChamberID(segment_endcap, segment_station, segment_ring, segment_chamber)
+
+        for isegment_rechit in range(0 , len(tree.cscSegments_recHitRecord_endcap[segment_index])):
+            chamber_of_srechit = self.ChamberID(tree.cscSegments_recHitRecord_endcap[segment_index][isegment_rechit],
+                                                tree.cscSegments_recHitRecord_station[segment_index][isegment_rechit],
+                                                tree.cscSegments_recHitRecord_ring[segment_index][isegment_rechit],
+                                                tree.cscSegments_recHitRecord_chamber[segment_index][isegment_rechit])
+            segment_rechit_localX = tree.cscSegments_recHitRecord_localX[segment_index][isegment_rechit]
+            segment_rechit_localY = tree.cscSegments_recHitRecord_localY[segment_index][isegment_rechit]
+            segment_rechit_layer  = tree.cscSegments_recHitRecord_layer[segment_index][isegment_rechit] 
+
+
+            for i2DRecHit in range(0, tree.recHits2D_nRecHits2D):
+                layer_2DRecHit     = tree.recHits2D_ID_layer[i2DRecHit]
+                localX_2DRecHit    = tree.recHits2D_localX[i2DRecHit]
+                localY_2DRecHit    = tree.recHits2D_localY[i2DRecHit]
+                if self.ChamberID(tree.recHits2D_ID_endcap[i2DRecHit],
+                                  tree.recHits2D_ID_station[i2DRecHit],
+                                  tree.recHits2D_ID_ring[i2DRecHit],
+                                  tree.recHits2D_ID_chamber[i2DRecHit]) == chamber_of_srechit:
+                          
+                          
+                    if(layer_2DRecHit == segment_rechit_layer   and 
+                       localX_2DRecHit == segment_rechit_localX and 
+                       localY_2DRecHit == segment_rechit_localY):
+                        segment_rechits.append(i2DRecHit)
+
+        return segment_rechits
+
+
+    def link_rechits_to_segments(self, tree, list_of_segments):
+        outlist = []
+        for i in list_of_segments:
+            outlist.append([i,self.allRechits_of_segment(tree, i)])
+        return outlist    
+
+                      
     def doAnalysis(self,file):
         global opt, args
   
@@ -123,8 +255,9 @@ class Analysis():
             raise RunTimeError,"Tree not found!"
 
 
-        #Analysis Loop
 
+
+        #Analysis Loop
         for i in range( tree.GetEntries() ):
 #            print('======================================================================== ')
             tree.GetEntry(i)
@@ -134,24 +267,48 @@ class Analysis():
             if self.totalEvents > opt.maxEvents:
                 break
             self.totalEvents+=1
-
+            recMuon_segments_rechits = []
             if opt.isLocalReco or opt.isFullReco:
 
                 #Muons
                 #AvgRH/Seg
+                self.simHits_muonMatched[:]=[]
+                self.recHits_muonMatched[:]=[]
 
+                list_test = []
+#                muon_list = []
                 for n in range(tree.muons_nMuons):
-#                    if tree.muons_isStandAloneMuon[n]:
-#                        recoMuon = TLorentzVector(tree.muons_energy[n], tree.muons_px[n], tree.muons_py[n], tree.muons_pz[n])
-#                        recoMuon.Print()
-                    if tree.muons_isStandAloneMuon[n]:
+                    if tree.muons_isStandAloneMuon[n] and len(self.allSegments_belonging_toMuon(tree, n) ) > 0:
+
+
+                        print("# muon ",n)
+                        print("segments  ", self.allSegments_belonging_toMuon(tree,n))
+                        for k in self.allSegments_belonging_toMuon(tree,n):
+                            print("rechits:  ",self.allRechits_of_segment(tree,k))
+
+#                        list_test.append([n, [self.allSegments_belonging_toMuon(tree, n), i for i in self.allRechits_of_segment(tree, k for k in self.allSegments_belonging_toMuon(tree, n)) ]])
+#                        list_test.append([n, [i for i in self.allSegments_belonging_toMuon(tree, n),[self.allRechits_of_segment(tree, (m for m in  self.allSegments_belonging_toMuon(tree, n)))]]])
+#                        print("do the list ",                        self.link_rechits_to_segments(tree, self.allSegments_belonging_toMuon(tree,n)))
+                        list_test.append([n, self.link_rechits_to_segments(tree, self.allSegments_belonging_toMuon(tree,n))])
+#                        list_test.append([n , [ i , self.allRechits_of_segment(tree,  (   i for i in self.allSegments_belonging_toMuon(tree,n)  )     )]])
+#                        print("  check  ", list(i for i in self.allSegments_belonging_toMuon(tree,n)) )
+#                        list_test[len(list_test)-1].append[self.allSegments_belonging_toMuon(tree, n)]
+#                        print("----------- >  # muon,  segments  ", n, self.allSegments_belonging_toMuon(tree, n) )
+#                        muon_list[len(muon_list)-1][len(muon_list[)]
+
+#                        list1 = self.allSegments_belonging_toMuon(tree, n)
+
+#                        for l1 in range(0, len(list1)):
+#                            list1[l1].append(self.allRechits_of_segment(tree,list1[l1]))
+
+#                        print(" list1:  ", list1)
                         segmentCounter = 0
                         recHitsCounter = 0
                         for m in range(len(tree.muons_cscSegmentRecord_nRecHits[n])):
                             self.hists1D['recHitsPerSegment_saMuon_Norm'].Fill(tree.muons_cscSegmentRecord_nRecHits[n][m])
                             segmentCounter += 1
                             recHitsCounter += tree.muons_cscSegmentRecord_nRecHits[n][m]
-#                        print 'muon |eta|  ', abs(tree.muons_eta[n]), '  nSegments:  ',segmentCounter
+
                         self.hists1D['segmentsPerSaMuon_Norm'].Fill(segmentCounter)
                         self.hists2D['recHitsVSp'].Fill(tree.muons_p[n],tree.muons_nRecHits[n])
                         self.hists2D['recHitsVSpT'].Fill(tree.muons_pt[n],tree.muons_nRecHits[n])
@@ -162,12 +319,19 @@ class Analysis():
                         self.hists2D['recHitsPerSegVSp'].Fill(tree.muons_p[n],avgRHpSeg)
                         self.hists2D['recHitsPerSegVSpT'].Fill(tree.muons_pt[n],avgRHpSeg)
                         
-
-
+                        rechits_segments_list = [[]]
+#                        for muon_segment in range(0, len(allSegments_belonging_toMuon(tree, n))):
+#                            rechits_segments_list.append()
+                            
+                        
+                print("===================>  ", list_test)
+                if len(list_test)!=0: print("KKKKKKKKKKKKKKK:   ", list_test[0])
+                if len(list_test)!=0: print("lllllllllllllll:   ", list_test[1])
                 #CSCSegments
                 CSC_SegmentCounter = [0] * 600
                 CSC_SegmentMap = [''] * 600
                 for n in range(tree.cscSegments_nSegments):
+#                    print(" print out rechits of the segment  ", n,                    self.allRechits_of_segment(tree, n))
                     serialRecord = tree.cscSegments_ID_chamberSerial[n]
                     CSC_SegmentCounter[serialRecord] = CSC_SegmentCounter[serialRecord]+1
                     CSC_SegmentMap[serialRecord]+=str(n)+'.'
@@ -226,42 +390,18 @@ class Analysis():
 
                 #2DSimHits
                 if opt.isMC:
-######################33 to be removed at some point 
-#                    print('------------- generated muons  ')
-                    gen_muons_momentum = []
-                    matchingOk = False
+                    selectedGenMuons=[]
                     for im in range(0, tree.gen_muons_nMuons):
-                        muon = TLorentzVector(tree.gen_muons_energy[im],
-                                             tree.gen_muons_px[im],
-                                             tree.gen_muons_py[im],
-                                             tree.gen_muons_pz[im])
+                        muon = self.genMuonLV(tree,im)
+                        if muon.Pt()> 3 and math.fabs(muon.Eta()) < 2.4:
+                            selectedGenMuons.append(im)
 
-                        if muon.Pt()> 2:gen_muons_momentum.append(muon.P())
- #                       print('gen Muons  phi and Theta:  ',muon.Phi(), muon.Theta(), muon.P())
-                        recoMuIndex = self.doMatching(tree,muon) 
-                        recoMuon=TLorentzVector(0,0,0,0)
-                        if recoMuIndex !=-1:
-                            matchingOk = True
-                            recoMuon = TLorentzVector(tree.muons_energy[recoMuIndex], 
-                                                      tree.muons_px[recoMuIndex], 
-                                                      tree.muons_py[recoMuIndex], 
-                                                      tree.muons_pz[recoMuIndex])
-                        print('----- reco Muon  ')
-                        recoMuon.Print()
-#                        print("do I have a match  for every gen muon?????   gen,reco Px ", recoMuIndex, muon.Px(), recoMuon.Px())
-                        deltaP_genMuon_simhitMOmenmtum = []
-                        for h in range(0,tree.simHits_nSimHits):
-#                            print(' All Hits  per muon  :  ',h,  tree.simHits_momentum[h])
-                            deltaP_genMuon_simhitMOmenmtum.append(  [  abs(muon.Pt() - tree.simHits_momentum[h] ), h, tree.simHits_particleType[h]])
-                        deltaP_genMuon_simhitMOmenmtum.sort(key=lambda element : element[0], reverse=True)
-                        print('---------- gen Muon P', muon.P())
-#                        print('The full vector   ', deltaP_genMuon_simhitMOmenmtum)
-#                        if len(deltaP_genMuon_simhitMOmenmtum)!=0:
-#                            print('closest  simhit ', deltaP_genMuon_simhitMOmenmtum[0][0], '  hit number  ',deltaP_genMuon_simhitMOmenmtum[0][1], ' hit particle type  ',deltaP_genMuon_simhitMOmenmtum[0][2])
-######################33 to be removed at some point 
-#                        print('Matched reco Muon is:')
-#                        recoMuon.Print()
-#                    print("============================== hits loop ============================= ")
+
+                        recoMuIndex = self.recoMuonMatchedIndex(tree,im) 
+                        if recoMuIndex!= -1: recoMuon = self.recMuonLV(tree,recoMuIndex)
+
+                    #print("============================== hits loop ============================= ")
+                    selected_hits=[] 
                     for n in range(0,tree.simHits_nSimHits):
                         sEndcap = tree.simHits_ID_endcap[n]
                         if sEndcap == 2: sEndcap = '-'
@@ -281,26 +421,14 @@ class Analysis():
                         self.hists2D[string].Fill(gx,gy)
                         string = 'ME'+sEndcap+sStation+'_simHits2D'
                         self.hists2D[string].Fill(gx,gy)
-#                        print(' All Hits :  ',n,  tree.simHits_momentum[n])
+
                         isMuonHit=False
-#                        for p in gen_muons_momentum:
- #                           print("muons momentum  ",p)
-#                            if abs(tree.simHits_momentum[n] - p) < 0.1:
-#                                print("This simHit is from Muon   ", tree.simHits_momentum[n])
-#                        if abs(tree.simHits_particleType[n]) == 13 and matchingOk:# or abs(tree.simHits_particleType[n]) == 11:
-                        if abs(tree.simHits_particleType[n]) == 13:# and matchingOk:# or abs(tree.simHits_particleType[n]) == 11:
-
-                            print('#hit, chamber,  genMuonGenIndex  and total nGenMuons :  ',n, chamberID, tree.simHits_genmuonindex[n], tree.gen_muons_nMuons  )
-                            genmuindex = self.linked_gen_mu_index(tree, tree.simHits_genmuonindex[n])
-                            if genmuindex!=-1:
-                                muon = TLorentzVector(tree.gen_muons_energy[genmuindex],
-                                                      tree.gen_muons_px[genmuindex],
-                                                      tree.gen_muons_py[genmuindex],
-                                                      tree.gen_muons_pz[genmuindex])
-                                print('Well matched MC gen muon')
-                                muon.Print()
-
-#                            print("------>#h,  This simHit is from Muon   ",n, tree.simHits_momentum[n],' Chamber  ', chamberID, '  layer ',sLayer, " (x,y)  ",x,y, matchingOk )
+                        for m in selectedGenMuons:
+                            if self.simHitBelongToMuon(tree, n, m) and self.recoMuonMatchedIndex(tree,m): 
+                                isMuonHit = True
+#                        print(" #hit   isMuonHit  ", n, isMuonHit)
+#                        if abs(tree.simHits_particleType[n]) == 13:
+                        if abs(tree.simHits_particleType[n]) == 13 and isMuonHit:   # make efficiency plots 
 
                             shChamberSerial = tree.simHits_ID_chamberSerial[n]
                             shLayer         = tree.simHits_ID_layer[n]
@@ -309,19 +437,16 @@ class Analysis():
                             shStation       = tree.simHits_ID_station[n]
                             shEndcap        = tree.simHits_ID_endcap[n]
 
-#                            print("======== sim hits: ")
-#                            print(tree.simHits_momentum[n],"   eta:   ",tree.simHits_theta[n], "   phi   ", tree.simHits_phi[n] )
                               
                             self.simHitsOverallEffDen += 1
                             self.simHitsEffDen[shChamberSerial] += 1
                             self.simHitsLayerEffDen[shChamberSerial][shLayer-1] += 1
                             self.simHitsChamberEffDen[shEndcap-1][shStation-1][shRing-1][shChamber-1][shLayer-1] += 1
+
+                            self.simHits_muonMatched.append(n)
                             #SimHit Reco Efficiency
                             for m in range(0,tree.recHits2D_nRecHits2D):
-#                                print("sim Hit particle type  ,  is from SA Muon,  is from Muon",tree.recHits2D_simHit_particleTypeID[m], tree.recHits2D_belongsToSaMuon[m],
-#                                      tree.recHits2D_belongsToMuon[m])
-
-#                                if abs(tree.recHits2D_simHit_particleTypeID[m]) == 13:
+                                if abs(tree.recHits2D_simHit_particleTypeID[m]) == 13:
                                     if tree.recHits2D_ID_chamberSerial[m] != shChamberSerial: continue
                                     if tree.recHits2D_ID_layer[m] != shLayer: continue
                                     xLow  = tree.recHits2D_localX[m] - 2*sqrt(tree.recHits2D_localXXerr[m])
@@ -329,20 +454,20 @@ class Analysis():
                                     yLow  = tree.recHits2D_localY[m] - 2*sqrt(tree.recHits2D_localYYerr[m])
                                     yHigh = tree.recHits2D_localY[m] + 2*sqrt(tree.recHits2D_localYYerr[m])
 
-#                                    print("recHit   x,y  ",tree.recHits2D_localX[m],tree.recHits2D_localY[m])
- #                                   print("simHIt that belongs to this rechit   x,y  ", tree.recHits2D_simHit_localX[m], tree.recHits2D_simHit_localY[m] )
-                                    #                                for n in range(tree.muons_nMuons):
-
-
                                     if (x < xLow or x > xHigh) and (y < yLow or y > yHigh): continue
                                     self.simHitsOverallEffNum += 1
                                     self.simHitsEffNum[shChamberSerial] += 1
                                     self.simHitsLayerEffNum[shChamberSerial][shLayer-1] += 1
                                     self.simHitsChamberEffNum[shEndcap-1][shStation-1][shRing-1][shChamber-1][shLayer-1] += 1
+
+                                    self.recHits_muonMatched.append(m)
                                     break
 
+                    self.hists1D['DeltaSimRecHits'].Fill( len(self.simHits_muonMatched) - len(self.recHits_muonMatched) )
 
-                                    
+
+
+                        
             if opt.isDigi and (opt.isLocalReco or opt.isFullReco):
                 #ACLT/CLTC
                 alctCounter = [0] * 600
@@ -371,6 +496,16 @@ class Analysis():
 #                                print '  EC  ', ec,'  st:  ', st ,' rg:  ', rg, ' ch:  ', ch,'  layer:  ',lr, '   nRecHits:  ',self.nRecHitsPerLayer[ec][st][rg][ch][lr] 
                                 string = 'nrecHitsPerLayer_allChambers'
                                 self.hists1D[string].Fill(self.nRecHitsPerLayer[ec][st][rg][ch][lr])
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -448,7 +583,7 @@ class Analysis():
                         string3 = string+'_simHitEfficiency'
                         self.hists1D[string3] = ROOT.TH1F(string3,"; Chamber; RECO Efficiency for Muons",40,0,40)
         # Per Event
-
+        self.hists1D['DeltaSimRecHits']              = ROOT.TH1F("DeltaSimRecHits","; N(sHits) - N(rHits) (gen muon matched)",10, -2.5, 7.5)
         self.hists1D['nrecHitsPerLayer_allChambers'] = ROOT.TH1F("nrecHitsPerLayer_allChambers", "; N RecHits per Layer", 11, -0.5, 10.5)
 
 
