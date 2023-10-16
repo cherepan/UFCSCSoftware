@@ -168,3 +168,4 @@ class DisplayManager(object):
         self.canvas.Update()
         self.canvas.SetLogy(False)
         self.canvas.Print(self.name)
+

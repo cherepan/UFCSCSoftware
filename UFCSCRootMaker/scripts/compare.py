@@ -58,9 +58,11 @@ def find1DHists(f):
 
 #def comparisonPlots(u_names, trees, titles, pname='sync.pdf', ratio=True):
 
-def comparisonPlots(hists, names_to_plot, titles, pname='compare_UF_RecentLR.pdf', ratio=True):
+def comparisonPlots(hists, names_to_plot, titles, pname, ratio=True):
 
     display = DisplayManager(pname, ratio)
+
+    print(names_to_plot)
 
     for i_hist_name in names_to_plot:
         histstocompare = []
@@ -74,7 +76,6 @@ def comparisonPlots(hists, names_to_plot, titles, pname='compare_UF_RecentLR.pdf
         display.Draw(histstocompare, titles)
 
 
-
 if __name__ == '__main__':
         
     usage = '''
@@ -85,6 +86,7 @@ if __name__ == '__main__':
 
     parser.add_option('-t', '--titles', type='string', dest='titles', default='UF, Recent', help='Comma-separated list of titles for the N input files')
     parser.add_option('-r', '--no-ratio', dest='do_ratio', action='store_false', default=True, help='Do not show ratio plots')
+    parser.add_option('-f', '--outfile', type='string', default='compare_UF_RecentLR.pdf', help='Output file name')
 #    parser.add_option('-d', '--diff', dest='do_diff', action='store_true', default=False, help='Print events where single variable differs')
     (options, args) = parser.parse_args()
 
@@ -112,5 +114,5 @@ if __name__ == '__main__':
 #    print(h_names_common,"==================")
 
     print('Making plots for all common branches')
-    comparisonPlots(hists, h_names_common, titles, 'compare_UF_RecentLR.pdf', options.do_ratio)
+    comparisonPlots(hists, h_names_common, titles, options.outfile, options.do_ratio)
 
