@@ -25,7 +25,7 @@ process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(100),
+    input = cms.untracked.int32(-1),
     output = cms.optional.untracked.allowed(cms.int32,cms.PSet)
 )
 
@@ -37,7 +37,8 @@ process.source = cms.Source("PoolSource",
                                         #'file:/eos/user/c/cherepan/CSC/ZMM_RAW_DIGI_ZMMRealVal/012344ab-9b99-48c9-966a-7a6653cc6b69.root',
                                         #'file:/eos/user/c/cherepan/CSC/ZMM_RAW_DIGI_ZMMRealVal/71810ecf-3ff3-4813-959f-c4a6b5793d5d.root',
                                         #'file:/eos/user/c/cherepan/CSC/ZMM_RAW_DIGI_ZMMRealVal/85afe352-54a2-4757-8d54-c57a89f37a9c.root'
-                                        '/store/relval/CMSSW_12_4_12/RelValZMM_PU_13p6/GEN-SIM-DIGI-RAW/PU_124X_mcRun3_2022_realistic_postEE_forPixelIneff_v5_PDMVRELVALS188_HS_2023PU-v1/00000/021f0888-0985-47ef-ae3a-891cbac30449.root'
+#                                        '/store/relval/CMSSW_12_4_12/RelValZMM_PU_13p6/GEN-SIM-DIGI-RAW/PU_124X_mcRun3_2022_realistic_postEE_forPixelIneff_v5_PDMVRELVALS188_HS_2023PU-v1/00000/021f0888-0985-47ef-ae3a-891cbac30449.root'
+                                        '/store/relval/CMSSW_12_4_14_patch2/RelValSingleMuPt10/GEN-SIM-DIGI-RAW/PU_124X_mcRun3_2022_realistic_v12_RV205-v1/2580000/0bb6ebca-c622-452f-a6ca-2d4838b1ee9e.root'
                                         #'/store/relval/CMSSW_12_4_0/RelValZMM_14/GEN-SIM-DIGI-RAW/124X_mcRun3_2022_realistic_v5-v1/2580000/050d4b88-616b-4e3d-a0e3-c5f3f28dd8c3.root'
                                     ),
     secondaryFileNames = cms.untracked.vstring()
@@ -88,9 +89,9 @@ process.FEVTDEBUGHLToutput = cms.OutputModule("PoolOutputModule",
         filterName = cms.untracked.string('')
     ),
 
-    #fileName = cms.untracked.string('/eos/user/c/cherepan/CSC/RECO_ZMM_RelVal_12_4_4/ZMM_RAW_DIGI_SIM_RECO_RU_____TEST.root'),
+    fileName = cms.untracked.string('SingleMu10_AddRECOTier.root'),
                                               
-    fileName = cms.untracked.string('ZMM_RAW_DIGI_SIM_RECO_RU_CRAB.root'),
+#    fileName = cms.untracked.string('ZMM_RAW_DIGI_SIM_RECO_RU_CRAB.root'),
     outputCommands = process.FEVTDEBUGHLTEventContent.outputCommands,
     splitLevel = cms.untracked.int32(0)
 )

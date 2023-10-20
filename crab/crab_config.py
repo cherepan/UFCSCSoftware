@@ -2,8 +2,8 @@ from WMCore.Configuration import Configuration
 config = Configuration()
 
 config.section_("General")
-config.General.requestName = 'RAW2DIGI_L1Reco_RECO_RECOSIM_v3'
-config.General.workArea =  'crab_area_v3'
+config.General.requestName = 'RAW2DIGI_RealVal'
+config.General.workArea =  'crab_area_ZMMRelVal_26_09_2023'
 config.General.transferLogs = True
 
 
@@ -17,15 +17,18 @@ config.JobType.numCores = 4
 
 config.section_("Data")
 
-config.Data.inputDataset = '/RelValZMM_PU_13p6/CMSSW_12_4_12-PU_124X_mcRun3_2022_realistic_postEE_forPixelIneff_v5_PDMVRELVALS188_HS_2023PU-v1/GEN-SIM-DIGI-RAW'
+#config.Data.inputDataset = '/RelValZMM_PU_13p6/CMSSW_12_4_12-PU_124X_mcRun3_2022_realistic_postEE_forPixelIneff_v5_PDMVRELVALS188_HS_2023PU-v1/GEN-SIM-DIGI-RAW'
+#config.Data.inputDataset = '/RelValSingleMuPt100/CMSSW_12_4_14_patch2-124X_mcRun3_2022_realistic_v12_RV205-v1/GEN-SIM-DIGI-RAW'
+config.Data.inputDataset = '/RelValZMM_14/CMSSW_12_4_13-124X_mcRun3_2022_realistic_v12_2021-v1/GEN-SIM-DIGI-RAW'
+
 config.Data.inputDBS  = 'global'
 config.Data.splitting = 'FileBased'
 config.Data.unitsPerJob = 1
-config.Data.totalUnits  = 60
+config.Data.totalUnits  = 61
 #config.Data.lumiMask = 'Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON.txt'
 config.Data.publication = True
 config.Data.outLFNDirBase = '/store/user/cherepan'
-config.Data.outputDatasetTag = 'RelValZMM_14_CMSSW_12_4_0RAW2DIGI_L1Reco_RECO_RECOSIM_v3'
+config.Data.outputDatasetTag = 'RelValZMM_14_CMSSW_12_4_0RAW2DIGIRECO_FullTIer_26_09_2023'
 
 
 config.section_("Site")

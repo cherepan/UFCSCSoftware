@@ -3,7 +3,7 @@
 
 import FWCore.ParameterSet.Config as cms
 
-process = cms.Process("reRECO")
+process = cms.Process("localRecoUF")
 
 process.load("Configuration.Geometry.GeometryIdeal_cff")
 process.load("Configuration.StandardSequences.MagneticField_cff")
@@ -31,6 +31,8 @@ isRAW = bool(True)
 ###################################################
 
 
+
+
 process.options   = cms.untracked.PSet( SkipEvent = cms.untracked.vstring("ProductNotFound") )
 process.options   = cms.untracked.PSet( wantSummary = cms.untracked.bool(True) )
 process.source    = cms.Source("PoolSource",
@@ -49,7 +51,15 @@ process.source    = cms.Source("PoolSource",
 ########################################## MC
 
 #                                   'file:DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8.root'
-                                   'file:/eos/user/c/cherepan/CSC/RECO_ZMM_RelVal_12_4_4/ZMM_RAW_DIGI_SIM_RECO_RU_____TEST.root'
+#                                   'file:/eos/user/c/cherepan/CSC/RECO_ZMM_RelVal_12_4_4/ZMM_RAW_DIGI_SIM_RECO_RU.root'
+
+
+#                                   '/store/user/cherepan/RelValSingleMuPt1/RelValZMM_14_CMSSW_12_4_0RAW2DIGI_L1Reco_RECO_RECOSIM_UF_SingleMu1/230904_154007/0000/ZMM_RAW_DIGI_SIM_RECO_UF_CRAB_ForLocalReco_1.root',
+#                                   '/store/user/cherepan/RelValSingleMuPt1/RelValZMM_14_CMSSW_12_4_0RAW2DIGI_L1Reco_RECO_RECOSIM_UF_SingleMu1/230904_154007/0000/ZMM_RAW_DIGI_SIM_RECO_UF_CRAB_ForLocalReco_2.root',
+#                                   '/store/user/cherepan/RelValSingleMuPt1/RelValZMM_14_CMSSW_12_4_0RAW2DIGI_L1Reco_RECO_RECOSIM_UF_SingleMu1/230904_154007/0000/ZMM_RAW_DIGI_SIM_RECO_UF_CRAB_ForLocalReco_3.root'
+
+                                   'file:/afs/cern.ch/work/c/cherepan/CSC/Run3/CMSSW_12_4_4/src/UFCSCSoftware/crab/SingleMu10_AddRECOTier.root'
+
 #                                   'file:012344ab-9b99-48c9-966a-7a6653cc6b69.root'
 
 #                                   '/store/relval/CMSSW_12_4_13/RelValZMM_14/GEN-SIM-DIGI-RECO/124X_mcRun3_2022_realistic_v12_2021_FastSim-v1/2590000/8a48a70c-ddaf-4aa3-91b5-23dcac5a80a2.root'
@@ -85,12 +95,17 @@ process.cscSegments.CSCUseTimingCorrections = cms.bool(False)
 process.csc2DRecHits.wireDigiTag  = cms.InputTag("simMuonCSCDigis","MuonCSCWireDigi")
 process.csc2DRecHits.stripDigiTag = cms.InputTag("simMuonCSCDigis","MuonCSCStripDigi")
 
+process.options.numberOfThreads=cms.untracked.uint32(4)
+process.options.numberOfStreams=cms.untracked.uint32(1)
 
 
 process.out = cms.OutputModule("PoolOutputModule",
                                fastCloning = cms.untracked.bool(False),
 #                               fileName = cms.untracked.string('/eos/user/c/cherepan/CSC/UF_tuples/SingleMuon_RAW-RECO_ZMu-12Nov2019_UL2018_CSCSegmentBuilder_UF_testRun.root'),
-                               fileName = cms.untracked.string('/eos/user/c/cherepan/CSC/LocalReco_output_RU/RelValZMM_14_RU_CSCSegmentBuilder__TEST.root'),
+#                               fileName = cms.untracked.string('RelValZMM_14_RU_CSCSegmentBuilder.root'),
+#                               fileName = cms.untracked.string('/eos/user/c/cherepan/CSC/LocalReco_output_UF/Single_14_UF_CSCSegmentBuilder.root'),
+                               fileName = cms.untracked.string('SingleMu10Pt_100_TestEvents_AddUFLocalREco.root'),
+
 #                               fileName = cms.untracked.string('DY_MUMURelVal_UF_CSCSegmentBuilder.root'),
 #                               fileName = cms.untracked.string('DYJetsToLL_M-50_RU_CSCSegmentBuilder.root'),
                                outputCommands = cms.untracked.vstring('keep *')
