@@ -5,8 +5,16 @@ cscRootMaker = cms.EDAnalyzer('UFCSCRootMaker',
   vertexSrc = cms.untracked.InputTag('offlinePrimaryVertices'),
   genParticles = cms.untracked.InputTag('genParticles'),
   standAloneMuonsSrc = cms.untracked.InputTag('standAloneMuons'),
-  cscRecHitTagSrc = cms.untracked.InputTag('csc2DRecHits'),
-#  cscSegTagSrc = cms.untracked.InputTag('cscSegments','','reRECO'),   #  UF reco
+  cscRecHitTagSrc = cms.untracked.InputTag('csc2DRecHits'), # it was default
+
+
+
+#  cscRecHitTagSrc = cms.untracked.InputTag('csc2DRecHits','','localRecoUF'), # UF RECO
+#  cscSegTagSrc = cms.untracked.InputTag('cscSegments','','localRecoUF'),   #  UF reco
+
+
+#  cscRecHitTagSrc = cms.untracked.InputTag('csc2DRecHits','','RECO'), # RU reco
+
   cscSegTagSrc = cms.untracked.InputTag('cscSegments','','RECO'),    #  RU reco
 
   level1TagSrc = cms.untracked.InputTag('gtDigis'),
@@ -18,6 +26,7 @@ cscRootMaker = cms.EDAnalyzer('UFCSCRootMaker',
   clctDigiTagSrc = cms.untracked.InputTag('muonCSCDigis', 'MuonCSCCLCTDigi'),
   corrlctDigiTagSrc = cms.untracked.InputTag('muonCSCDigis', 'MuonCSCCorrelatedLCTDigi'),
   simHitTagSrc = cms.untracked.InputTag('g4SimHits', 'MuonCSCHits'),
+  simTracksTagSrc = cms.untracked.InputTag('g4SimHits','', 'SIM'),
   fedRawTagSrc = cms.untracked.InputTag('rawDataCollector'),
   isLocalRECO = cms.untracked.bool(False),
   isFullRECO = cms.untracked.bool(True),
