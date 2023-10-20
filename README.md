@@ -1,4 +1,4 @@
-0;136;0c# UFCSCSoftware
+# UFCSCSoftware
 UF CSC ntuple
 
 ```
@@ -11,9 +11,17 @@ cmsenv
 
 For RunIII:
 cmsrel CMSSW_12_4_4
-cd CMSSW_12_4_4
+cd CMSSW_12_4_4/src
 cmsenv
 
+
+
+
+
+
+
+
+cp the insides from https://github.com/cherepan/UFSegmentReco to the CMSSW core here
 
 
 git cms-init
