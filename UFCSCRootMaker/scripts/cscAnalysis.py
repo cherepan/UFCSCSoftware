@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 
 
 import sys, os, pwd, commands
@@ -154,12 +155,27 @@ class Analysis():
         return endcap*10000 + 1000*station + 100*ring + chamber
 
 
-    def AllGenRecoMuonsMap(self, tree):
+
+
+    def Chambers_crossedByMuon(self, tree, muon_index):
+        out = []
+        for j in range(0, len(tree.muons_cscSegmentRecord_endcap[muon_index])):
+            endcap  = tree.muons_cscSegmentRecord_endcap[muon_index][j];
+            station = tree.muons_cscSegmentRecord_station[muon_index][j];
+            ring    = tree.muons_cscSegmentRecord_ring[muon_index][j];
+            chamber = tree.muons_cscSegmentRecord_chamber[muon_index][j];
+            out.append(self.ChamberID(endcap,station,ring,chamber))
+        return out
+
+
+
+    def AllGenRecoMuonsMap(self, tree):   # gen muon index comes first
         out = []
         for igen in range(tree.gen_muons_nMuons):
             recoMuIndex = self.recoMuonMatchedIndex(tree,igen)
             out.append([igen,recoMuIndex])
         return out
+
 
 
     def SelectedGenRecoMuonsMap(self, tree, gen_muon_list):  # gen muon index comes first
@@ -171,11 +187,25 @@ class Analysis():
 
 
 
+    def GenCSCRecoMuonsMap(self, tree):  #   GEN-RECO (in CSC)  Muons Map with some pre-selection;
+        out = []
+        for igen in range(tree.gen_muons_nMuons):
+            muon = self.genMuonLV(tree,igen)
+            if muon.Pt()> 3 and math.fabs(muon.Eta()) > 1.1 and math.fabs(muon.Eta()) < 2.4:
+                recoMuIndex = self.recoMuonMatchedIndex(tree,igen)
+                if recoMuIndex!=-1:
+                    if self.muonHasCSCSegements(tree, recoMuIndex):
+                        out.append([igen,recoMuIndex])
+        return out
+
+
+
     def allSegments_belonging_toMuon(self, tree, muon_index):
         muon_segments = []
         if muon_index > tree.muons_nMuons: 
             print("==== > allSegments_belonging_toMuon: Muon index out of range, return empty list  ")
             return muon_segments
+
 
         for s in range(tree.cscSegments_nSegments):
 
@@ -204,7 +234,20 @@ class Analysis():
                      segmenLocalY == muon_segment_localY): muon_segments.append(s)
         return muon_segments
                      
+    def allSegments_InChamber(self,tree,chamber):
+        out = []
+        for s in range(tree.cscSegments_nSegments):
 
+            segmentRing          = tree.cscSegments_ID_ring[s]
+            segmentStation       = tree.cscSegments_ID_station[s]
+            segmentEndcap        = tree.cscSegments_ID_endcap[s] 
+            segmentChamber       = tree.cscSegments_ID_chamber[s]
+
+            segmentChamberID     = self.ChamberID(segmentEndcap, segmentStation, segmentRing, segmentChamber )
+            if segmentChamberID == chamber:
+                out.append(s)
+        return out
+        
 
     def allRechits_of_segment(self, tree, segment_index):
 
@@ -219,6 +262,7 @@ class Analysis():
         segment_ring       = tree.cscSegments_ID_ring[segment_index]
         segment_chamber    = tree.cscSegments_ID_chamber[segment_index]
         chamber_of_segment = self.ChamberID(segment_endcap, segment_station, segment_ring, segment_chamber)
+
 
         for isegment_rechit in range(0 , len(tree.cscSegments_recHitRecord_endcap[segment_index])):
             chamber_of_srechit = self.ChamberID(tree.cscSegments_recHitRecord_endcap[segment_index][isegment_rechit],
@@ -283,11 +327,95 @@ class Analysis():
 
 
 
+    def muonHasCSCSegements(self, tree, muon):
+        if len(self.allSegments_belonging_toMuon(tree, muon))!=0: return True
+        return False
+
+
+
+
+    def rechit_is_from_segment(self, tree, rechit):
+
+        SegmentIndex = -1
+
+        chamber_rechit   = self.ChamberID(tree.recHits2D_ID_endcap[rechit],
+                                          tree.recHits2D_ID_station[rechit],
+                                          tree.recHits2D_ID_ring[rechit],
+                                          tree.recHits2D_ID_chamber[rechit])
+        layer_rechit     = tree.recHits2D_ID_layer[rechit]
+        localX_rechit    = tree.recHits2D_localX[rechit]
+        localY_rechit    = tree.recHits2D_localY[rechit]
+
+
+        for s in range(tree.cscSegments_nSegments):
+
+            chamber_segment = self.ChamberID(tree.cscSegments_ID_endcap[s],
+                                             tree.cscSegments_ID_station[s],
+                                             tree.cscSegments_ID_ring[s],
+                                             tree.cscSegments_ID_chamber[s])
+
+            if chamber_rechit == chamber_segment:
+                
+                for isegment_rechit in range(0 , len(tree.cscSegments_recHitRecord_endcap[s])):
+                    chamber_of_srechit = self.ChamberID(tree.cscSegments_recHitRecord_endcap[s][isegment_rechit],
+                                                        tree.cscSegments_recHitRecord_station[s][isegment_rechit],
+                                                        tree.cscSegments_recHitRecord_ring[s][isegment_rechit],
+                                                        tree.cscSegments_recHitRecord_chamber[s][isegment_rechit])
+                    segment_rechit_localX = tree.cscSegments_recHitRecord_localX[s][isegment_rechit]
+                    segment_rechit_localY = tree.cscSegments_recHitRecord_localY[s][isegment_rechit]
+                    segment_rechit_layer  = tree.cscSegments_recHitRecord_layer[s][isegment_rechit]
+
+                    if(chamber_of_srechit   == chamber_rechit        and 
+                       segment_rechit_layer == layer_rechit          and
+                       localX_rechit        == segment_rechit_localX and
+                       localY_rechit        == segment_rechit_localY ): 
+                        SegmentIndex = s
+                       
+                        
+
+        return SegmentIndex
+
+
+
+
+    def segment_is_from_muon(self, tree, segment):
+        MuonIndex = -1
+        segment_endcap     = tree.cscSegments_ID_endcap[segment]
+        segment_station    = tree.cscSegments_ID_station[segment]
+        segment_ring       = tree.cscSegments_ID_ring[segment]
+        segment_chamber    = tree.cscSegments_ID_chamber[segment]
+        segment_LocalX     = tree.cscSegments_localX[segment] 
+        segment_LocalY     = tree.cscSegments_localY[segment] 
+
+        chamberID_of_segment = self.ChamberID(segment_endcap,segment_station,segment_ring,segment_chamber)
+        for m in range(tree.muons_nMuons):
+            for s in range(0, len(tree.muons_cscSegmentRecord_endcap[m])):
+                 muon_segment_endcap     = tree.muons_cscSegmentRecord_endcap[m][s];
+                 muon_segment_station    = tree.muons_cscSegmentRecord_station[m][s];
+                 muon_segment_ring       = tree.muons_cscSegmentRecord_ring[m][s];
+                 muon_segment_chamber    = tree.muons_cscSegmentRecord_chamber[m][s];
+
+                 muon_segment_localX     = tree.muons_cscSegmentRecord_localX[m][s];
+                 muon_segment_localY     = tree.muons_cscSegmentRecord_localY[m][s];
+
+                 muonsegmentChamberID = self.ChamberID(muon_segment_endcap,muon_segment_station,muon_segment_ring,muon_segment_chamber)
+                 if muonsegmentChamberID == chamberID_of_segment:
+                     if muon_segment_localX == segment_LocalX:
+                         if segment_LocalY == muon_segment_localY:
+                             MuonIndex = m
+        return  MuonIndex
+
+
+#    def rechit_is_from_muon(self, tree, rechit):
+
+
     def link_rechits_to_segments(self, tree, list_of_segments):
         outlist = []
         for i in list_of_segments:
             outlist.append([i,self.allRechits_of_segment(tree, i)])
         return outlist    
+
+
 
                       
     def doAnalysis(self,file):
@@ -390,7 +518,7 @@ class Analysis():
                 CSC_SegmentCounter = [0] * 600
                 CSC_SegmentMap = [''] * 600
                 for n in range(tree.cscSegments_nSegments):
-#                    print(" print out rechits of the segment  ", n,                    self.allRechits_of_segment(tree, n))
+#                    print(" segment#   ", n, "   from muon# ",self.segment_is_from_muon(tree,n))
                     serialRecord = tree.cscSegments_ID_chamberSerial[n]
                     CSC_SegmentCounter[serialRecord] = CSC_SegmentCounter[serialRecord]+1
                     CSC_SegmentMap[serialRecord]+=str(n)+'.'
@@ -422,6 +550,7 @@ class Analysis():
 
                 #2DRecHits
                 for n in range(0,tree.recHits2D_nRecHits2D):
+
                     sEndcap = tree.recHits2D_ID_endcap[n]
                     if sEndcap == 2: sEndcap = '-'
                     else: sEndcap = '+'
@@ -449,32 +578,86 @@ class Analysis():
 
                 #2DSimHits
                 if opt.isMC:
-                    print("__________________________________________________________________________________")
+                    GRMuonsMap = self.GenCSCRecoMuonsMap(tree)
+                    if len(GRMuonsMap)!=0:
+
+                        self.sorted_hists1D["nSegments_sorted_Norm"].Fill(tree.cscSegments_nSegments)
+#                        print(GRMuonsMap)
+                        for pair in GRMuonsMap:                        
+                            recoMuIndex = pair[1]
+                            ChambersCrossedByMuon = self.Chambers_crossedByMuon(tree, recoMuIndex)
+#                            print('ChambersCrossedByMuon',  ChambersCrossedByMuon)
+                            self.sorted_hists1D["nMuonsSegments_sorted_Norm"].Fill(len(self.allSegments_belonging_toMuon(tree, recoMuIndex)))
+                            self.sorted_hists1D["nChambers_crossedByMuon_Norm"].Fill(len(ChambersCrossedByMuon) )
+#                            print("chambers:  ", self.Chambers_crossedByMuon(tree, recoMuIndex))
+                            for chamber in ChambersCrossedByMuon:
+                                allSegmentsInAGivenChamber = self.allSegments_InChamber(tree, chamber)
+                                self.sorted_hists1D["nSegmentsInMuonCrossedChamber_Norm"].Fill(len(allSegmentsInAGivenChamber))
+ #                               print("segments  in chamber ", self.allSegments_InChamber(tree, chamber))
+ #                               for seg in self.allSegments_InChamber(tree, chamber):
+ #                                   print("this segment is from a muon ", self.segment_is_from_muon(tree,seg) )
+
+                            for s in self.allSegments_belonging_toMuon(tree, recoMuIndex):
+                                self.sorted_hists1D["nRecHitsPerMuonSegments_sorted_Norm"].Fill(len(self.allRechits_of_segment(tree,s)))
+
+
+                #2DSimHits
+                if opt.isMC:
+
                     selectedGenMuons=[]
+                    #                    print(" \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ ")
+                    #                    print(" \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ ")
                     for im in range(0, tree.gen_muons_nMuons):
                         muon = self.genMuonLV(tree,im)
+                        #                        muon.Print()
                         if muon.Pt()> 3 and math.fabs(muon.Eta()) > 1.1 and math.fabs(muon.Eta()) < 2.4:
                             selectedGenMuons.append(im)
-
+                            
 
                         recoMuIndex = self.recoMuonMatchedIndex(tree,im) 
                         if recoMuIndex!= -1: recoMuon = self.recMuonLV(tree,recoMuIndex)
-  #                  print(" print reco gen map   ",self.SelectedGenRecoMuonsMap(tree,selectedGenMuons))
+
+
+
+
+
+                    GRMuonsMap = self.GenCSCRecoMuonsMap(tree)
+
+#                    print(" print reco gen map   ",self.SelectedGenRecoMuonsMap(tree,selectedGenMuons))
+#                    print(" map if reco Muons has segment  ", GRMuonsMap)
                     self.sorted_hists1D["GenRecoMatchingSize"].Fill(len(self.SelectedGenRecoMuonsMap(tree,selectedGenMuons)))
 
                     ### debug HERE
-                    print(" gen reco muons map  ", self.SelectedGenRecoMuonsMap(tree,selectedGenMuons))
-
-                    for n in range(tree.muons_nMuons):
-                        if math.fabs(self.recMuonLV(tree,n).Eta() > 1.1):
-                            print(" muon   n, ++++++++++++ nSegments, standalon/Global  ",n, len ( self.allSegments_belonging_toMuon(tree, n)), tree.muons_isStandAloneMuon[n], tree.muons_isGlobalMuon[n])
-                            self.recMuonLV(tree,n).Print()
-                            if tree.muons_isStandAloneMuon[n] and len(self.allSegments_belonging_toMuon(tree, n) ) > 0:
+#                    print(" gen reco muons map  ", self.SelectedGenRecoMuonsMap(tree,selectedGenMuons))
 
 
-                                print(" Muon n   ", n, "  has   ", self.allSegments_belonging_toMuon(tree,n)," segments  ")
-                                for k in self.allSegments_belonging_toMuon(tree,n):
-                                    print("  Segment  #   ", k  , "  has    ", self.allRechits_of_segment(tree,k), "  rechits " ) #
+#                    print("///////////////////////////////////////////////////////")
+#                    print("///////////////////////////////////////////////////////")
+#                    print("///////////////////////////////////////////////////////")
+#                    for n in range(tree.muons_nMuons):
+#                        print("Muons #",n, "  is in chambers, ", len(tree.muons_cscSegmentRecord_endcap[n]))
+#                        self.recMuonLV(tree,n).Print()
+#                    print("///////////////////////////////////////////////////////")
+#                    print("///////////////////////////////////////////////////////")
+#                    print("///////////////////////////////////////////////////////")
+
+
+#                    for n in range(tree.muons_nMuons):
+#                            if self.muonHasCSCSegements(tree, n):
+#                                print(" #muon , ++++ nSegments d , SD/GL/Tr  ",n, len ( self.allSegments_belonging_toMuon(tree, n)), 
+#                                      tree.muons_isStandAloneMuon[n], 
+#                                      tree.muons_isTrackerMuon[n], 
+#                                      tree.muons_isGlobalMuon[n],
+#                                      " this muons crossed chambers:  ", self.Chambers_crossedByMuon(tree,n), "   number of chambers from ntuple:  ", 
+#                                      tree.muons_numberOfChambers[n],
+#                                      "  Gen-Reco Map  ",GRMuonsMap)
+#                                self.recMuonLV(tree,n).Print()
+#                                if tree.muons_isStandAloneMuon[n] and len(self.allSegments_belonging_toMuon(tree, n) ) > 0:
+
+
+#                                    print(" Muon n   ", n, "  has   ", self.allSegments_belonging_toMuon(tree,n)," segments  ")
+#                                    for k in self.allSegments_belonging_toMuon(tree,n):
+#                                        print("  Segment  #   ", k  , "  has    ", self.allRechits_of_segment(tree,k), "  rechits " ) #
 
 
 
@@ -483,12 +666,13 @@ class Analysis():
 
 
                     for l in self.SelectedGenRecoMuonsMap(tree,selectedGenMuons):
-                        if l[1]!=-1:
-                            print("=======================================   matched   gen and reco indices    ", l[0],l[1]) 
+#                    for l in self.GenCSCRecoMuonsMap(tree):
+                        if l[1]!=-1 and self.muonHasCSCSegements(tree, l[1]):
+#                            print("=======================================  check gen selected   matched   gen and reco indices    ", l[0],l[1]) 
 
-                            self.genMuonLV(tree,l[0]).Print()
-                            self.recMuonLV(tree,l[1]).Print()
-
+ #                           self.genMuonLV(tree,l[0]).Print()
+ #                           self.recMuonLV(tree,l[1]).Print()
+ #                           print(" and number of  segments for reco muon :  ",len ( self.allSegments_belonging_toMuon(tree, l[1])))
                             self.sorted_hists1D["dRMatching"].Fill(self.recMuonLV(tree,l[1]).DeltaR(self.genMuonLV(tree,l[0])))
 
 #                            print("------------------- muon index  ", l[1])
@@ -681,7 +865,19 @@ class Analysis():
         self.hists1D['nrecHitsPerLayer_allChambers'] = ROOT.TH1F("nrecHitsPerLayer_allChambers", "; N RecHits per Layer", 11, -0.5, 10.5)
         self.sorted_hists1D['GenRecoMatchingSize'] = ROOT.TH1F("GenRecoMatchingSize", "; n matched muons  ", 4, -0.5, 3.5) # 1D hist templtae
         self.sorted_hists1D['dRMatching'] = ROOT.TH1F("dRMatching", ";dR(gen-reco) ", 50, -0.001, 0.05) # 1D hist templtae
-#        self.hists1D[''] = ROOT.TH1F("", "; ", 11, -0.5, 10.5) # 1D hist templtae
+
+
+        self.sorted_hists1D['nSegments_sorted_Norm'] = ROOT.TH1F("nSegments_sorted_Norm", "; N Segments (all CSC's) )", 35, -0.5, 34.5)
+        self.sorted_hists1D['nMuonsSegments_sorted_Norm'] = ROOT.TH1F("nMuonsSegments_sorted_Norm", "; N segments belong to selected mu ", 7, -0.5, 6.5)
+        self.sorted_hists1D['nRecHitsPerMuonSegments_sorted_Norm'] = ROOT.TH1F("nRecHitsPerMuonSegments_sorted_Norm", "; N rechits per muon segment ", 11, -0.5, 10.5)
+
+        self.sorted_hists1D['nChambers_crossedByMuon_Norm'] = ROOT.TH1F("nChambers_crossedByMuon_Norm", "; N chambers crossed by muon ", 6, -0.5, 5.5)
+
+        self.sorted_hists1D['nSegmentsInMuonCrossedChamber_Norm'] = ROOT.TH1F("nSegmentsInMuonCrossedChamber_Norm", "; N segments in a chamber with muon ", 5, -0.5, 4.5) 
+
+
+
+#        self.sorted_hists1D[''] = ROOT.TH1F("", "; ", 11, -0.5, 10.5) # 1D hist templtae
 
 
 
