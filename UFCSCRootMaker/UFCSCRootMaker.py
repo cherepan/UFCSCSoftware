@@ -112,7 +112,11 @@ process.TFileService = cms.Service("TFileService",
 #                                   fileName = cms.string("DUMMYFILENAME.root")
 #                                   fileName = cms.string("CSC_UF_ntuple_UF_SegmentBuilder.root")
 #                                   fileName = cms.string("run3_MC_test_UF.root")
-                                   fileName = cms.string("run3_MC_RU_TestMCRun.root")
+#                                   fileName = cms.string("run3_MC_RU_SingleMu1.root")
+
+#                                   fileName = cms.string("run3_MC_RU_SingleMu1.root")
+
+                                   fileName = cms.string("TestRU_afterUFLC.root")
 
 #                                   fileName = cms.string("test/SingleMuon_RAW-RECO_ZMu-12Nov2019_UL2018_CSCSegmentBuilder_UF_testRun.root")
                                    )
@@ -182,7 +186,38 @@ else:
 #        '/store/relval/CMSSW_12_4_13/RelValZMM_14/GEN-SIM-DIGI-RECO/124X_mcRun3_2022_realistic_v12_2021_FastSim-v1/2590000/8a48a70c-ddaf-4aa3-91b5-23dcac5a80a2.root'
 #        'file:../crab/DY_MUMURelVal_RU_CSCSegmentBuilder.root'
 #        'file:/eos/user/c/cherepan/CSC/LocalReco_output_RU/RelValZMM_14_RU_CSCSegmentBuilder.root'
-        'file:/eos/user/c/cherepan/CSC/RECO_ZMM_RelVal_12_4_4/ZMM_RAW_DIGI_SIM_RECO_RU_____TEST.root'
+
+#        '/store/user/cherepan/RelValSingleMuPt1/RelValZMM_14_CMSSW_12_4_0RAW2DIGI_L1Reco_RECO_RECOSIM_SingleMu1_RU_LocalRECO/230911_135703/0000/SingleMu1Pt_14_RU_CSCSegmentBuilder_1.root',
+#        '/store/user/cherepan/RelValSingleMuPt1/RelValZMM_14_CMSSW_12_4_0RAW2DIGI_L1Reco_RECO_RECOSIM_SingleMu1_RU_LocalRECO/230911_135703/0000/SingleMu1Pt_14_RU_CSCSegmentBuilder_1.root',
+#        '/store/user/cherepan/RelValSingleMuPt1/RelValZMM_14_CMSSW_12_4_0RAW2DIGI_L1Reco_RECO_RECOSIM_SingleMu1_RU_LocalRECO/230911_135703/0000/SingleMu1Pt_14_RU_CSCSegmentBuilder_1.root'
+
+#    'file:/afs/cern.ch/work/c/cherepan/CSC/Run3/UFSegementBuilder/CMSSW_12_4_4/src/UFCSCSoftware/crab/SingleMu10Pt_100_TestEvents_AddUFLocalREco.root'
+        'file:/afs/cern.ch/work/c/cherepan/CSC/Run3/CMSSW_12_4_4/src/UFCSCSoftware/crab/SingleMu10_AddRECOTier.root'
+
+
+
+
+#    ' /store/user/cherepan/RelValSingleMuPt10/RelValZMM_14_CMSSW_12_4_0RAW2DIGI_L1Reco_RECO_RECOSIM_SingleMu10_RU_LocalRECO_final_v2/230920_112116/0000/SingleMu1Pt_14_RU_CSCSegmentBuilder_1.root'#,
+#    ' /store/user/cherepan/RelValSingleMuPt10/RelValZMM_14_CMSSW_12_4_0RAW2DIGI_L1Reco_RECO_RECOSIM_SingleMu10_RU_LocalRECO_final_v2/230920_112116/0000/SingleMu1Pt_14_RU_CSCSegmentBuilder_2.root'#,
+#    ' /store/user/cherepan/RelValSingleMuPt10/RelValZMM_14_CMSSW_12_4_0RAW2DIGI_L1Reco_RECO_RECOSIM_SingleMu10_RU_LocalRECO_final_v2/230920_112116/0000/SingleMu1Pt_14_RU_CSCSegmentBuilder_3.root'#,
+#    ' /store/user/cherepan/RelValSingleMuPt10/RelValZMM_14_CMSSW_12_4_0RAW2DIGI_L1Reco_RECO_RECOSIM_SingleMu10_RU_LocalRECO_final_v2/230920_112116/0000/SingleMu1Pt_14_RU_CSCSegmentBuilder_4.root'#,
+#    ' /store/user/cherepan/RelValSingleMuPt10/RelValZMM_14_CMSSW_12_4_0RAW2DIGI_L1Reco_RECO_RECOSIM_SingleMu10_RU_LocalRECO_final_v2/230920_112116/0000/SingleMu1Pt_14_RU_CSCSegmentBuilder_5.root'#,
+#    ' /store/user/cherepan/RelValSingleMuPt10/RelValZMM_14_CMSSW_12_4_0RAW2DIGI_L1Reco_RECO_RECOSIM_SingleMu10_RU_LocalRECO_final_v2/230920_112116/0000/SingleMu1Pt_14_RU_CSCSegmentBuilder_6.root'#,
+#    ' /store/user/cherepan/RelValSingleMuPt10/RelValZMM_14_CMSSW_12_4_0RAW2DIGI_L1Reco_RECO_RECOSIM_SingleMu10_RU_LocalRECO_final_v2/230920_112116/0000/SingleMu1Pt_14_RU_CSCSegmentBuilder_7.root'#,
+#    ' /store/user/cherepan/RelValSingleMuPt10/RelValZMM_14_CMSSW_12_4_0RAW2DIGI_L1Reco_RECO_RECOSIM_SingleMu10_RU_LocalRECO_final_v2/230920_112116/0000/SingleMu1Pt_14_RU_CSCSegmentBuilder_8.root'#,
+#    ' /store/user/cherepan/RelValSingleMuPt10/RelValZMM_14_CMSSW_12_4_0RAW2DIGI_L1Reco_RECO_RECOSIM_SingleMu10_RU_LocalRECO_final_v2/230920_112116/0000/SingleMu1Pt_14_RU_CSCSegmentBuilder_9.root'#,
+#    ' /store/user/cherepan/RelValSingleMuPt10/RelValZMM_14_CMSSW_12_4_0RAW2DIGI_L1Reco_RECO_RECOSIM_SingleMu10_RU_LocalRECO_final_v2/230920_112116/0000/SingleMu1Pt_14_RU_CSCSegmentBuilder_10.root#',
+#    ' /store/user/cherepan/RelValSingleMuPt10/RelValZMM_14_CMSSW_12_4_0RAW2DIGI_L1Reco_RECO_RECOSIM_SingleMu10_RU_LocalRECO_final_v2/230920_112116/0000/SingleMu1Pt_14_RU_CSCSegmentBuilder_11.root#',
+#    ' /store/user/cherepan/RelValSingleMuPt10/RelValZMM_14_CMSSW_12_4_0RAW2DIGI_L1Reco_RECO_RECOSIM_SingleMu10_RU_LocalRECO_final_v2/230920_112116/0000/SingleMu1Pt_14_RU_CSCSegmentBuilder_12.root#',
+#    ' /store/user/cherepan/RelValSingleMuPt10/RelValZMM_14_CMSSW_12_4_0RAW2DIGI_L1Reco_RECO_RECOSIM_SingleMu10_RU_LocalRECO_final_v2/230920_112116/0000/SingleMu1Pt_14_RU_CSCSegmentBuilder_13.root#',
+#    ' /store/user/cherepan/RelValSingleMuPt10/RelValZMM_14_CMSSW_12_4_0RAW2DIGI_L1Reco_RECO_RECOSIM_SingleMu10_RU_LocalRECO_final_v2/230920_112116/0000/SingleMu1Pt_14_RU_CSCSegmentBuilder_14.root#'
+#    ' /store/user/cherepan/RelValSingleMuPt10/RelValZMM_14_CMSSW_12_4_0RAW2DIGI_L1Reco_RECO_RECOSIM_SingleMu10_RU_LocalRECO_final_v2/230920_112116/0000/SingleMu1Pt_14_RU_CSCSegmentBuilder_15.root#',
+#    ' /store/user/cherepan/RelValSingleMuPt10/RelValZMM_14_CMSSW_12_4_0RAW2DIGI_L1Reco_RECO_RECOSIM_SingleMu10_RU_LocalRECO_final_v2/230920_112116/0000/SingleMu1Pt_14_RU_CSCSegmentBuilder_16.root#'
+
+#        'file:/eos/user/c/cherepan/CSC/RECO_ZMM_RelVal_12_4_4/ZMM_RAW_DIGI_SIM_RECO_RU_____TEST.root'
+
+
+
 #        'file:../8a48a70c-ddaf-4aa3-91b5-23dcac5a80a2.root'
 #        '/store/relval/CMSSW_7_0_0/RelValTTbar/GEN-SIM-DIGI-RECO/START70_V6_FastSim-v2/00000/00743452-B498-E311-AD84-02163E00EAC9.root',
 #        'file:/raid/raid8/mhl/CSC_Run2/CMSSW_dev/outputRoot/test2.root'
