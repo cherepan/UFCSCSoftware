@@ -28,7 +28,7 @@ addDigiInfo = bool(True)
 addTimeMonitoringInfo = bool(True)
 addCalibrationInfo = bool(False)
 
-maxEvents = -1
+maxEvents = 200
 
 MCGlobalTag='124X_mcRun3_2022_realistic_v12' #for DYmumu_PU140
 #DataGlobalTag='76X_dataRun2_v19'
@@ -65,7 +65,7 @@ process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(maxEvents))
 # initialize MessageLogger and output report
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 #process.MessageLogger.cerr.threshold = 'ERROR' # Options: INFO, WARNING, ERROR
-process.MessageLogger.cerr.FwkReport.reportEvery = -1
+process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 #process.MessageLogger.destinations = ['cout', 'cerr']
 #process.MessageLogger.suppressWarning.append('classByHitsGlb') # kill stupid RPC hit associator warning
 
@@ -111,12 +111,22 @@ process.out = cms.OutputModule("PoolOutputModule",
 process.TFileService = cms.Service("TFileService",
 #                                   fileName = cms.string("DUMMYFILENAME.root")
 #                                   fileName = cms.string("CSC_UF_ntuple_UF_SegmentBuilder.root")
-#                                   fileName = cms.string("run3_MC_test_UF.root")
-#                                   fileName = cms.string("run3_MC_RU_SingleMu1.root")
+#                                   fileName = cms.string("run3_MC_UF_SingleMu1.root")
 
-#                                   fileName = cms.string("run3_MC_RU_SingleMu1.root")
+#                                   fileName = cms.string("file:SingleMu10PtZMM_RU.root")
+#                                   fileName = cms.string("file:SingleMuPt10_UF_27_09.root")
 
-                                   fileName = cms.string("TestRU_afterUFLC.root")
+#                                   fileName = cms.string("file:SingleMu10PtZMM_RU.root")
+#                                   fileName = cms.string("file:ZMM_RU_27_09.root")
+
+
+
+#                                   fileName = cms.string("file:SingleMuPt10_18_10_UF.root")
+#                                   fileName = cms.string("file:ZMM10_18_10_UF.root")
+                                   fileName = cms.string("file:Test_UF.root")
+
+
+#                                   fileName = cms.string("file:ZMM_UF_27_09.root")
 
 #                                   fileName = cms.string("test/SingleMuon_RAW-RECO_ZMu-12Nov2019_UL2018_CSCSegmentBuilder_UF_testRun.root")
                                    )
@@ -142,11 +152,20 @@ if isDATA:
     process.source.fileNames = cms.untracked.vstring(
 #        'file:/eos/user/c/cherepan/HeavyFiles/SingleMuon_RAW-RECO_ZMu-12Nov2019_UL2018_CSCSegmentBuilder_UF.root'
 #        'file:test/SingleMuon_RAW-RECO_ZMu-12Nov2019_UL2018_CSCSegmentBuilder_UF_testRun.root'
-#        'file:/eos/user/c/cherepan/CSC/SingleMuon_RAW-RECO_ZMu-12Nov2019_UL2018_CSCSegmentBuilder_UF_testRun.root'
-#        'file:/afs/cern.ch/work/c/cherepan/CSC/Run3/UFSegementBuilder/CMSSW_12_4_4/src/UFCSCSoftware/crab/DY_MUMURelVal_RU_CSCSegmentBuilder.root'
-#        'file:../crab/DY_MUMURelVal_RU_CSCSegmentBuilder.root'
-        'file:/eos/user/c/cherepan/CSC/LocalReco_output_RU/RelValZMM_14_RU_CSCSegmentBuilder.root'
+#         'file:/eos/user/c/cherepan/CSC/SingleMuon_RAW-RECO_ZMu-12Nov2019_UL2018_CSCSegmentBuilder_UF_testRun.root'
 
+
+
+        '/store/user/cherepan/RelValSingleMuPt1/RelValZMM_14_CMSSW_12_4_0RAW2DIGI_L1Reco_RECO_RECOSIM_UF_SingleMu1_UF_LocalRECO/230908_124247/0000/SingleMu1Pt_14_UF_CSCSegmentBuilder_1.root',
+        '/store/user/cherepan/RelValSingleMuPt1/RelValZMM_14_CMSSW_12_4_0RAW2DIGI_L1Reco_RECO_RECOSIM_UF_SingleMu1_UF_LocalRECO/230908_124247/0000/SingleMu1Pt_14_UF_CSCSegmentBuilder_2.root',
+        '/store/user/cherepan/RelValSingleMuPt1/RelValZMM_14_CMSSW_12_4_0RAW2DIGI_L1Reco_RECO_RECOSIM_UF_SingleMu1_UF_LocalRECO/230908_124247/0000/SingleMu1Pt_14_UF_CSCSegmentBuilder_3.root'
+
+
+
+
+
+
+#        'file:../crab/DY_MUMURelVal_UF_CSCSegmentBuilder.root'
 #        '/store/data/Run2022C/SingleMuon/RAW-RECO/ZMu-PromptReco-v1/000/356/381/00000/6513929e-95f2-4528-9b6b-6b0a15a768d4.root'
 
 
@@ -183,40 +202,59 @@ if isDATA:
 )
 else:
     process.source.fileNames = cms.untracked.vstring(
+
+# 'file:/eos/user/c/cherepan/CSC/LocalReco_output_UF/RelValZMM_14_UF_CSCSegmentBuilder_v2.root'
+
+
+#        'file:../crab/SingleMu10Pt_100_TestEvents_AddUFLocalREco.root'
+#
+
+       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_2.root',
+       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_18.root',
+       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_8.root',
+       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_4.root',
+       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_16.root',
+       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_7.root',
+       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_14.root',
+       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_10.root',
+       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_19.root',
+       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_21.root',
+       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_13.root',
+       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_20.root',
+       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_1.root',
+       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_11.root',
+       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_12.root',
+       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_9.root',
+       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_3.root',
+       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_15.root',
+       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_5.root',
+       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_6.root',
+       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_17.root'
+
+
+
+
+#        '/store/user/cherepan/RelValZMM_14/RelValMM14_ReRunLocalReco/230927_095118/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_3.root',
+#        '/store/user/cherepan/RelValZMM_14/RelValMM14_ReRunLocalReco/230927_095118/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_4.root',
+#        '/store/user/cherepan/RelValZMM_14/RelValMM14_ReRunLocalReco/230927_095118/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_1.root',
+#        '/store/user/cherepan/RelValZMM_14/RelValMM14_ReRunLocalReco/230927_095118/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_6.root',
+#        '/store/user/cherepan/RelValZMM_14/RelValMM14_ReRunLocalReco/230927_095118/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_2.root',
+#        '/store/user/cherepan/RelValZMM_14/RelValMM14_ReRunLocalReco/230927_095118/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_7.root',
+#        '/store/user/cherepan/RelValZMM_14/RelValMM14_ReRunLocalReco/230927_095118/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_5.root'
+
+
+
+
+
+
+
+#        '/store/user/cherepan/RelValSingleMuPt1/RelValZMM_14_CMSSW_12_4_0RAW2DIGI_L1Reco_RECO_RECOSIM_UF_SingleMu1_UF_LocalRECO/230908_124247/0000/SingleMu1Pt_14_UF_CSCSegmentBuilder_1.root',
+#        '/store/user/cherepan/RelValSingleMuPt1/RelValZMM_14_CMSSW_12_4_0RAW2DIGI_L1Reco_RECO_RECOSIM_UF_SingleMu1_UF_LocalRECO/230908_124247/0000/SingleMu1Pt_14_UF_CSCSegmentBuilder_2.root',
+#        '/store/user/cherepan/RelValSingleMuPt1/RelValZMM_14_CMSSW_12_4_0RAW2DIGI_L1Reco_RECO_RECOSIM_UF_SingleMu1_UF_LocalRECO/230908_124247/0000/SingleMu1Pt_14_UF_CSCSegmentBuilder_3.root'
+
+
+
 #        '/store/relval/CMSSW_12_4_13/RelValZMM_14/GEN-SIM-DIGI-RECO/124X_mcRun3_2022_realistic_v12_2021_FastSim-v1/2590000/8a48a70c-ddaf-4aa3-91b5-23dcac5a80a2.root'
-#        'file:../crab/DY_MUMURelVal_RU_CSCSegmentBuilder.root'
-#        'file:/eos/user/c/cherepan/CSC/LocalReco_output_RU/RelValZMM_14_RU_CSCSegmentBuilder.root'
-
-#        '/store/user/cherepan/RelValSingleMuPt1/RelValZMM_14_CMSSW_12_4_0RAW2DIGI_L1Reco_RECO_RECOSIM_SingleMu1_RU_LocalRECO/230911_135703/0000/SingleMu1Pt_14_RU_CSCSegmentBuilder_1.root',
-#        '/store/user/cherepan/RelValSingleMuPt1/RelValZMM_14_CMSSW_12_4_0RAW2DIGI_L1Reco_RECO_RECOSIM_SingleMu1_RU_LocalRECO/230911_135703/0000/SingleMu1Pt_14_RU_CSCSegmentBuilder_1.root',
-#        '/store/user/cherepan/RelValSingleMuPt1/RelValZMM_14_CMSSW_12_4_0RAW2DIGI_L1Reco_RECO_RECOSIM_SingleMu1_RU_LocalRECO/230911_135703/0000/SingleMu1Pt_14_RU_CSCSegmentBuilder_1.root'
-
-#    'file:/afs/cern.ch/work/c/cherepan/CSC/Run3/UFSegementBuilder/CMSSW_12_4_4/src/UFCSCSoftware/crab/SingleMu10Pt_100_TestEvents_AddUFLocalREco.root'
-        'file:/afs/cern.ch/work/c/cherepan/CSC/Run3/CMSSW_12_4_4/src/UFCSCSoftware/crab/SingleMu10_AddRECOTier.root'
-
-
-
-
-#    ' /store/user/cherepan/RelValSingleMuPt10/RelValZMM_14_CMSSW_12_4_0RAW2DIGI_L1Reco_RECO_RECOSIM_SingleMu10_RU_LocalRECO_final_v2/230920_112116/0000/SingleMu1Pt_14_RU_CSCSegmentBuilder_1.root'#,
-#    ' /store/user/cherepan/RelValSingleMuPt10/RelValZMM_14_CMSSW_12_4_0RAW2DIGI_L1Reco_RECO_RECOSIM_SingleMu10_RU_LocalRECO_final_v2/230920_112116/0000/SingleMu1Pt_14_RU_CSCSegmentBuilder_2.root'#,
-#    ' /store/user/cherepan/RelValSingleMuPt10/RelValZMM_14_CMSSW_12_4_0RAW2DIGI_L1Reco_RECO_RECOSIM_SingleMu10_RU_LocalRECO_final_v2/230920_112116/0000/SingleMu1Pt_14_RU_CSCSegmentBuilder_3.root'#,
-#    ' /store/user/cherepan/RelValSingleMuPt10/RelValZMM_14_CMSSW_12_4_0RAW2DIGI_L1Reco_RECO_RECOSIM_SingleMu10_RU_LocalRECO_final_v2/230920_112116/0000/SingleMu1Pt_14_RU_CSCSegmentBuilder_4.root'#,
-#    ' /store/user/cherepan/RelValSingleMuPt10/RelValZMM_14_CMSSW_12_4_0RAW2DIGI_L1Reco_RECO_RECOSIM_SingleMu10_RU_LocalRECO_final_v2/230920_112116/0000/SingleMu1Pt_14_RU_CSCSegmentBuilder_5.root'#,
-#    ' /store/user/cherepan/RelValSingleMuPt10/RelValZMM_14_CMSSW_12_4_0RAW2DIGI_L1Reco_RECO_RECOSIM_SingleMu10_RU_LocalRECO_final_v2/230920_112116/0000/SingleMu1Pt_14_RU_CSCSegmentBuilder_6.root'#,
-#    ' /store/user/cherepan/RelValSingleMuPt10/RelValZMM_14_CMSSW_12_4_0RAW2DIGI_L1Reco_RECO_RECOSIM_SingleMu10_RU_LocalRECO_final_v2/230920_112116/0000/SingleMu1Pt_14_RU_CSCSegmentBuilder_7.root'#,
-#    ' /store/user/cherepan/RelValSingleMuPt10/RelValZMM_14_CMSSW_12_4_0RAW2DIGI_L1Reco_RECO_RECOSIM_SingleMu10_RU_LocalRECO_final_v2/230920_112116/0000/SingleMu1Pt_14_RU_CSCSegmentBuilder_8.root'#,
-#    ' /store/user/cherepan/RelValSingleMuPt10/RelValZMM_14_CMSSW_12_4_0RAW2DIGI_L1Reco_RECO_RECOSIM_SingleMu10_RU_LocalRECO_final_v2/230920_112116/0000/SingleMu1Pt_14_RU_CSCSegmentBuilder_9.root'#,
-#    ' /store/user/cherepan/RelValSingleMuPt10/RelValZMM_14_CMSSW_12_4_0RAW2DIGI_L1Reco_RECO_RECOSIM_SingleMu10_RU_LocalRECO_final_v2/230920_112116/0000/SingleMu1Pt_14_RU_CSCSegmentBuilder_10.root#',
-#    ' /store/user/cherepan/RelValSingleMuPt10/RelValZMM_14_CMSSW_12_4_0RAW2DIGI_L1Reco_RECO_RECOSIM_SingleMu10_RU_LocalRECO_final_v2/230920_112116/0000/SingleMu1Pt_14_RU_CSCSegmentBuilder_11.root#',
-#    ' /store/user/cherepan/RelValSingleMuPt10/RelValZMM_14_CMSSW_12_4_0RAW2DIGI_L1Reco_RECO_RECOSIM_SingleMu10_RU_LocalRECO_final_v2/230920_112116/0000/SingleMu1Pt_14_RU_CSCSegmentBuilder_12.root#',
-#    ' /store/user/cherepan/RelValSingleMuPt10/RelValZMM_14_CMSSW_12_4_0RAW2DIGI_L1Reco_RECO_RECOSIM_SingleMu10_RU_LocalRECO_final_v2/230920_112116/0000/SingleMu1Pt_14_RU_CSCSegmentBuilder_13.root#',
-#    ' /store/user/cherepan/RelValSingleMuPt10/RelValZMM_14_CMSSW_12_4_0RAW2DIGI_L1Reco_RECO_RECOSIM_SingleMu10_RU_LocalRECO_final_v2/230920_112116/0000/SingleMu1Pt_14_RU_CSCSegmentBuilder_14.root#'
-#    ' /store/user/cherepan/RelValSingleMuPt10/RelValZMM_14_CMSSW_12_4_0RAW2DIGI_L1Reco_RECO_RECOSIM_SingleMu10_RU_LocalRECO_final_v2/230920_112116/0000/SingleMu1Pt_14_RU_CSCSegmentBuilder_15.root#',
-#    ' /store/user/cherepan/RelValSingleMuPt10/RelValZMM_14_CMSSW_12_4_0RAW2DIGI_L1Reco_RECO_RECOSIM_SingleMu10_RU_LocalRECO_final_v2/230920_112116/0000/SingleMu1Pt_14_RU_CSCSegmentBuilder_16.root#'
-
-#        'file:/eos/user/c/cherepan/CSC/RECO_ZMM_RelVal_12_4_4/ZMM_RAW_DIGI_SIM_RECO_RU_____TEST.root'
-
-
 
 #        'file:../8a48a70c-ddaf-4aa3-91b5-23dcac5a80a2.root'
 #        '/store/relval/CMSSW_7_0_0/RelValTTbar/GEN-SIM-DIGI-RECO/START70_V6_FastSim-v2/00000/00743452-B498-E311-AD84-02163E00EAC9.root',
