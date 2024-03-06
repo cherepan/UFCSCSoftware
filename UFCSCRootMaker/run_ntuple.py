@@ -28,7 +28,7 @@ addDigiInfo = bool(True)
 addTimeMonitoringInfo = bool(True)
 addCalibrationInfo = bool(False)
 
-maxEvents = 200
+maxEvents = -1
 
 MCGlobalTag='124X_mcRun3_2022_realistic_v12' #for DYmumu_PU140
 #DataGlobalTag='76X_dataRun2_v19'
@@ -123,7 +123,7 @@ process.TFileService = cms.Service("TFileService",
 
 #                                   fileName = cms.string("file:SingleMuPt10_18_10_UF.root")
 #                                   fileName = cms.string("file:ZMM10_18_10_UF.root")
-                                   fileName = cms.string("file:Test_UF.root")
+                                   fileName = cms.string("file:ZMM_26_10_RU.root")
 
 
 #                                   fileName = cms.string("file:ZMM_UF_27_09.root")
@@ -209,34 +209,39 @@ else:
 #        'file:../crab/SingleMu10Pt_100_TestEvents_AddUFLocalREco.root'
 #
 
-       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_2.root',
-       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_18.root',
-       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_8.root',
-       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_4.root',
-       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_16.root',
-       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_7.root',
-       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_14.root',
-       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_10.root',
-       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_19.root',
-       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_21.root',
-       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_13.root',
-       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_20.root',
-       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_1.root',
-       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_11.root',
-       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_12.root',
-       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_9.root',
-       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_3.root',
-       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_15.root',
-       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_5.root',
-       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_6.root',
-       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_17.root'
+#        'file:../crab/SingleMu10Pt_100_TestEvents_AddUFLocalREco.root'
 
 
 
+#       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_2.root',
+#       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_18.root',
+#       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_8.root',
+#       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_4.root',
+#       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_16.root',
+#       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_7.root',
+#       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_14.root',
+#       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_10.root',
+#       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_19.root',
+#       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_21.root',
+#       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_13.root',
+ #      '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_20.root',
+ ##      '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_1.root',
+ #      '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_11.root',
+ #      '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_12.root',
+ #      '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_9.root',
+ #      '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_3.root',
+ #      '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_15.root',
+ #      '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_5.root',
+ #      '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_6.root',
+ #      '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_17.root'
 
+
+        'file:/eos/user/c/cherepan/CSC/LocalReco_output_Test_whileCantDownload/SingleMu10Pt_100_TestEvents_AddUFLocalREco_3.root'
+
+#  uncomment later 
+#        '/store/user/cherepan/RelValZMM_14/RelValMM14_ReRunLocalReco/230927_095118/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_1.root',
 #        '/store/user/cherepan/RelValZMM_14/RelValMM14_ReRunLocalReco/230927_095118/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_3.root',
 #        '/store/user/cherepan/RelValZMM_14/RelValMM14_ReRunLocalReco/230927_095118/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_4.root',
-#        '/store/user/cherepan/RelValZMM_14/RelValMM14_ReRunLocalReco/230927_095118/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_1.root',
 #        '/store/user/cherepan/RelValZMM_14/RelValMM14_ReRunLocalReco/230927_095118/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_6.root',
 #        '/store/user/cherepan/RelValZMM_14/RelValMM14_ReRunLocalReco/230927_095118/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_2.root',
 #        '/store/user/cherepan/RelValZMM_14/RelValMM14_ReRunLocalReco/230927_095118/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_7.root',

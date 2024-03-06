@@ -10,12 +10,19 @@ cscRootMaker = cms.EDAnalyzer('UFCSCRootMaker',
 
 
 #  cscRecHitTagSrc = cms.untracked.InputTag('csc2DRecHits','','localRecoUF'), # UF RECO
-#  cscSegTagSrc = cms.untracked.InputTag('cscSegments','','localRecoUF'),   #  UF reco
-
-
 #  cscRecHitTagSrc = cms.untracked.InputTag('csc2DRecHits','','RECO'), # RU reco
 
+
+#  cscSegTagSrc = cms.untracked.InputTag('cscSegments','','localRecoUF'),   #  UF reco
   cscSegTagSrc = cms.untracked.InputTag('cscSegments','','RECO'),    #  RU reco
+
+
+
+
+  cscSegmentsRULR = cms.untracked.InputTag('cscSegments','','RECO'),    #  RU reco
+  cscSegmentsUFLR = cms.untracked.InputTag('cscSegments','','localRecoUF'),    #  UF reco
+
+
 
   level1TagSrc = cms.untracked.InputTag('gtDigis'),
   hltTagSrc = cms.untracked.InputTag('TriggerResults', '', 'HLT'),

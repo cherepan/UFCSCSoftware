@@ -8,10 +8,15 @@
 //
 //
 //
-// Original Author:  Matthew Snowball/Vladimir Cherepanov
+// Original Author:  Matthew Snowball
 //         Created:  Tue Jun 18 10:26:09 EDT 2013
 //
 // Last Updated: Apr. 30, 2014
+//
+//
+// Recent Developments: Apr. 2023
+// by Vladimir Cherepanov
+//
 //
 
 
@@ -188,13 +193,27 @@ private:
   void doGenMuons(edm::Handle<reco::GenParticleCollection>& genParticles);
 
 
-  void SimHitSimTkDebug(edm::Handle<reco::GenParticleCollection>& genParticles,edm::Handle<edm::PSimHitContainer> simHits, edm::Handle<edm::SimTrackContainer> simTk);
+  void SimHitSimTkDebug(edm::Handle<reco::GenParticleCollection>& genParticles,edm::Handle<edm::PSimHitContainer> simHits, edm::Handle<edm::SimTrackContainer> simTk, edm::Handle<reco::TrackCollection> saMuons, edm::Handle<CSCRecHit2DCollection> recHits);
+
+  void SimHitGENParticleDebug(edm::Handle<reco::GenParticleCollection>& genParticles,edm::Handle<edm::PSimHitContainer> simHits, edm::Handle<edm::SimTrackContainer> simTk, 
+			      edm::Handle<reco::TrackCollection> saMuons, edm::Handle<reco::MuonCollection> muons, edm::Handle<CSCRecHit2DCollection> recHits);
 
   void doTracks(edm::Handle<reco::TrackCollection> genTracks);
   void doRecHits(edm::Handle<CSCRecHit2DCollection> recHits, edm::Handle<edm::PSimHitContainer> simHits, edm::Handle<edm::SimTrackContainer> simTk, edm::Handle<reco::GenParticleCollection>& genParticles, edm::Handle<reco::TrackCollection> saMuons, 
 		 edm::Handle<reco::MuonCollection> muons, const CSCGeometry* cscGeom, const edm::Event& iEvent);
   double getthisSignal(const CSCStripDigiCollection& stripdigis, CSCDetId idRH, int centerStrip);
   void doSegments(edm::Handle<CSCSegmentCollection> cscSegments, const CSCGeometry* cscGeom);
+
+
+
+  void CompareLRSegments(edm::Handle<CSCSegmentCollection> cscRUSegments, edm::Handle<CSCSegmentCollection> cscUFSegments,  edm::Handle<reco::MuonCollection> muons,
+                         edm::Handle<reco::TrackCollection> saMuons,
+                         edm::Handle<CSCRecHit2DCollection> recHits, const reco::Vertex *&PV, const edm::Event& iEvent, const edm::EventSetup& iSetup,
+                         const GlobalTrackingGeometry*  theGeom, const CSCGeometry* cscGeom);
+
+
+
+
   void doTrigger(edm::Handle<L1MuGMTReadoutCollection> pCollection, edm::Handle<edm::TriggerResults> hlt);
   void doStripDigis(edm::Handle<CSCStripDigiCollection> strips, const CSCGeometry* cscGeom);
   void doWireDigis(edm::Handle<CSCWireDigiCollection> wires, const CSCGeometry* cscGeom);
@@ -241,6 +260,12 @@ private:
   edm::EDGetTokenT<reco::TrackCollection> standAloneMuonsSrc;
   edm::EDGetTokenT<CSCRecHit2DCollection> cscRecHitTagSrc;
   edm::EDGetTokenT<CSCSegmentCollection> cscSegTagSrc;
+
+
+  edm::EDGetTokenT<CSCSegmentCollection> cscRUSegments;
+  edm::EDGetTokenT<CSCSegmentCollection> cscUFSegments;
+
+
   edm::EDGetTokenT<L1MuGMTReadoutCollection> level1TagSrc;
   edm::EDGetTokenT<edm::TriggerResults> hltTagSrc;
   edm::EDGetTokenT<CSCWireDigiCollection> wireDigiTagSrc;
@@ -499,6 +524,10 @@ UFCSCRootMaker::UFCSCRootMaker(const edm::ParameterSet& iConfig) :
   standAloneMuonsSrc(consumes<reco::TrackCollection>(iConfig.getUntrackedParameter<edm::InputTag>("standAloneMuonsSrc"))),
   cscRecHitTagSrc(consumes<CSCRecHit2DCollection>(iConfig.getUntrackedParameter<edm::InputTag>("cscRecHitTagSrc"))),
   cscSegTagSrc(consumes<CSCSegmentCollection>(iConfig.getUntrackedParameter<edm::InputTag>("cscSegTagSrc"))),
+
+  cscRUSegments(consumes<CSCSegmentCollection>(iConfig.getUntrackedParameter<edm::InputTag>("cscSegmentsRULR"))),
+  cscUFSegments(consumes<CSCSegmentCollection>(iConfig.getUntrackedParameter<edm::InputTag>("cscSegmentsUFLR"))),
+
   level1TagSrc(consumes<L1MuGMTReadoutCollection>(iConfig.getUntrackedParameter<edm::InputTag>("level1TagSrc"))),
   hltTagSrc(consumes<edm::TriggerResults>(iConfig.getUntrackedParameter<edm::InputTag>("hltTagSrc"))),
   wireDigiTagSrc(consumes<CSCWireDigiCollection>(iConfig.getUntrackedParameter<edm::InputTag>("wireDigiTagSrc"))),
@@ -634,7 +663,27 @@ void UFCSCRootMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
    // get CSC segment collection
    edm::Handle<CSCSegmentCollection> cscSegments;
    if(isLocalRECO || isFullRECO) iEvent.getByToken(cscSegTagSrc, cscSegments);
- 
+
+   //--------------- Here define two type of Segments RU and UF Local reco
+   // Note that UF Segments must present in the EDM file
+   bool CompareLRECO(true);
+   edm::Handle<CSCSegmentCollection> cscSegments_RU;
+   edm::Handle<CSCSegmentCollection> cscSegments_UF;
+   if( CompareLRECO  && (isLocalRECO || isFullRECO)) 
+     {
+       iEvent.getByToken(cscRUSegments, cscSegments_RU);
+       iEvent.getByToken(cscUFSegments, cscSegments_UF);
+       //       CompareLRSegments(cscSegments_RU, cscSegments_UF, muons,saMuons , recHits,PV,iEvent,iSetup,geometry_,cscGeom);
+     }
+
+
+
+
+
+
+   //----------------------------------------------------------------------
+
+
    // get the trigger collection
    edm::Handle<L1MuGMTReadoutCollection> pCollection;
    iEvent.getByToken(level1TagSrc,pCollection);
@@ -675,13 +724,17 @@ void UFCSCRootMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
    edm::Handle<reco::GenParticleCollection> genParticles;
    if(isGEN)
      {
-       if ( iEvent.getByToken(genToken_, genParticles))  doGenMuons(genParticles);
+       //       std::cout<<"================================== EVENT   ============================== "<<std::endl;
+       //       if ( iEvent.getByToken(genToken_, genParticles))  doGenMuons(genParticles);
 
      }
 
 
-   //   if(isGEN and isSIM)
-     //     SimHitSimTkDebug(genParticles,simHits,simTk);
+     if(isGEN and isSIM)
+        {
+   //  // SimHitSimTkDebug(genParticles,simHits,simTk,saMuons,recHits);
+              SimHitGENParticleDebug(genParticles,simHits,simTk,saMuons, muons, recHits);
+        }
    ////////////////////////////////////////////////////////////////////////////////
    nEventsTotal++;
 
@@ -689,7 +742,7 @@ void UFCSCRootMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
    Event = iEvent.id().event();
    LumiSect = iEvent.id().luminosityBlock();
    BunchCrossing = iEvent.bunchCrossing();
-
+   //   std::cout<<"--------------------------------------------------------------------------------------  Event   "<< Event << std::endl;
    //   cout<<" deb4 "<< std::endl;
    //Lumi Details
 /*   if (isDATA && isFullRECO && LumiDet.isValid()){
@@ -897,17 +950,345 @@ void UFCSCRootMaker::endLuminosityBlock(edm::LuminosityBlock const&, edm::EventS
 
 
 
-
-
-
-
-
-void UFCSCRootMaker::SimHitSimTkDebug(edm::Handle<reco::GenParticleCollection>& genParticles,edm::Handle<edm::PSimHitContainer> simHits,edm::Handle<edm::SimTrackContainer> simTk)
+void UFCSCRootMaker::SimHitGENParticleDebug(edm::Handle<reco::GenParticleCollection>& genParticles,edm::Handle<edm::PSimHitContainer> simHits,edm::Handle<edm::SimTrackContainer> simTk, edm::Handle<reco::TrackCollection> saMuons, edm::Handle<reco::MuonCollection> muons, edm::Handle<CSCRecHit2DCollection> recHits)
 {
+
+  float MuMass(0.1026);
+  TLorentzVector RCMuon_P4(0,0,0,0);
+  //  std::vector<>
+  if(muons->size() == 1)
+    {
+      //  std::cout<< " N MUONS:   "<< muons->size() << std::endl;
+  for(reco::MuonCollection::const_iterator mu = muons->begin(); mu != muons->end(); mu++ )
+    {
+      RCMuon_P4.SetPxPyPzE(mu->px(),mu->py(), mu->pz(), mu->energy());
+    }
+
+  TLorentzVector SAMuon_P4(0,0,0,0);
+  for(reco::TrackCollection::const_iterator muon = saMuons->begin(); muon != saMuons->end(); muon++ )
+    {
+      SAMuon_P4.SetPxPyPzE(muon->px(), muon->py(), muon->pz(), sqrt(muon->p2() + MuMass*MuMass));
+    }
+
+
+
+  int MCMuon_matched_to_SAMuon(-1);
+  int MCMuon_matched_to_RCMuon(-1);
+  double dR_MC_to_SA(999.);
+  double dR_MC_to_RC(999.);
+
+  std::cout<<" =============  gen Muons   "<< std::endl;
+  for (unsigned int igenparticle=0; igenparticle < genParticles->size(); igenparticle++)
+    {
+      const reco::GenParticle &g = genParticles->at(igenparticle);
+      if(abs(g.pdgId() ) == 13 )
+	{
+	  if(g.status() == 1 )
+	    {
+	      TLorentzVector gen_mu(g.p4().Px(),g.p4().Py(),g.p4().Pz(),g.p4().E());
+	      //	      gen_mu.Print();
+	      if(gen_mu.DeltaR(SAMuon_P4) < dR_MC_to_SA)
+		{
+		  dR_MC_to_SA = gen_mu.DeltaR(SAMuon_P4);
+		  MCMuon_matched_to_SAMuon = igenparticle;
+		}
+	      
+	      if(gen_mu.DeltaR(RCMuon_P4) < dR_MC_to_RC)
+		{
+		  dR_MC_to_RC = gen_mu.DeltaR(RCMuon_P4);
+		  MCMuon_matched_to_RCMuon = igenparticle;
+		}
+	    }
+	}
+    }
+  
+  if(MCMuon_matched_to_SAMuon!=-1)
+    {
+      const reco::GenParticle &g = genParticles->at(MCMuon_matched_to_SAMuon);
+      TLorentzVector gen_mu(g.p4().Px(),g.p4().Py(),g.p4().Pz(),g.p4().E());
+    }
+  
+  
+  if(MCMuon_matched_to_RCMuon!=-1)
+    {
+      const reco::GenParticle &g = genParticles->at(MCMuon_matched_to_RCMuon);
+      TLorentzVector gen_mu(g.p4().Px(),g.p4().Py(),g.p4().Pz(),g.p4().E());
+    }
+
+  //  regardons les particules simulees
+  std::cout<<"   Look at all sim Tracks   "<< std::endl;
+  int SimTrack_matched_to_RCMuon(-1);
+  float dR_SimTr_to_RC(999.);
+  for(unsigned int isimTrack = 0; isimTrack < simTk->size(); isimTrack++)
+    {
+      const SimTrack &simtr = simTk->at(isimTrack);
+      TLorentzVector SimTkP4_AtBoundary(simtr.getMomentumAtBoundary().Px(),
+                                        simtr.getMomentumAtBoundary().Py(),
+                                        simtr.getMomentumAtBoundary().Pz(),
+                                        simtr.getMomentumAtBoundary().E());
+
+
+      if(MCMuon_matched_to_RCMuon!=-1)
+	{
+	  const reco::GenParticle &g = genParticles->at(MCMuon_matched_to_RCMuon);
+	  TLorentzVector gen_mu(g.p4().Px(),g.p4().Py(),g.p4().Pz(),g.p4().E());
+
+	  if( SimTkP4_AtBoundary.DeltaR(gen_mu) < dR_SimTr_to_RC )
+	    {
+	      SimTrack_matched_to_RCMuon = isimTrack;
+	      dR_SimTr_to_RC = SimTkP4_AtBoundary.DeltaR(gen_mu);
+	    }
+	  //      std::cout<<"  i Sim Track   "<< isimTrack <<  "   noGenPart   "<< simtr.noGenpart()  ;
+	  //      SimTkP4_AtBoundary.Print();
+	}
+    }
+  TLorentzVector SimTkToxCheck(0,0,0,0);
+  if(SimTrack_matched_to_RCMuon!=-1)
+    {
+
+      const reco::GenParticle &g = genParticles->at(MCMuon_matched_to_RCMuon);
+      TLorentzVector gen_mu(g.p4().Px(),g.p4().Py(),g.p4().Pz(),g.p4().E());
+
+
+      const SimTrack &simTr_MatchedToMC = simTk->at(SimTrack_matched_to_RCMuon);
+      TLorentzVector SimTkP4_AtBoundary_Matched(simTr_MatchedToMC.getMomentumAtBoundary().Px(),
+						simTr_MatchedToMC.getMomentumAtBoundary().Py(),
+						simTr_MatchedToMC.getMomentumAtBoundary().Pz(),
+						simTr_MatchedToMC.getMomentumAtBoundary().E());
+      SimTkToxCheck = SimTkP4_AtBoundary_Matched;
+      std::cout<<"::  Matched SimTrack to GEN Muon    " << SimTrack_matched_to_RCMuon  << "  --->dR:  "  <<SimTkP4_AtBoundary_Matched.DeltaR(RCMuon_P4) 
+	       << "  pAbs  "<< SimTkP4_AtBoundary_Matched.P()  << "  genIndex      " << simTr_MatchedToMC.genpartIndex()<<"  SimTrack  trackID   " << simTr_MatchedToMC.trackId() <<std::endl;
+
+
+      SimTkP4_AtBoundary_Matched.Print();
+      gen_mu.Print();
+
+      if(simTr_MatchedToMC.genpartIndex()!=-1)
+	{
+	  const reco::GenParticle &genPart_by_SimTk_index = genParticles->at(simTr_MatchedToMC.genpartIndex()-1);
+	  TLorentzVector genPart_by_SimTk_P4(genPart_by_SimTk_index.p4().Px(),genPart_by_SimTk_index.p4().Py(),genPart_by_SimTk_index.p4().Pz(),genPart_by_SimTk_index.p4().E());
+
+	  std::cout<<" ----   "<<std::endl;
+	  genPart_by_SimTk_P4.Print();
+	}
+    }
+
+  //---------------- sim hits loop
+  edm::PSimHitContainer::const_iterator dSHsimIter;
+  for (dSHsimIter = simHits->begin(); dSHsimIter != simHits->end(); dSHsimIter++)
+    {
+
+      std::cout<<" Closest SimHit  x - y  "<< (*dSHsimIter).localPosition().x() << " - "<<  (*dSHsimIter).localPosition().y() 
+	       << "   sim Hit trackID   " << (*dSHsimIter).trackId()  << "  pabs    "<<  (*dSHsimIter).pabs() << "  pType    " <<  (*dSHsimIter).particleType()  
+	       <<  "   dR   to Phi _ Eta at entry  "<< sqrt(pow(SimTkToxCheck.Phi() - (*dSHsimIter).phiAtEntry(),2 ) +  pow(SimTkToxCheck.Theta() - (*dSHsimIter).thetaAtEntry(),2))  <<std::endl;
+    }
+  //---------------- sim hits loop
+
+    }
+
+}
+
+
+
+
+void UFCSCRootMaker::SimHitSimTkDebug(edm::Handle<reco::GenParticleCollection>& genParticles,edm::Handle<edm::PSimHitContainer> simHits,edm::Handle<edm::SimTrackContainer> simTk, edm::Handle<reco::TrackCollection> saMuons, edm::Handle<CSCRecHit2DCollection> recHits)
+{
+  for(reco::TrackCollection::const_iterator muon = saMuons->begin(); muon != saMuons->end(); muon++ )
+    {
+      TLorentzVector SAMuonLV(muon->px(), muon->py(), muon->pz(),sqrt(muon->p2() + 0.102*0.102));
+      double deltaR(999.);
+      //      int GenPartMatchedIndex(-1);
+      TLorentzVector MCp4;
+      for (unsigned int igenparticle=0; igenparticle < genParticles->size(); igenparticle++)
+	{
+	  const reco::GenParticle &g = genParticles->at(igenparticle);
+	  TLorentzVector gen_mu(g.p4().Px(),g.p4().Py(),g.p4().Pz(),g.p4().E());
+	  //    if(SimTkP4_AtBoundary.Pt() == 0)                  std::cout<<"  Something is not going right with sim track PT   " << std::endl;
+	  if(SAMuonLV.DeltaR(gen_mu) < deltaR)
+	    {
+	      deltaR = SAMuonLV.DeltaR(gen_mu) ;
+	      //      GenPartMatchedIndex = igenparticle;
+	      MCp4 = gen_mu;
+	    }
+	}
+
+            std::cout<<" >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>  Muons Matching Reco::Gen dR  " << SAMuonLV.DeltaR(MCp4)<<std::endl;
+	    SAMuonLV.Print();
+
+            std::cout<<" Muons Matching GEne::  " <<std::endl;
+
+	    MCp4.Print();
+    }
+
+
+
+
+
+
+
+
+  std::cout<<" --------------------- loop over RecHits  --------  "<< std::endl;
+  for (CSCRecHit2DCollection::const_iterator dRHIter = recHits->begin(); dRHIter != recHits->end(); dRHIter++) {
+    CSCDetId idrec = (CSCDetId)(*dRHIter).cscDetId();
+    AllRechits.insert(std::pair<CSCDetId , CSCRecHit2D>(idrec,*dRHIter));
+    TLorentzVector ThisRecHitMuon(0,0,0,0);
+    // Store rechit as a Local Point:
+    LocalPoint rhitlocal = (*dRHIter).localPosition();
+    //    LocalError rerrlocal = (*dRHIter).localPositionError();
+
+    std::cout<<" ----------- RC   "<< rhitlocal.x() << "      " << rhitlocal.y() << " layer   "<<idrec.layer() <<std::endl;
+    double xTolerance = 0.10; // was 0.05
+    double yTolerance = 0.10;
+    reco::TrackCollection::const_iterator HitMuon;
+    for(reco::TrackCollection::const_iterator muon = saMuons->begin(); muon != saMuons->end(); muon++ )
+      {
+	bool found = false;
+	for (trackingRecHit_iterator hit = muon->recHitsBegin(); hit != muon->recHitsEnd(); hit++ )
+	  {
+	    const DetId detId( (*hit)->geographicalId() );
+	    if (detId.det() == DetId::Muon)
+	      {
+		if (detId.subdetId() == MuonSubdetId::CSC)
+		  { 
+		    CSCDetId  cscId(detId.rawId());
+		    LocalPoint rhitlocalSA = (*hit)->localPosition();
+
+		  //		  		  cout << saMuCounter << endl
+		  //				  cout<< "x : " << rhitlocal.x() << "  " << rhitlocalSA.x() << endl
+		  //				      << "y : " << rhitlocal.y() << "  " << rhitlocalSA.y() << endl
+		  //				      << "ec: " << idrec.endcap() << "  " << cscId.endcap() << endl
+		  //				      << "rg: " << idrec.ring() << "  " << cscId.ring() << endl
+		  //				      << "cb: " << idrec.chamber() << "  " << cscId.chamber() << endl
+		  //				      << "lr: " << idrec.layer() << "  " << cscId.layer() << endl
+		  //				      << "st: " << idrec.station() << "  " << cscId.station() << endl;
+		  if(idrec.endcap() == cscId.endcap() && idrec.ring() == cscId.ring() && idrec.station() == cscId.station() && !found)
+		    {
+		      if(idrec.chamber() == cscId.chamber() && !found)// && idrec.layer() == cscId.layer() && !found)
+			{
+			  std::cout<<" ------------------------------  RC SA  "<< rhitlocalSA.x() << "      " << rhitlocalSA.y() << " layer    "<<cscId.layer() <<std::endl;
+			  if( (fabs(rhitlocal.x() - rhitlocalSA.x()) < fabs(xTolerance*rhitlocal.x()) || fabs(rhitlocal.x() - rhitlocalSA.x()) < fabs(xTolerance*rhitlocalSA.x())) && !found)
+			    {
+			      if( (fabs(rhitlocal.y() - rhitlocalSA.y()) < fabs(yTolerance*rhitlocal.y()) || fabs(rhitlocal.y() - rhitlocalSA.y()) < fabs(yTolerance*rhitlocalSA.y())) && !found)
+				{
+				  
+				  //						  recHits2D_belongsToSaMuon[counter] = saMuCounter;
+				  found = true;
+				  HitMuon = muon;
+				  ThisRecHitMuon.SetPxPyPzE(muon->px(), muon->py(), muon->pz(), sqrt(muon->p2() + 0.102*0.102));
+				  std::cout<<"  Muon pT   "<<muon->pt() <<" recHit x-y   " 
+					   << rhitlocal.x() << "     "<< rhitlocalSA.x() <<"  y:  " << rhitlocal.y() <<"   " <<rhitlocalSA.y() <<  std::endl;					
+				}
+			    }
+			}
+		    }
+		  }
+	      }
+	  }
+      }
+
+  
+  double mindiff = 1000;
+  double mindiffX = 99;
+  // If MC, find closest muon simHit to check resolution:
+  edm::PSimHitContainer::const_iterator dSHsimIter;
+  edm::PSimHitContainer::const_iterator dSHsimIter_matched;
+
+  //  std::cout<<  "  >>>>>>>>>>>>>>>>>>>> Strat loop over SimHits   "<< std::endl;
+  for (dSHsimIter = simHits->begin(); dSHsimIter != simHits->end(); dSHsimIter++){
+    // Get DetID for this simHit:
+    CSCDetId sId = (CSCDetId)(*dSHsimIter).detUnitId();
+    // Check if the simHit detID matches that of current recHit
+    if (sId == idrec ){
+      // Get the position of this simHit in local coordinate system:
+      LocalPoint sHitlocal = (*dSHsimIter).localPosition();
+
+
+
+
+      // Now we need to make reasonably sure that this simHit is
+      // responsible for this recHit:
+      if ( sqrt((sHitlocal.x() - rhitlocal.x())*(sHitlocal.x() - rhitlocal.x())
+		+ (sHitlocal.y() - rhitlocal.y())*(sHitlocal.y() - rhitlocal.y())) < mindiff
+	   && (sHitlocal.x() - rhitlocal.x()) < mindiffX
+	   && (sHitlocal.y() - rhitlocal.y()) < 10.0)
+	{
+	  mindiff = sqrt((sHitlocal.x() - rhitlocal.x())*(sHitlocal.x() - rhitlocal.x())
+			 + (sHitlocal.y() - rhitlocal.y())*(sHitlocal.y() - rhitlocal.y()));
+	  mindiffX = (sHitlocal.x() - rhitlocal.x());
+	  dSHsimIter_matched = dSHsimIter;
+	}
+
+
+    }
+  }
+  
+  std::cout<<" MATCHING  =================== delta  x-y  (RECO - MC)  "<< fabs(rhitlocal.x()  - (*dSHsimIter_matched).localPosition().x())
+  	   <<"  -  "<< fabs(rhitlocal.y() - (*dSHsimIter_matched).localPosition().y())  << std::endl;
+  std::cout<<" Closest SimHit  x - y  "<< (*dSHsimIter_matched).localPosition().x() << " - "<<  (*dSHsimIter_matched).localPosition().y() << std::endl;
+  std::cout<<"----------------------------------------   lets Look at this Sim hit and find GenMuon it corresponds to   "<< std::endl;
+
+  std::cout<<"  The trackId of this   hit    "<< (*dSHsimIter_matched).trackId() << "   is it always a muon  "  << (*dSHsimIter_matched).particleType() 
+	   <<"  PABS   "<<(*dSHsimIter_matched).pabs() <<std::endl;
+
+  std::cout<<" This hit SimTrack Momentum   "<< std::endl;
+  
+  double dPabs(999.);
+
+  TLorentzVector checkP4(0,0,0,0);
+  for (unsigned int igenparticle=0; igenparticle < genParticles->size(); igenparticle++)
+    {
+        const reco::GenParticle &g = genParticles->at(igenparticle);
+	TLorentzVector gen_mu(g.p4().Px(),
+			      g.p4().Py(),
+			      g.p4().Pz(),
+			      g.p4().E() );
+	//	if(fabs(gen_mu.P() - (*dSHsimIter_matched).pabs()) < 2 )
+	//	  {
+	//	    std::cout<< ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> all genParticles  "<< gen_mu.P();
+	//	    gen_mu.Print();
+	//	  }
+
+        if(fabs((*dSHsimIter_matched).pabs() - gen_mu.P() ) < dPabs )
+	  {
+	    dPabs = fabs((*dSHsimIter_matched).pabs() - gen_mu.P());
+	    checkP4 = gen_mu;
+	  }
+
+      }
+
+  //  std::cout<<" and the reco Track of RecHit is:     PABS    "<< ThisRecHitMuon.P() << std::endl;
+  //  ThisRecHitMuon.Print();
+  //  std::cout<<"  MC  matched :  "<< checkP4.P() <<std::endl;
+  //  checkP4.Print();
+
+  }
+  
+  /*
+  if((*dSHsimIter_matched).trackId() < simTk->size() )
+    {
+      TLorentzVector ThisHitTkP4_AtBoundary(simTk->at((*dSHsimIter_matched).trackId()).getMomentumAtBoundary().Px(),
+					    simTk->at((*dSHsimIter_matched).trackId()).getMomentumAtBoundary().Py(),
+					    simTk->at((*dSHsimIter_matched).trackId()).getMomentumAtBoundary().Pz(),
+					    simTk->at((*dSHsimIter_matched).trackId()).getMomentumAtBoundary().E());
+      ThisHitTkP4_AtBoundary.Print();
+      std::cout<<" and the reco Track of RecHit is:     PABS    "<< ThisRecHitMuon.P() << std::endl;
+      ThisRecHitMuon.Print();
+
+
+    }
+  else
+    {
+      std::cout<<"  Track Hit Id  is >>>    "<< (*dSHsimIter_matched).trackId() << "   than   Number of SimTrackss   "<< simTk->size()<< std::endl;
+    }
+  }
+  */
 
 
   //  const edm::View<pat::PackedCandidate>* cands = pfCandHandle.product();
   std::cout<<"   nSim Hits   "<< simHits->size()  << "   nSimTk   " <<simTk->size() << " ngenPart  " << genParticles->size()<<std::endl;
+
+
+
 
   for(unsigned int isimHit = 0 ; isimHit < simHits->size(); isimHit++)
     {
@@ -918,12 +1299,10 @@ void UFCSCRootMaker::SimHitSimTkDebug(edm::Handle<reco::GenParticleCollection>& 
       //      simHits_ID_station[counter] = sId.station();
       //      simHits_ID_chamber[counter] = sId.chamber();
       int Chamber  = 10000*sId.endcap() + 1000*sId.station() + 100*sId.ring() + sId.chamber();
-      if(abs(hit.particleType())== 13 )
+      //      if(abs(hit.particleType())== 13 )
 	{
-
-	  std::cout<<" hit #     simTk index   "<< isimHit  << " ,  "<<  hit.trackId() << std::endl;
-	    //		   <<"   chamber/layer   " << Chamber <<" /   "<<sId.layer()  <<std::endl;
-
+	  std::cout<<"--------- all simhits pabs  "<< hit.pabs() <<std::endl;
+	  //	  std::cout<<" hit #   simTk index   "<< isimHit  << " ,  "<<  hit.trackId() << std::endl;
 	
 	  int gen_index(-1);
 	  if(hit.trackId() < simTk->size() )
@@ -944,7 +1323,7 @@ void UFCSCRootMaker::SimHitSimTkDebug(edm::Handle<reco::GenParticleCollection>& 
 	      //	      std::cout<<"  SimTk P4  At Surface : "; SimTkP4_Surface.Print();
 	      
 	      //	  std::cout<<" gen_index from simTk  "<< gen_index << "  simTk pT    " << SimTkP4_AtBoundary.Pt() <<std::endl;
-	      std::cout<<" hit Track ID  "<< hit.trackId() << "  simTk pT    " << SimTkP4_AtBoundary.Pt() <<std::endl;
+	      //  std::cout<<" hit Track ID  "<< hit.trackId() << "  simTk pT    " << SimTkP4_AtBoundary.Pt() <<std::endl;
 	      
 	      //	  const reco::GenParticle &gen_part = genParticles->at(gen_index);
 	      int selected_gen_index(-1);
@@ -961,6 +1340,7 @@ void UFCSCRootMaker::SimHitSimTkDebug(edm::Handle<reco::GenParticleCollection>& 
 		  {
 		    const reco::GenParticle &g = genParticles->at(igenparticle);
 		    TLorentzVector gen_mu(g.p4().Px(),g.p4().Py(),g.p4().Pz(),g.p4().E());
+		    //    if(SimTkP4_AtBoundary.Pt() == 0)		    std::cout<<"  Something is not going right with sim track PT   " << std::endl;
 		    if(SimTkP4_AtBoundary.Pt() !=0 )
 		      {
 			//			      if(gen_mu.DeltaR(SimTkP4_AtBoundary) < dR)
@@ -977,26 +1357,54 @@ void UFCSCRootMaker::SimHitSimTkDebug(edm::Handle<reco::GenParticleCollection>& 
 		
 	      }
 	      
-	      
-	      //  std::cout<<" genindex from SimTk and dR  matched selected_gen_particle_index:   "<< gen_index <<"  " <<selected_gen_index << std::endl;
-	      std::cout<<" matched selected_gen_particle_index:   " <<selected_gen_index <<std::endl;
+
+	      std::cout<<" genindex from SimTk and dR  matched selected_gen_particle_index:   "<< gen_index <<"  " <<selected_gen_index <<"    particle type  "  <<hit.particleType() <<std::endl;
+	      //	      std::cout<<" matched selected_gen_particle_index:   " <<selected_gen_index <<std::endl;
+	      //	      std::cout<<" simHits x - y "<< hit.localPosition().x() << "  -  "<< hit.localPosition().y() << std::endl;
 	      //	      if(gen_index)	      const reco::GenParticle &gen_part1 = genParticles->at(gen_index);
 	      if(selected_gen_index!=-1)
 		{
 		  const reco::GenParticle &gen_part2 = genParticles->at(selected_gen_index);
-		  std::cout<<" --------------   GenParticle is :     "<< gen_part2.pdgId() <<  " pT  " <<  sqrt(gen_part2.p4().Px()*gen_part2.p4().Px() + 
-														gen_part2.p4().Py()*gen_part2.p4().Py() )<<std::endl;
+		  TLorentzVector gen_mu_sel(gen_part2.p4().Px(),gen_part2.p4().Py(),gen_part2.p4().Pz(),gen_part2.p4().E());
+		  std::cout<<" --------------   GenParticle is :     "<< gen_part2.pdgId() <<  " pT  " <<  gen_mu_sel.Pt() <<std::endl;
+		  gen_mu_sel.Print();
+
 		}
 	    }
-	  
-	  
-	  
 	}
     }
-      //      for(unsigned int isimTrack = 0; isimTrack < simTk->size(); isimTrack++)
-      //	{
-      //	  const SimTrack &simtr = simTk->at(isimTrack);
-      //	}
+
+
+
+  for(unsigned int isimTrack = 0; isimTrack < simTk->size(); isimTrack++)
+    {
+      const SimTrack &simtr = simTk->at(isimTrack);
+      TLorentzVector SimTkP4_AtBoundary(simtr.getMomentumAtBoundary().Px(),
+					simtr.getMomentumAtBoundary().Py(),
+					simtr.getMomentumAtBoundary().Pz(),
+					simtr.getMomentumAtBoundary().E());
+
+      //      TLorentzVector MCp4;
+      int genindex(-1);
+      double simgendR(999.);
+      for (unsigned int igenparticle=0; igenparticle < genParticles->size(); igenparticle++)
+        {
+          const reco::GenParticle &g = genParticles->at(igenparticle);
+          TLorentzVector MCp4(g.p4().Px(),g.p4().Py(),g.p4().Pz(),g.p4().E());
+	  if(MCp4.DeltaR(SimTkP4_AtBoundary) < simgendR)
+	    {
+	      simgendR = MCp4.DeltaR(SimTkP4_AtBoundary);
+	      genindex = igenparticle;
+	    }
+	}
+      if(abs(genParticles->at(genindex).pdgId()) == 13)
+	{
+	  //	  std::cout<<" >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> genParticle matched to the simTr   "<< genindex 
+	  //		   <<  "  pdgId   " << genParticles->at(genindex).pdgId() <<"   simTrack gnindex:   " << simtr.genpartIndex() <<std::endl;
+	  TLorentzVector mathc(genParticles->at(genindex).p4().Px(),genParticles->at(genindex).p4().Py(),genParticles->at(genindex).p4().Pz(),genParticles->at(genindex).p4().E());
+	  mathc.Print();
+	}
+    }
       
 
 
@@ -1038,6 +1446,7 @@ void UFCSCRootMaker::SimHitSimTkDebug(edm::Handle<reco::GenParticleCollection>& 
 	  TLorentzVector mu(gen_muons_px[counter],gen_muons_py[counter], gen_muons_pz[counter],gen_muons_energy[counter]);
 	  //	  if(mu.Pt()> 10 && fabs(mu.Eta())  < 2.4 && fabs(mu.Eta())  > 1.0 )
 	  std::cout<<":::::::::::::Found Muons:  gen    muon pT/|eta|:  "<<  mu.Pt() << "  /   "<< fabs(mu.Eta())   << "   genIndex=============>:    "<< itr <<std::endl;
+	  mu.Print();
 	  //	  std::cout<<"  muon gen counter     "<< gen_counter << std::endl;
           counter++;
 
@@ -1049,7 +1458,7 @@ void UFCSCRootMaker::SimHitSimTkDebug(edm::Handle<reco::GenParticleCollection>& 
 
 
 
-}
+  }
 
 
 
@@ -1085,11 +1494,7 @@ UFCSCRootMaker::doGenMuons(edm::Handle<reco::GenParticleCollection>& genParticle
 	  gen_muons_genindex[counter] = igenparticle;
 
 
-	  //	  std::cout<<"Selected Muon   pT index :  "<<  sqrt(g.p4().Px()*g.p4().Px() + g.p4().Py()*g.p4().Py()) <<"     " << gen_muons_genindex[counter] <<std::endl;
-	  //	  std::cout<<"  muon gen counter     "<< gen_counter << std::endl;
 	  counter++;
-	  
-
 	}
 
     }
@@ -1236,10 +1641,15 @@ void UFCSCRootMaker::doMuons(edm::Handle<reco::MuonCollection> muons,
 	  //	  if(mu->outerTrack().isNonnull() && (mu->isStandAloneMuon() || mu->isGlobalMuon()) )
 	    {
 	      //	      std::cout<<"  deb 3 "<< std::endl;
-	      std::vector<CSCSegment> mySavedSegments = findMuonSegments(*mu->outerTrack(), cscSegments, recHits, cscGeom);
+
+
+	      std::vector<CSCSegment> mySavedSegments= findMuonSegments(*mu->outerTrack(), cscSegments, recHits, cscGeom);
+
+
+
 	      //	      std::vector<CSCSegment> mySavedSegments = findMuonSegments(*mu->bestTrack(), cscSegments, recHits, cscGeom);
 
-	      std::cout<< "=====  per muon    mySavedSegments.size()  " << mySavedSegments.size()  << std::endl;  
+	      //	      std::cout<< "=====  per muon    mySavedSegments.size()  " << mySavedSegments.size()  << std::endl;  
 	      for (int j = 0; j < (int)mySavedSegments.size(); j++)
 		{
 		  //		  std::cout<<"  ==================================================    I have to see this  "<< j << std::endl;
@@ -1701,10 +2111,10 @@ UFCSCRootMaker::doRecHits(edm::Handle<CSCRecHit2DCollection> recHits, edm::Handl
 	   simHits_theta[counter] = (*dSHsimIter).thetaAtEntry();
 	   
 	   // find gen muon index that produced this hit
-	   //============================================
+	   
 	   int gen_muon_index(-1);
-
-	   if(abs((*dSHsimIter).particleType())  == 13 )
+	   //============================================ c'est commente le 05.03.2024
+	   /*	   if(abs((*dSHsimIter).particleType())  == 13 )
 
 	       if( (*dSHsimIter).trackId() < simTk->size() ) // hit sometimes return not realistic track index (> 10^5)
 		 {
@@ -1719,7 +2129,7 @@ UFCSCRootMaker::doRecHits(edm::Handle<CSCRecHit2DCollection> recHits, edm::Handl
 		     for (unsigned int igenparticle=0; igenparticle < genParticles->size(); igenparticle++)
 		       {
 			 const reco::GenParticle &g = genParticles->at(igenparticle);
-			 TLorentzVector gen_mu(g.p4().Px(),g.p4().Py(),g.p4().Pz(),g.p4().E());
+			 TLorentzVector gen_mu(g.p4().Px(),g.p4().Py(),g.4().Pz(),g.p4().E());
 			 
 			 //if(gen_mu.DeltaR(SimTkP4_AtBoundary) < dR)
 			 if(fabs(gen_mu.Pt() - SimTkP4_AtBoundary.Pt()) < dPt)
@@ -1729,28 +2139,27 @@ UFCSCRootMaker::doRecHits(edm::Handle<CSCRecHit2DCollection> recHits, edm::Handl
 			     gen_muon_index = igenparticle;
 			   }
 		       }
-		 }
+		 
 	   
 	   //	   std::cout<<"  recHit  gen_muon_index  "<< gen_muon_index << std::endl;
 	   //	   if(gen_muon_index!=-1)std::cout<<  " gen pT to be stored  " << sqrt(genParticles->at(gen_muon_index).p4().Px()*genParticles->at(gen_muon_index).p4().Px() + 
 	   //									       genParticles->at(gen_muon_index).p4().Py()*genParticles->at(gen_muon_index).p4().Py()) << std::endl;
-	   simHits_genmuonindex[counter] = gen_muon_index;
-	   
-
-	   /*
-	   std::cout<<"============  gen_muon_index:    "<< gen_muon_index<< std::endl;
-	   if(gen_muon_index!=-1){
-	     const reco::GenParticle &gen_part2 = genParticles->at(gen_muon_index);
-	     std::cout<<" --------------   GenParticle is :     "<< gen_part2.pdgId() <<  " pT  " <<  sqrt(gen_part2.p4().Px()*gen_part2.p4().Px() +
-													   gen_part2.p4().Py()*gen_part2.p4().Py() )<<std::endl;
-	   }
 	   */
 
+	   unsigned int simHits_simTrackId;
+	   simHits_simTrackId = (*dSHsimIter).trackId(); // track id of the track that produced the simHit
+	   for(unsigned int isimTrack = 0; isimTrack < simTk->size(); isimTrack++)
+	     {
+	       const SimTrack &simTrack = simTk->at(isimTrack);
+	       if(simTrack.trackId() == simHits_simTrackId)
+		 gen_muon_index = simTrack.genpartIndex()-1;
 
-
+	     }
+	   simHits_genmuonindex[counter] = gen_muon_index;
 	   counter++;
 	 }
      }
+
    simHits_nSimHits = counter;
    
 
@@ -1802,6 +2211,38 @@ double UFCSCRootMaker::getthisSignal(const CSCStripDigiCollection& stripdigis, C
 	return thisADC;
 }
 
+void // this function is pure;y for debugging purposes;
+UFCSCRootMaker::CompareLRSegments(edm::Handle<CSCSegmentCollection> cscRUSegments, edm::Handle<CSCSegmentCollection> cscUFSegments,  edm::Handle<reco::MuonCollection> muons,
+				  edm::Handle<reco::TrackCollection> saMuons,
+				  edm::Handle<CSCRecHit2DCollection> recHits, const reco::Vertex *&PV, const edm::Event& iEvent, const edm::EventSetup& iSetup,
+				  const GlobalTrackingGeometry*  theGeom, const CSCGeometry* cscGeom)
+
+{
+
+  std::cout<<"  segmentSizes   RU:  "<< cscRUSegments->size() << "  UF:    " << cscUFSegments->size() <<std::endl;
+
+
+  counter = 0;
+  for(reco::MuonCollection::const_iterator mu = muons->begin(); mu != muons->end(); mu++ ) 
+    {
+      std::cout<<"   outer Tracks is NonNull:    "<<   mu->outerTrack().isNonnull() <<std::endl;
+
+      if( mu->outerTrack().isNonnull())
+	{
+
+	  std::cout<<" ====================================  RUN RU Segment-Muon Matching   ===================="<<std::endl;
+	  std::vector<CSCSegment> mySavedSegmentsRU = findMuonSegments(*mu->outerTrack(), cscRUSegments, recHits, cscGeom);
+	  std::cout<<" ====================================  RUN UF Segment-Muon Matching   ===================="<<std::endl;
+	  std::vector<CSCSegment> mySavedSegmentsUF = findMuonSegments(*mu->outerTrack(), cscUFSegments, recHits, cscGeom);
+
+	  std::cout<<"  N RU Segments linked to muon #   "<<mySavedSegmentsRU.size() << "   UF:   "<< mySavedSegmentsUF.size() <<std::endl;
+	}
+    }
+
+
+}
+
+					
 
 void
 UFCSCRootMaker::doSegments(edm::Handle<CSCSegmentCollection> cscSegments, const CSCGeometry* cscGeom)
@@ -1809,7 +2250,7 @@ UFCSCRootMaker::doSegments(edm::Handle<CSCSegmentCollection> cscSegments, const 
   
    // CSC Segments
    counter = 0;
-   std::cout<<"  do Segments   size ()   "<< cscSegments->size() << std::endl;
+   //  std::cout<<"  do Segments   size ()   "<< cscSegments->size() << std::endl;
    for(CSCSegmentCollection::const_iterator dSiter=cscSegments->begin(); dSiter != cscSegments->end(); dSiter++) {
 
      std::vector<double> recHitRecord_localX, recHitRecord_localY;
@@ -3255,7 +3696,7 @@ std::vector<CSCSegment> UFCSCRootMaker::findMuonSegments(const reco::Track& Trac
 
   std::vector<CSCSegment>  savedSegments;
   std::vector<GlobalPoint> savedPoints;
-  //  std::cout<<"  findMuonSegments  deb 1"  << std::endl;
+
   for(trackingRecHit_iterator recHit =  Track.recHitsBegin(); recHit != Track.recHitsEnd(); ++recHit)
     {
       //      std::cout<<"  findMuonSegments:   recHit is valid     "  <<(*recHit)->isValid() <<std::endl;
@@ -3270,7 +3711,7 @@ std::vector<CSCSegment> UFCSCRootMaker::findMuonSegments(const reco::Track& Trac
       if (idRivHit.det() == 2 /*DetId::Muon*/ && idRivHit.subdetId() == 2 /*MuonSubdetId::CSC*/ ) 
 	{
 
-
+	  //	  std::cout<<"  Muon ID and in CSC " << std::endl;
 	  // get the RecHit Local Position
 	  LocalPoint posTrackRecHit = (*recHit)->localPosition(); 
 	  // get the chamber Id
@@ -3281,7 +3722,7 @@ std::vector<CSCSegment> UFCSCRootMaker::findMuonSegments(const reco::Track& Trac
 	  int chamber = tempchamberId.chamber();    
 	  CSCDetId chamberId(endcap, station, ring, chamber, 0);
 	  int trackRHChamberSerial = chamberSerial(chamberId);
-	  //  std::cout << "CSC RH:   x/y " << posTrackRecHit.x()   << " /  "<< posTrackRecHit.y()  << "   chamber:  "<< std::endl;	  
+	  //	  std::cout << "CSC RH:   x/y " << posTrackRecHit.x()   << " /  "<< posTrackRecHit.y()  << "   chamber:  "<< std::endl;	  
 	  for(CSCSegmentCollection::const_iterator dSiter=cscSegments->begin(); dSiter != cscSegments->end(); dSiter++) 
 	    {
 
@@ -3289,8 +3730,9 @@ std::vector<CSCSegment> UFCSCRootMaker::findMuonSegments(const reco::Track& Trac
 	      //int nRH = (*dSiter).nRecHits();
 	      int allSegChamberSerial = chamberSerial(id);
 
-	      //cout << "NEW SEG  " << allSegChamberSerial << "   " << trackRHChamberSerial << endl;
+	      //	      cout << "NEW SEG  " << allSegChamberSerial << "   " << trackRHChamberSerial << endl;
 	      if (allSegChamberSerial != trackRHChamberSerial) continue;
+	      //	      cout << "PASSED   " <<"  allSegChamberSerial     " << allSegChamberSerial << "   trackRHChamberSerial    " << trackRHChamberSerial << endl;
 	      LocalPoint localPos = (*dSiter).localPosition();
 	      const CSCChamber* cscchamber = cscGeom->chamber(id);
 	      GlobalPoint globalPosition = GlobalPoint(0.0, 0.0, 0.0);
@@ -3316,12 +3758,27 @@ std::vector<CSCSegment> UFCSCRootMaker::findMuonSegments(const reco::Track& Trac
 		  selected = true;
 		}
 	      */
+	      //	      std::cout<<"   compare positions  x  " <<  localPos.x() <<  "  +-   "<< (*dSiter).localPositionError().xx()  << "   " <<  posTrackRecHit.x() << std::endl;
+	      //	      std::cout<<"   compare positions  y  " <<  localPos.y() <<  "  +-   "<< (*dSiter).localPositionError().yy()  << "   " <<  posTrackRecHit.y() << std::endl;
 
-	      if (localPos.x() != posTrackRecHit.x()) continue;                                                                                                                                            
-	      if (localPos.y() != posTrackRecHit.y()) continue;                                                                                                                                            
-	      if (localPos.z() != posTrackRecHit.z()) continue; 
+
+
+	      //	      std::cout<< "  delta X  segment rechit is whithn uncert ?     "<< fabs(localPos.x() -  posTrackRecHit.x()) << "   segment LR uncertainty  "<< 2*(*dSiter).localPositionError().xx() << std::endl;
+	      //	      std::cout<< "  delta Y  segment rechit is whithn uncert ?     "<< fabs(localPos.y() -  posTrackRecHit.y()) << "   segment LR uncertainty  "<< 2*(*dSiter).localPositionError().yy() << std::endl;
+
+
+	      //commented out on 26.10.2023, lets allow segment muon matchiong to be within 3 sigma of segment uncertainty
+	      //the UF approach defines recHits positions differently, add discsuttion on that subject later 
+	      //	      if (localPos.x() != posTrackRecHit.x()) continue; 
+	      //	      if (localPos.y() != posTrackRecHit.y()) continue;                                                                                                                     
+
+	      // accept the segment if withing 3 sigmas of the rechit positon, i have serious doubts it's right, to be looked further
+	      if(std::fabs(localPos.x()  -  posTrackRecHit.x())  > 3* (*dSiter).localPositionError().xx()) continue;
+	      if(std::fabs(localPos.y()  -  posTrackRecHit.y())  > 3* (*dSiter).localPositionError().yy()) continue;
+	      //	      if (localPos.z() != posTrackRecHit.z()) continue;   //  Z  componentz of the RecHit ?!!!! Bloody hell, friends ... you compared 0 to 0
 	      
-	      //cout << "Selected!" << endl;
+
+	      //	      cout << "Selected!" << endl;
 	      if(savedSegments.empty())
 		{
 		  savedSegments.push_back(*dSiter);
