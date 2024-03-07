@@ -17,8 +17,6 @@ cscRootMaker = cms.EDAnalyzer('UFCSCRootMaker',
   cscSegTagSrc = cms.untracked.InputTag('cscSegments','','RECO'),    #  RU reco
 
 
-
-
   cscSegmentsRULR = cms.untracked.InputTag('cscSegments','','RECO'),    #  RU reco
   cscSegmentsUFLR = cms.untracked.InputTag('cscSegments','','localRecoUF'),    #  UF reco
 

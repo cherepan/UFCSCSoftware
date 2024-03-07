@@ -25,7 +25,8 @@ process.GlobalTag.globaltag = "124X_mcRun3_2022_realistic_v12"
 
 #process.GlobalTag.globaltag = "106X_upgrade2018_realistic_v15_L1v1"
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(500) )
+#process.maxEvents = cms.untracked.PSet(  500 )
 isSIMDIGI = bool(False)
 isRAW = bool(True)
 ###################################################
@@ -58,8 +59,8 @@ process.source    = cms.Source("PoolSource",
 #                                   '/store/user/cherepan/RelValSingleMuPt1/RelValZMM_14_CMSSW_12_4_0RAW2DIGI_L1Reco_RECO_RECOSIM_UF_SingleMu1/230904_154007/0000/ZMM_RAW_DIGI_SIM_RECO_UF_CRAB_ForLocalReco_2.root',
 #                                   '/store/user/cherepan/RelValSingleMuPt1/RelValZMM_14_CMSSW_12_4_0RAW2DIGI_L1Reco_RECO_RECOSIM_UF_SingleMu1/230904_154007/0000/ZMM_RAW_DIGI_SIM_RECO_UF_CRAB_ForLocalReco_3.root'
 
-                                   'file:/afs/cern.ch/work/c/cherepan/CSC/Run3/CMSSW_12_4_4/src/UFCSCSoftware/crab/SingleMu10_AddRECOTier.root'
-
+#                                   'file:/afs/cern.ch/work/c/cherepan/CSC/Run3/CMSSW_12_4_4/src/UFCSCSoftware/crab/SingleMu10_AddRECOTier.root'
+                                   '/store/user/cherepan/RelValZMM_14/RelValZMM_14_CMSSW_12_4_0RAW2DIGIRECO_FullTIer_26_09_2023/230926_094107/0000/SingleMu10_AddRECOTier_1.root'
 #                                   'file:012344ab-9b99-48c9-966a-7a6653cc6b69.root'
 
 #                                   '/store/relval/CMSSW_12_4_13/RelValZMM_14/GEN-SIM-DIGI-RECO/124X_mcRun3_2022_realistic_v12_2021_FastSim-v1/2590000/8a48a70c-ddaf-4aa3-91b5-23dcac5a80a2.root'

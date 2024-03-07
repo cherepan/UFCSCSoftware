@@ -673,7 +673,7 @@ void UFCSCRootMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
      {
        iEvent.getByToken(cscRUSegments, cscSegments_RU);
        iEvent.getByToken(cscUFSegments, cscSegments_UF);
-       //       CompareLRSegments(cscSegments_RU, cscSegments_UF, muons,saMuons , recHits,PV,iEvent,iSetup,geometry_,cscGeom);
+       CompareLRSegments(cscSegments_RU, cscSegments_UF, muons,saMuons , recHits,PV,iEvent,iSetup,geometry_,cscGeom);
      }
 
 
@@ -733,7 +733,7 @@ void UFCSCRootMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
      if(isGEN and isSIM)
         {
    //  // SimHitSimTkDebug(genParticles,simHits,simTk,saMuons,recHits);
-              SimHitGENParticleDebug(genParticles,simHits,simTk,saMuons, muons, recHits);
+	  //              SimHitGENParticleDebug(genParticles,simHits,simTk,saMuons, muons, recHits);
         }
    ////////////////////////////////////////////////////////////////////////////////
    nEventsTotal++;
