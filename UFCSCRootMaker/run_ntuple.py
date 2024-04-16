@@ -1,6 +1,6 @@
 ######################################################################
 #                                                                    #
-# This version works with CMSSW_6_2_X                                #
+# This version works with CMSSW_12_4_X                                #
 #                                                                    #
 ######################################################################
 import FWCore.ParameterSet.Config as cms
@@ -28,7 +28,7 @@ addDigiInfo = bool(True)
 addTimeMonitoringInfo = bool(True)
 addCalibrationInfo = bool(False)
 
-maxEvents = -1
+maxEvents = 50
 
 MCGlobalTag='124X_mcRun3_2022_realistic_v12' #for DYmumu_PU140
 #DataGlobalTag='76X_dataRun2_v19'
@@ -121,9 +121,10 @@ process.TFileService = cms.Service("TFileService",
 
 
 
-#                                   fileName = cms.string("file:SingleMuPt10_18_10_UF.root")
+                                   fileName = cms.string("file:SingleMuPt10_15_04_RU.root")
+#                                   fileName = cms.string("file:Test.root")
 #                                   fileName = cms.string("file:ZMM10_18_10_UF.root")
-                                   fileName = cms.string("file:ZMM_26_10_RU.root")
+#                                   fileName = cms.string("file:ZMM_07_03_RU.root")
 
 
 #                                   fileName = cms.string("file:ZMM_UF_27_09.root")
@@ -248,7 +249,6 @@ else:
 #        '/store/user/cherepan/RelValZMM_14/RelValMM14_ReRunLocalReco/230927_095118/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_2.root',
 #        '/store/user/cherepan/RelValZMM_14/RelValMM14_ReRunLocalReco/230927_095118/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_7.root',
 #        '/store/user/cherepan/RelValZMM_14/RelValMM14_ReRunLocalReco/230927_095118/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_5.root'
-
 
 
 
