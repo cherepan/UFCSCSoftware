@@ -88,7 +88,7 @@ class DisplayManager(object):
 
         for i, h in enumerate(self.histos):
             title = titles[i]
-            h.GetYaxis().SetRangeUser(0.1, ymax * 1.3)
+            h.GetYaxis().SetRangeUser(0.001, ymax * 1.3)
 #            print("title, histoName",title, h.GetName())
             if xmax:
                 h.GetXaxis().SetRangeUser(0., xmax)
