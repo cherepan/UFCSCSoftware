@@ -199,7 +199,8 @@ private:
 			      edm::Handle<reco::TrackCollection> saMuons, edm::Handle<reco::MuonCollection> muons, edm::Handle<CSCRecHit2DCollection> recHits);
 
   void doTracks(edm::Handle<reco::TrackCollection> genTracks);
-  void doRecHits(edm::Handle<CSCRecHit2DCollection> recHits, edm::Handle<edm::PSimHitContainer> simHits, edm::Handle<edm::SimTrackContainer> simTk, edm::Handle<reco::GenParticleCollection>& genParticles, edm::Handle<reco::TrackCollection> saMuons, 
+  void doRecHits(edm::Handle<CSCRecHit2DCollection> recHits, edm::Handle<edm::PSimHitContainer> simHits, edm::Handle<edm::SimTrackContainer> simTk, 
+		 edm::Handle<reco::GenParticleCollection>& genParticles, edm::Handle<reco::TrackCollection> saMuons, 
 		 edm::Handle<reco::MuonCollection> muons, const CSCGeometry* cscGeom, const edm::Event& iEvent);
   double getthisSignal(const CSCStripDigiCollection& stripdigis, CSCDetId idRH, int centerStrip);
   void doSegments(edm::Handle<CSCSegmentCollection> cscSegments, const CSCGeometry* cscGeom);
@@ -211,7 +212,8 @@ private:
                          edm::Handle<CSCRecHit2DCollection> recHits, const reco::Vertex *&PV, const edm::Event& iEvent, const edm::EventSetup& iSetup,
                          const GlobalTrackingGeometry*  theGeom, const CSCGeometry* cscGeom);
 
-
+  void CompareLRRechHits(edm::Handle<CSCRecHit2DCollection> recHitsRU, edm::Handle<CSCRecHit2DCollection> recHitsUF ,edm::Handle<reco::TrackCollection> saMuons, 
+			 edm::Handle<reco::MuonCollection> muons, const CSCGeometry* cscGeom, const edm::Event& iEvent);
 
 
   void doTrigger(edm::Handle<L1MuGMTReadoutCollection> pCollection, edm::Handle<edm::TriggerResults> hlt);
@@ -259,6 +261,10 @@ private:
   edm::EDGetTokenT<reco::VertexCollection> vertexSrc;
   edm::EDGetTokenT<reco::TrackCollection> standAloneMuonsSrc;
   edm::EDGetTokenT<CSCRecHit2DCollection> cscRecHitTagSrc;
+
+  edm::EDGetTokenT<CSCRecHit2DCollection> cscRecHitTagSrcRULR;
+  edm::EDGetTokenT<CSCRecHit2DCollection> cscRecHitTagSrcUFLR;
+
   edm::EDGetTokenT<CSCSegmentCollection> cscSegTagSrc;
 
 
@@ -400,7 +406,7 @@ private:
   int       cscSegments_nSegments;
   double    cscSegments_localX[10000], cscSegments_localY[10000], cscSegments_globalX[10000], cscSegments_globalY[10000];
   double    cscSegments_globalTheta[10000], cscSegments_globalPhi[10000];
-  double    cscSegments_localTheta[10000], cscSegments_chi2[10000], cscSegments_nRecHits[10000];
+  double    cscSegments_localTheta[10000],  cscSegments_localPhi[10000],cscSegments_chi2[10000], cscSegments_nRecHits[10000];
   int       cscSegments_nDOF[10000];
   int       cscSegments_ID_endcap[10000], cscSegments_ID_ring[10000], cscSegments_ID_station[10000], cscSegments_ID_chamber[10000];
   double    cscSegments_distToIP[10000], cscSegments_segmentTime[10000];
@@ -523,6 +529,10 @@ UFCSCRootMaker::UFCSCRootMaker(const edm::ParameterSet& iConfig) :
   vertexSrc(consumes<reco::VertexCollection>(iConfig.getUntrackedParameter<edm::InputTag>("vertexSrc"))),
   standAloneMuonsSrc(consumes<reco::TrackCollection>(iConfig.getUntrackedParameter<edm::InputTag>("standAloneMuonsSrc"))),
   cscRecHitTagSrc(consumes<CSCRecHit2DCollection>(iConfig.getUntrackedParameter<edm::InputTag>("cscRecHitTagSrc"))),
+
+  cscRecHitTagSrcRULR(consumes<CSCRecHit2DCollection>(iConfig.getUntrackedParameter<edm::InputTag>("cscRecHitTagSrcRULR"))),
+  cscRecHitTagSrcUFLR(consumes<CSCRecHit2DCollection>(iConfig.getUntrackedParameter<edm::InputTag>("cscRecHitTagSrcUFLR"))),
+
   cscSegTagSrc(consumes<CSCSegmentCollection>(iConfig.getUntrackedParameter<edm::InputTag>("cscSegTagSrc"))),
 
   cscRUSegments(consumes<CSCSegmentCollection>(iConfig.getUntrackedParameter<edm::InputTag>("cscSegmentsRULR"))),
@@ -658,7 +668,11 @@ void UFCSCRootMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 
    edm::Handle<CSCRecHit2DCollection> recHits;
+
+   edm::Handle<CSCRecHit2DCollection> recHits_RU;
+   edm::Handle<CSCRecHit2DCollection> recHits_UF;
    if(isLocalRECO || isFullRECO) iEvent.getByToken(cscRecHitTagSrc,recHits);
+
 
    // get CSC segment collection
    edm::Handle<CSCSegmentCollection> cscSegments;
@@ -673,7 +687,12 @@ void UFCSCRootMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
      {
        iEvent.getByToken(cscRUSegments, cscSegments_RU);
        iEvent.getByToken(cscUFSegments, cscSegments_UF);
-       CompareLRSegments(cscSegments_RU, cscSegments_UF, muons,saMuons , recHits,PV,iEvent,iSetup,geometry_,cscGeom);
+       //       CompareLRSegments(cscSegments_RU, cscSegments_UF, muons,saMuons , recHits,PV,iEvent,iSetup,geometry_,cscGeom);
+
+       iEvent.getByToken(cscRecHitTagSrcRULR,recHits_RU);
+       iEvent.getByToken(cscRecHitTagSrcUFLR,recHits_UF);
+
+       //       CompareLRRechHits(recHits_RU, recHits_UF , saMuons, muons,cscGeom,iEvent);
      }
 
 
@@ -725,7 +744,7 @@ void UFCSCRootMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
    if(isGEN)
      {
        //       std::cout<<"================================== EVENT   ============================== "<<std::endl;
-       //       if ( iEvent.getByToken(genToken_, genParticles))  doGenMuons(genParticles);
+       if ( iEvent.getByToken(genToken_, genParticles))  doGenMuons(genParticles);
 
      }
 
@@ -1217,8 +1236,6 @@ void UFCSCRootMaker::SimHitSimTkDebug(edm::Handle<reco::GenParticleCollection>& 
 	  mindiffX = (sHitlocal.x() - rhitlocal.x());
 	  dSHsimIter_matched = dSHsimIter;
 	}
-
-
     }
   }
   
@@ -1555,10 +1572,11 @@ void UFCSCRootMaker::doMuons(edm::Handle<reco::MuonCollection> muons,
 	  muons_globalTrackNormalizedChi2[counter] = (double)mu->globalTrack()->chi2()/mu->globalTrack()->ndof();
 	  muons_globalTrackNumberOfValidMuonHits[counter] = mu->globalTrack()->hitPattern().numberOfValidMuonHits();
 	}  
-      else{
+      else
+	{
 	muons_globalTrackNormalizedChi2[counter] = -999;
 	muons_globalTrackNumberOfValidMuonHits[counter] = -999;
-      }
+	}
       //      std::cout<<"  deb 1 "<< std::endl;
 
       //      //      std::cout<<" mu->track().isNonnull()   " << mu->track().isNonnull() << std::endl;
@@ -1778,6 +1796,8 @@ void UFCSCRootMaker::doMuons(edm::Handle<reco::MuonCollection> muons,
     GlobalVector innerKin(muon->innerMomentum().x(),muon->innerMomentum().y(),muon->innerMomentum().z());
     GlobalVector outerKin(muon->outerMomentum().x(),muon->outerMomentum().y(),muon->outerMomentum().z());
     GlobalVector deltaPnt = innerPnt - outerPnt;
+
+
     standaloneMuons_crudeLength[counter] = deltaPnt.mag();
     standaloneMuons_deltaPhi[counter] = innerPnt.phi() - outerPnt.phi();
     standaloneMuons_innerGlobalPolarAngle[counter] = innerKin.theta();
@@ -1787,6 +1807,8 @@ void UFCSCRootMaker::doMuons(edm::Handle<reco::MuonCollection> muons,
   }
   standaloneMuons_nMuons = counter;
 }
+
+
 
 void 
 UFCSCRootMaker::doTracks(edm::Handle<reco::TrackCollection> genTracks)
@@ -1810,6 +1832,8 @@ UFCSCRootMaker::doTracks(edm::Handle<reco::TrackCollection> genTracks)
    tracks_nTracks = counter;
 
 }
+
+
 
 
 void
@@ -2238,11 +2262,20 @@ UFCSCRootMaker::CompareLRSegments(edm::Handle<CSCSegmentCollection> cscRUSegment
 	  std::cout<<"  N RU Segments linked to muon #   "<<mySavedSegmentsRU.size() << "   UF:   "<< mySavedSegmentsUF.size() <<std::endl;
 	}
     }
+}
 
+
+void 
+UFCSCRootMaker::CompareLRRechHits(edm::Handle<CSCRecHit2DCollection> recHitsRU, edm::Handle<CSCRecHit2DCollection> recHitsUF , edm::Handle<reco::TrackCollection> saMuons,
+					edm::Handle<reco::MuonCollection> muons, const CSCGeometry* cscGeom, const edm::Event& iEvent)
+{
+
+  std::cout<<"  RecHits   RU:  "<< recHitsRU->size() << "  UF:    " << recHitsUF->size() <<std::endl;
 
 }
 
-					
+
+
 
 void
 UFCSCRootMaker::doSegments(edm::Handle<CSCSegmentCollection> cscSegments, const CSCGeometry* cscGeom)
@@ -2275,7 +2308,9 @@ UFCSCRootMaker::doSegments(edm::Handle<CSCSegmentCollection> cscSegments, const 
      cscSegments_localY[counter]     = localPos.y();
      LocalVector segDir = (*dSiter).localDirection();
      cscSegments_localTheta[counter] = segDir.theta();
-     
+     cscSegments_localTheta[counter] = segDir.phi();
+     std::cout<<"   phi   "<< segDir.phi() << std::endl;
+
      // global transformation
      cscSegments_globalX[counter] = 0.;
      cscSegments_globalY[counter] = 0.;
@@ -3963,6 +3998,7 @@ UFCSCRootMaker::bookTree(TTree *tree)
   tree->Branch("cscSegments_globalTheta",  cscSegments_globalTheta,"cscSegments_globalTheta[cscSegments_nSegments]/D");
   tree->Branch("cscSegments_globalPhi",  cscSegments_globalPhi,"cscSegments_globalPhi[cscSegments_nSegments]/D");
   tree->Branch("cscSegments_localTheta",  cscSegments_localTheta,"cscSegments_localTheta[cscSegments_nSegments]/D");
+  tree->Branch("cscSegments_localPhi",  cscSegments_localPhi,"cscSegments_localPhi[cscSegments_nSegments]/D");
   tree->Branch("cscSegments_chi2",  cscSegments_chi2,"cscSegments_chi2[cscSegments_nSegments]/D");
   tree->Branch("cscSegments_nRecHits",  cscSegments_nRecHits,"cscSegments_nRecHits[cscSegments_nSegments]/D");
   tree->Branch("cscSegments_nDOF",  cscSegments_nDOF,"cscSegments_nDOF[cscSegments_nSegments]/I");
