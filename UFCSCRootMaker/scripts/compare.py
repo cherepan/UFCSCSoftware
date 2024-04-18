@@ -15,7 +15,7 @@ from DisplayManager import DisplayManager
 ROOT.gROOT.SetBatch(True)
 ROOT.gStyle.SetOptStat(0)
 
-colours = [63, 30, 3, 6, 8]
+colours = [2, 1, 3, 6, 8]
 styles = [1, 1, 3, 4, 5]
 width = [2, 2, 3, 3, 2]
 
