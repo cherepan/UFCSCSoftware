@@ -2309,7 +2309,7 @@ UFCSCRootMaker::doSegments(edm::Handle<CSCSegmentCollection> cscSegments, const 
      LocalVector segDir = (*dSiter).localDirection();
      cscSegments_localTheta[counter] = segDir.theta();
      cscSegments_localPhi[counter] = segDir.phi();
-     std::cout<<"   phi   "<< segDir.phi() << std::endl;
+
 
      // global transformation
      cscSegments_globalX[counter] = 0.;
