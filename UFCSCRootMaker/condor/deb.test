@@ -1,0 +1,8 @@
+python -i cscAnalysis.py -m 1 -f ../ZMM2Files_18_04_RU.root  -j Test_19_04_RU 2>&1 | tee LogRU
+python -i cscAnalysis.py -m 1 -f ../ZMM2Files_18_04_UF.root  -j Test_19_04_UF 2>&1 | tee LogUF
+./compare.py Test_19_04_UFsorted.root Test_19_04_RUsorted.root -f AllStat_19_04.pdf
+
+
+
+
+ 

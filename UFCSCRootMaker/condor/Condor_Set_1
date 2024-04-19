@@ -1,0 +1,10 @@
+universe     = vanilla      
+rank         = memory       
+executable   = Run.sh      
+output       = Run-Condor_$(cluster)_$(proccess).o  
+error        = Run-Condor_$(cluster)_$(proccess).e  
+log          = Run-Condor_$(cluster)_$(proccess).log  
+getenv       = True
++MaxRuntime  = 7200
+notification = Error        
+queue  1 
