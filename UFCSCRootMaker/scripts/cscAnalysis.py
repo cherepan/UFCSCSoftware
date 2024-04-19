@@ -726,12 +726,22 @@ class Analysis():
                                 allMuonSimHitsInChamber = self.all_muon_simhits_in_a_chamber(tree, good_chambers, genMuIndex )
                                 allRecHitsInChamber     = self.all_rechits_in_a_chamber(tree, good_chambers)
 
+                                self.sorted_hists1D['allSimHitsInChamber'].Fill(len(allSimHitsInChamber) )
+                                self.sorted_hists1D['allMuonSimHitsInChamber'].Fill(len(allMuonSimHitsInChamber) )
+                                self.sorted_hists1D['allRecHitsInChamber'].Fill(len(allRecHitsInChamber) )
+                                self.sorted_hists2D['SimHitsVsMuonSimHits'].Fill(len(allSimHitsInChamber),len(allMuonSimHitsInChamber) )
+                                self.sorted_hists2D['SimHitsVsRecHits'].Fill(len(allSimHitsInChamber), len(allRecHitsInChamber) )
+
+
 #                                print("Chamber:   ", good_chambers, "  All segments in chamber  ", self.allSegments_InChamber(tree,good_chambers), "all sim hits in a chamber -->",
 #                                      allSimHitsInChamber, " all sim hits of the muon  ",  allMuonSimHitsInChamber)
 
 
 #                                if(allSimHitsInChamber == allMuonSimHitsInChamber and len(allMuonSimHitsInChamber) == 6 and len(allRecHitsInChamber) == 6):
-                                if(allSimHitsInChamber == allMuonSimHitsInChamber and len(allMuonSimHitsInChamber) > 3 and len(allRecHitsInChamber) > 3 and self.Chamber_station(good_chambers)!=1):
+#                                if(allSimHitsInChamber == allMuonSimHitsInChamber and len(allMuonSimHitsInChamber) > 3 
+                                if(len(allMuonSimHitsInChamber) == 3 
+#                                   if(allSimHitsInChamber == allMuonSimHitsInChamber and len(allMuonSimHitsInChamber) > 3 
+                                   and len(allRecHitsInChamber) > 3 and len(allRecHitsInChamber) < 7 and self.Chamber_station(good_chambers)!=1):
                                 
                                     CleanSimChambers.append(good_chambers)
 #                                    print("=============================== all simhits in chamber are muon simhits:   ", AllSimHitOfTheMuon)
@@ -776,6 +786,8 @@ class Analysis():
                                 for s in  NSegments:
                                     NRecHitsOfSegment = self.allRechits_of_segment(tree,s)
 #                                    if len(NRecHitsOfSegment)!=6: continue
+                                    if(tree.cscSegments_nDOF[s]!=0):
+                                        self.sorted_hists1D['RecoSegmentChi2ndof'].Fill(tree.cscSegments_chi2[s]/tree.cscSegments_nDOF[s])
                                     self.sorted_hists1D['RecoSegmentNRH'].Fill(tree.cscSegments_nRecHits[s] )
                                     self.sorted_hists1D['RecoSegmentLocalTheta'].Fill(tree.cscSegments_localTheta[s] )
                                     self.sorted_hists1D['RecoSegmentLocalPhi'].Fill(tree.cscSegments_localPhi[s] )
@@ -1030,10 +1042,10 @@ class Analysis():
 
         self.hists1D['recHitsPerSegment_saMuon_Norm'] = ROOT.TH1F("recHitsPerSegment_saMuon", "; RecHits Per Segment; Fraction of SAMuons", 8,-0.5,7.5)
 
-        self.hists2D['recHitsVSp'] = ROOT.TH2F("recHitsVSp","; P (GeV); N RecHits",1000, 0, 800, 100, 0, 60)
-        self.hists2D['recHitsVSpT'] = ROOT.TH2F("recHitsVSpT","; pT (GeV); N RecHits",1000, 0, 800, 100, 0, 60)
-        self.hists2D['recHitsVSEta'] = ROOT.TH2F("recHitsVSEta","; eta; N RecHits",1000, -2.5, 2.5, 100, 0, 60)
-        self.hists2D['recHitsPerSegVSp'] = ROOT.TH2F("recHitsPerSegVSp","; P (GeV); N RecHits/Segment", 1000, 0, 800, 8, 0, 8)
+        self.hists2D['recHitsVSp']        = ROOT.TH2F("recHitsVSp","; P (GeV); N RecHits",1000, 0, 800, 100, 0, 60)
+        self.hists2D['recHitsVSpT']       = ROOT.TH2F("recHitsVSpT","; pT (GeV); N RecHits",1000, 0, 800, 100, 0, 60)
+        self.hists2D['recHitsVSEta']      = ROOT.TH2F("recHitsVSEta","; eta; N RecHits",1000, -2.5, 2.5, 100, 0, 60)
+        self.hists2D['recHitsPerSegVSp']  = ROOT.TH2F("recHitsPerSegVSp","; P (GeV); N RecHits/Segment", 1000, 0, 800, 8, 0, 8)
         self.hists2D['recHitsPerSegVSpT'] = ROOT.TH2F("recHitsPerSegVSpT","; pT (GeV); N RecHits/Segment", 1000, 0, 800, 8, 0, 8)
 
 
@@ -1099,7 +1111,7 @@ class Analysis():
         self.sorted_hists1D["RecMuPt_Debug"]         = ROOT.TH1F("RecMuPt_Debug","; RecMuon PT, GeV (debug)",50,25,70)
 
         self.sorted_hists1D['DeltaThetaRecoSimSegment']  = ROOT.TH1F("DeltaThetaRecoSimSegment","; #Delta#theta (recoseg-simhit), rad", 60,-0.5, 0.5)
-        self.sorted_hists1D['DeltaPhiRecoSimSegment']    = ROOT.TH1F("DeltaPhiRecoSimSegment","; #Delta#phi (recoseg-simhit), rad", 60,-0.5, 0.5)
+        self.sorted_hists1D['DeltaPhiRecoSimSegment']    = ROOT.TH1F("DeltaPhiRecoSimSegment","; #Delta#phi (recoseg-simhit), rad", 60,-0.1, 0.1)
         self.sorted_hists1D['DeltaXRecoSimSegment']      = ROOT.TH1F("DeltaXRecoSimSegment","; Local #Delta X (recosegment - simsegment), cm",60,-0.5,0.5)
         self.sorted_hists1D['DeltaYRecoSimSegment']      = ROOT.TH1F("DeltaYRecoSimSegment","; Local #Delta Y (recosegment - simsegment), cm",60,-0.5,0.5)
 
@@ -1112,13 +1124,20 @@ class Analysis():
         self.sorted_hists1D['RecHitsLocalX'] = ROOT.TH1F("RecHitsLocalX","; RecHit local X, cm", 50,-100, 100)
         self.sorted_hists1D['RecHitsLocalY'] = ROOT.TH1F("RecHitsLocalY","; RecHit local Y, cm", 50,-100, 100)
 
-        self.sorted_hists1D['RecHitsLocalX_nonSegment'] = ROOT.TH1F("RecHitsLocalX_nonSegment","; RecHit local X, (Not from segment), cm", 50,-100, 100)
-        self.sorted_hists1D['RecHitsLocalY_nonSegment'] = ROOT.TH1F("RecHitsLocalY_nonSegment","; RecHit local Y,(Not from segment), cm", 50,-100, 100)
+        self.sorted_hists1D['RecHitsLocalX_nonSegment'] = ROOT.TH1F("RecHitsLocalX_nonSegment","; RecHit local X,(Not from segment record), cm", 50,-100, 100)
+        self.sorted_hists1D['RecHitsLocalY_nonSegment'] = ROOT.TH1F("RecHitsLocalY_nonSegment","; RecHit local Y,(Not from segment record), cm", 50,-100, 100)
  
         self.sorted_hists1D['RHSegementDeltaLocalX']  = ROOT.TH1F("RHSegementDeltaLocalX","; #Delta Local X(RH - Seg) cm", 50,-1, 1)
         self.sorted_hists1D['RHSegementDeltaLocalY']  = ROOT.TH1F("RHSegementDeltaLocalY","; #Delta Local Y(RH - Seg) cm", 50,-1, 1)
         self.sorted_hists1D['RecHitsLayer']           = ROOT.TH1F("RecHitsLayer","; Layer RH ", 7,-0.5,6.5)
         self.sorted_hists1D['RecoSegmentNRH']         = ROOT.TH1F('RecoSegmentNRH',"; N rechits of selected segment", 10, -0.5, 9.5);
+        self.sorted_hists1D['RecoSegmentChi2ndof']    = ROOT.TH1F('RecoSegmentChi2ndof',"; segment #chi^2/ndof", 50, 0, 5);
+        self.sorted_hists1D['allSimHitsInChamber']    = ROOT.TH1F('RecoSegmentChi2ndof',"; N SimHits in chamber", 20, 0.5, 20.5);
+        self.sorted_hists1D['allMuonSimHitsInChamber']= ROOT.TH1F('RecoSegmentChi2ndof',"; N #mu SimHits in chamber", 20, 0.5, 20.5);
+        self.sorted_hists1D['allRecHitsInChamber']    = ROOT.TH1F('RecoSegmentChi2ndof',"; N RecHits in chamber", 20, 0.5, 20.5);
+
+        self.sorted_hists2D['SimHitsVsMuonSimHits']   = ROOT.TH2F("","; N SimHits; N Muon SimHits", 20, 0.5, 20.5, 0.5, 0, 20.5)
+        self.sorted_hists2D['SimHitsVsRecHits']       = ROOT.TH2F("","; N SimHits; N RecHits", 20, 0.5, 20.5, 0.5, 0, 20.5)
 
 
 #        self.sorted_hists1D[''] = ROOT.TH1F("", "; ", 11, -0.5, 10.5) # 1D hist templtae
