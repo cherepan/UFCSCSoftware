@@ -739,7 +739,7 @@ class Analysis():
 
 #                                if(allSimHitsInChamber == allMuonSimHitsInChamber and len(allMuonSimHitsInChamber) == 6 and len(allRecHitsInChamber) == 6):
 #                                if(allSimHitsInChamber == allMuonSimHitsInChamber and len(allMuonSimHitsInChamber) > 3 
-                                if(len(allMuonSimHitsInChamber) == 3 
+                                if(len(allMuonSimHitsInChamber) > 3 
 #                                   if(allSimHitsInChamber == allMuonSimHitsInChamber and len(allMuonSimHitsInChamber) > 3 
                                    and len(allRecHitsInChamber) > 3 and len(allRecHitsInChamber) < 7 and self.Chamber_station(good_chambers)!=1):
                                 
@@ -1132,12 +1132,12 @@ class Analysis():
         self.sorted_hists1D['RecHitsLayer']           = ROOT.TH1F("RecHitsLayer","; Layer RH ", 7,-0.5,6.5)
         self.sorted_hists1D['RecoSegmentNRH']         = ROOT.TH1F('RecoSegmentNRH',"; N rechits of selected segment", 10, -0.5, 9.5);
         self.sorted_hists1D['RecoSegmentChi2ndof']    = ROOT.TH1F('RecoSegmentChi2ndof',"; segment #chi^2/ndof", 50, 0, 5);
-        self.sorted_hists1D['allSimHitsInChamber']    = ROOT.TH1F('RecoSegmentChi2ndof',"; N SimHits in chamber", 20, 0.5, 20.5);
-        self.sorted_hists1D['allMuonSimHitsInChamber']= ROOT.TH1F('RecoSegmentChi2ndof',"; N #mu SimHits in chamber", 20, 0.5, 20.5);
-        self.sorted_hists1D['allRecHitsInChamber']    = ROOT.TH1F('RecoSegmentChi2ndof',"; N RecHits in chamber", 20, 0.5, 20.5);
+        self.sorted_hists1D['allSimHitsInChamber']    = ROOT.TH1F('allSimHitsInChamber',"; N SimHits in chamber", 20, 0.5, 20.5);
+        self.sorted_hists1D['allMuonSimHitsInChamber']= ROOT.TH1F('allMuonSimHitsInChamber',"; N #mu SimHits in chamber", 20, 0.5, 20.5);
+        self.sorted_hists1D['allRecHitsInChamber']    = ROOT.TH1F('allRecHitsInChamber',"; N RecHits in chamber", 20, 0.5, 20.5);
 
-        self.sorted_hists2D['SimHitsVsMuonSimHits']   = ROOT.TH2F("","; N SimHits; N Muon SimHits", 20, 0.5, 20.5, 0.5, 0, 20.5)
-        self.sorted_hists2D['SimHitsVsRecHits']       = ROOT.TH2F("","; N SimHits; N RecHits", 20, 0.5, 20.5, 0.5, 0, 20.5)
+        self.sorted_hists2D['SimHitsVsMuonSimHits']   = ROOT.TH2F("SimHitsVsMuonSimHits","; N SimHits; N Muon SimHits", 20, 0.5, 20.5, 20, 0, 20.5)
+        self.sorted_hists2D['SimHitsVsRecHits']       = ROOT.TH2F("SimHitsVsRecHits","; N SimHits; N RecHits", 20, 0.5, 20.5, 20, 0, 20.5)
 
 
 #        self.sorted_hists1D[''] = ROOT.TH1F("", "; ", 11, -0.5, 10.5) # 1D hist templtae
