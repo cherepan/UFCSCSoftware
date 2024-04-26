@@ -192,6 +192,7 @@ private:
 
   void doGenMuons(edm::Handle<reco::GenParticleCollection>& genParticles);
 
+  void doTrackCSCSegments(edm::Handle<reco::TrackCollection>& trackCollection);
 
   void SimHitSimTkDebug(edm::Handle<reco::GenParticleCollection>& genParticles,edm::Handle<edm::PSimHitContainer> simHits, edm::Handle<edm::SimTrackContainer> simTk, edm::Handle<reco::TrackCollection> saMuons, edm::Handle<CSCRecHit2DCollection> recHits);
 
@@ -203,7 +204,7 @@ private:
 		 edm::Handle<reco::GenParticleCollection>& genParticles, edm::Handle<reco::TrackCollection> saMuons, 
 		 edm::Handle<reco::MuonCollection> muons, const CSCGeometry* cscGeom, const edm::Event& iEvent);
   double getthisSignal(const CSCStripDigiCollection& stripdigis, CSCDetId idRH, int centerStrip);
-  void doSegments(edm::Handle<CSCSegmentCollection> cscSegments, const CSCGeometry* cscGeom);
+  void   doSegments(edm::Handle<CSCSegmentCollection> cscSegments, const CSCGeometry* cscGeom);
 
 
 
@@ -214,6 +215,8 @@ private:
 
   void CompareLRRechHits(edm::Handle<CSCRecHit2DCollection> recHitsRU, edm::Handle<CSCRecHit2DCollection> recHitsUF ,edm::Handle<reco::TrackCollection> saMuons, 
 			 edm::Handle<reco::MuonCollection> muons, const CSCGeometry* cscGeom, const edm::Event& iEvent);
+
+
 
 
   void doTrigger(edm::Handle<L1MuGMTReadoutCollection> pCollection, edm::Handle<edm::TriggerResults> hlt);
@@ -257,6 +260,11 @@ private:
   //---- Variables ----//
   edm::EDGetTokenT<reco::MuonCollection> muonSrc;
   edm::EDGetTokenT<reco::GenParticleCollection> genToken_;
+  edm::EDGetTokenT<reco::TrackCollection> trackToken_;
+
+
+
+  
 //  edm::InputTag muonSrc;
   edm::EDGetTokenT<reco::VertexCollection> vertexSrc;
   edm::EDGetTokenT<reco::TrackCollection> standAloneMuonsSrc;
@@ -525,6 +533,9 @@ UFCSCRootMaker::UFCSCRootMaker(const edm::ParameterSet& iConfig) :
   histContainer_(),
   muonSrc(consumes<reco::MuonCollection>(iConfig.getUntrackedParameter<edm::InputTag>("muonSrc"))),
   genToken_(consumes<reco::GenParticleCollection>(iConfig.getUntrackedParameter<edm::InputTag>("genParticles"))),
+
+
+  trackToken_(consumes<reco::TrackCollection>(iConfig.getParameter<edm::InputTag>("generalTracksSrc"))),
 //  muonSrc(iConfig.getUntrackedParameter<edm::InputTag>("muonSrc")),
   vertexSrc(consumes<reco::VertexCollection>(iConfig.getUntrackedParameter<edm::InputTag>("vertexSrc"))),
   standAloneMuonsSrc(consumes<reco::TrackCollection>(iConfig.getUntrackedParameter<edm::InputTag>("standAloneMuonsSrc"))),
@@ -633,7 +644,13 @@ void UFCSCRootMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
    // get the standalone muon collection
    edm::Handle<reco::TrackCollection> saMuons;
-   if(isFullRECO) iEvent.getByToken(standAloneMuonsSrc,saMuons);
+   edm::Handle<reco::TrackCollection> trackCollection;
+   doTrackCSCSegments(trackCollection);
+   if(isFullRECO) 
+     {
+       iEvent.getByToken(standAloneMuonsSrc,saMuons);
+       //       iEvent.getByToken(trackToken_,trackCollection);
+     }
    //   cout<<" deb2 "<< std::endl;
 
 
@@ -786,7 +803,11 @@ void UFCSCRootMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
  */  
 
 
-   if(addMuons && isFullRECO) doMuons(muons,saMuons,cscSegments,recHits,PV,iEvent,iSetup,geometry_,cscGeom);
+   if(addMuons && isFullRECO) 
+     {
+       doMuons(muons,saMuons,cscSegments,recHits,PV,iEvent,iSetup,geometry_,cscGeom);
+
+     }
 
 
 
@@ -1519,6 +1540,12 @@ UFCSCRootMaker::doGenMuons(edm::Handle<reco::GenParticleCollection>& genParticle
 
 }
 
+
+
+void UFCSCRootMaker::doTrackCSCSegments(edm::Handle<reco::TrackCollection>& trackCollection)
+{
+  std::cout<<" run over trackCollection   "<< std::endl;
+}
 
 
 

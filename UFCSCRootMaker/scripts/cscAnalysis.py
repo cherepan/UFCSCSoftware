@@ -444,6 +444,7 @@ class Analysis():
         return simhit_list
 
 
+
     def all_simhits_in_a_chamber(self, tree, chamber):
         simhit_list = []
         for n in range(0,tree.simHits_nSimHits):
@@ -720,28 +721,46 @@ class Analysis():
                             
                             CleanSimChambers = []
 
+#                            for good_chambers in ChambersCrossedByGenMuon:
                             for good_chambers in ChambersCrossedByGenMuon:
 #                                print('------------- good_chambers', good_chambers, 'station: ', self.Chamber_station(good_chambers), self.Chamber_ring(good_chambers))
                                 allSimHitsInChamber     = self.all_simhits_in_a_chamber(tree, good_chambers)
                                 allMuonSimHitsInChamber = self.all_muon_simhits_in_a_chamber(tree, good_chambers, genMuIndex )
                                 allRecHitsInChamber     = self.all_rechits_in_a_chamber(tree, good_chambers)
+                                allSegmentsInChamber    = self.allSegments_InChamber(tree, good_chambers)
+
 
                                 self.sorted_hists1D['allSimHitsInChamber'].Fill(len(allSimHitsInChamber) )
                                 self.sorted_hists1D['allMuonSimHitsInChamber'].Fill(len(allMuonSimHitsInChamber) )
                                 self.sorted_hists1D['allRecHitsInChamber'].Fill(len(allRecHitsInChamber) )
                                 self.sorted_hists2D['SimHitsVsMuonSimHits'].Fill(len(allSimHitsInChamber),len(allMuonSimHitsInChamber) )
                                 self.sorted_hists2D['SimHitsVsRecHits'].Fill(len(allSimHitsInChamber), len(allRecHitsInChamber) )
+                                self.sorted_hists1D['AllSegmentsInMuonsChamber'].Fill(len(allSegmentsInChamber))
+                                for n in allSimHitsInChamber:
+                                    self.sorted_hists1D['SimHitsParticleType'].Fill(tree.simHits_particleType[n])
 
+                                for n in allRecHitsInChamber:
+                                    self.sorted_hists1D['RecHitSimHitParticleType'].Fill(tree.recHits2D_simHit_particleTypeID[n])
+                                    
 
+# Lucia 
 #                                print("Chamber:   ", good_chambers, "  All segments in chamber  ", self.allSegments_InChamber(tree,good_chambers), "all sim hits in a chamber -->",
 #                                      allSimHitsInChamber, " all sim hits of the muon  ",  allMuonSimHitsInChamber)
 
 
 #                                if(allSimHitsInChamber == allMuonSimHitsInChamber and len(allMuonSimHitsInChamber) == 6 and len(allRecHitsInChamber) == 6):
 #                                if(allSimHitsInChamber == allMuonSimHitsInChamber and len(allMuonSimHitsInChamber) > 3 
-                                if(len(allMuonSimHitsInChamber) > 3 
-#                                   if(allSimHitsInChamber == allMuonSimHitsInChamber and len(allMuonSimHitsInChamber) > 3 
-                                   and len(allRecHitsInChamber) > 3 and len(allRecHitsInChamber) < 7 and self.Chamber_station(good_chambers)!=1):
+#                                if(len(allMuonSimHitsInChamber) == 3 
+
+#                                if(allSimHitsInChamber == allMuonSimHitsInChamber  and len(allRecHitsInChamber) ==  3 and self.Chamber_station(good_chambers)!=1 and self.Chamber_ring(good_chambers)!=1):
+
+
+                                if(len(allMuonSimHitsInChamber) == 6  and len(allRecHitsInChamber) > 3 and len(allRecHitsInChamber) <=10 and self.Chamber_station(good_chambers)!=1 and self.Chamber_ring(good_chambers)!=1):
+
+#                                if(allSimHitsInChamber == allMuonSimHitsInChamber and len(allMuonSimHitsInChamber) == 6   
+#                                   and len(allRecHitsInChamber) == 6  and self.Chamber_station(good_chambers)!=1 and self.Chamber_ring(good_chambers)!=1):
+
+#                                if(self.Chamber_station(good_chambers)!=1):
                                 
                                     CleanSimChambers.append(good_chambers)
 #                                    print("=============================== all simhits in chamber are muon simhits:   ", AllSimHitOfTheMuon)
@@ -751,6 +770,7 @@ class Analysis():
 #                                        ' layer  ', tree.simHits_ID_layer[sh], ' x-y  ', tree.simHits_localX[sh], ' - ', tree.simHits_localY[sh])
                                         self.sorted_hists1D["SimHitsLocalX_Debug"].Fill(tree.simHits_localX[sh] )
                                         self.sorted_hists1D["SimHitsLocalY_Debug"].Fill(tree.simHits_localY[sh] )
+#                                        print('Sh ', sh  , '  Layer  ', tree.simHits_ID_layer[sh] ,"SimHit THeta ", tree.simHits_theta[sh], '  SimHit Phi   ', tree.simHits_phi[sh] )
 #                                    print("all rechits :   ", AllRecHitOfTheMuon)
                                     ChambersWithRecoMuon = []
 #                                    for rh in AllRecHitOfTheMuon:
@@ -761,6 +781,8 @@ class Analysis():
 #                                        ' layer  ', tree.recHits2D_ID_layer[rh], ' REC x-y', tree.recHits2D_localX[rh] ,' - ' , tree.recHits2D_localY[rh] , 'all rechits in this chamber  ', self.all_rechits_in_a_chamber(tree,rhchamber))
                                         self.sorted_hists1D['RecHitsLocalX_nonSegment'].Fill(tree.recHits2D_localX[rh] )
                                         self.sorted_hists1D['RecHitsLocalY_nonSegment'].Fill(tree.recHits2D_localY[rh] )
+                                        self.sorted_hists1D['RecHitsPerLayer_nonSEgment'].Fill(tree.recHits2D_ID_layer[rh])
+#                                        print('RH  layer: ', tree.recHits2D_ID_layer[rh] )
 #                                print("all rechits in a chamber  ",self.all_rechits_in_a_chamber(tree, self.ChamberID(tree.recHits2D_ID_endcap[rh],tree.recHits2D_ID_station[rh],tree.recHits2D_ID_ring[rh], tree.recHits2D_ID_chamber[rh])))
 
 
@@ -795,7 +817,7 @@ class Analysis():
                                     self.sorted_hists1D['RecoSegmentLocalY'].Fill(tree.cscSegments_localY[s] )
 
 
-#                                    print("------------  segment : ", s, "  all rechits of segment   ", len(NRecHitsOfSegment))
+#                                    print("------------  segment : ", s, "  all rechits of segment   ", len(NRecHitsOfSegment), ' Theta/Phi ' ,tree.cscSegments_localTheta[s], tree.cscSegments_localPhi[s])
                                     for rh in NRecHitsOfSegment:
 
 #                                        print("RH  ", rh, ' layer  ', tree.recHits2D_ID_layer[rh], ' REC x-y', tree.recHits2D_localX[rh] ,' - ' , tree.recHits2D_localY[rh])
@@ -803,12 +825,12 @@ class Analysis():
                                         self.sorted_hists1D['RecHitsLocalY'].Fill(tree.recHits2D_localY[rh] )
                                         self.sorted_hists1D['RHSegementDeltaLocalX'].Fill(tree.recHits2D_localX[rh] - tree.cscSegments_localX[s] )
                                         self.sorted_hists1D['RHSegementDeltaLocalY'].Fill(tree.recHits2D_localY[rh] - tree.cscSegments_localY[s] )
-                                        self.sorted_hists1D['RecHitsLayer'].Fill(tree.recHits2D_ID_layer[rh] )
+                                        self.sorted_hists1D['RecHitsPerLayer'].Fill(tree.recHits2D_ID_layer[rh] )
 
                                         central_sim_hit = -1
                                         allMuonSimHitsInChamber = self.all_muon_simhits_in_a_chamber(tree, good_chambers, genMuIndex )
                                         for sh in self.MuonSimSegment(tree, allMuonSimHitsInChamber, s):
-                                            if tree.simHits_ID_layer[sh] ==3:
+                                            if tree.simHits_ID_layer[sh] == 3:
                                                 central_sim_hit = sh
                                                 if(central_sim_hit!=-1):
 
@@ -816,7 +838,6 @@ class Analysis():
                                                     self.sorted_hists1D['DeltaPhiRecoSimSegment'].Fill(tree.cscSegments_localPhi[s] - tree.simHits_phi[central_sim_hit])
                                                     self.sorted_hists1D['DeltaXRecoSimSegment'].Fill(tree.cscSegments_localX[s]  - tree.simHits_localX[central_sim_hit])
                                                     self.sorted_hists1D['DeltaYRecoSimSegment'].Fill(tree.cscSegments_localY[s] - tree.simHits_localY[central_sim_hit])
-
 
 
 
@@ -1107,7 +1128,7 @@ class Analysis():
         self.sorted_hists1D['NSegmentsCleanChamber'] = ROOT.TH1F("NSegmentsCleanChamber","; N Segments in clean chamber (AllSimhit = MuonSimhits)", 4, -0.5,3.5)
         self.sorted_hists1D['NRecHitsCleanChamber']  = ROOT.TH1F("NRecHitsCleanChamber","; N RecHits in clean chamber (AllSimhit = MuonSimhits)",10, -0.5,9.5 )
         self.sorted_hists1D["SimHitsLocalX_Debug"]   = ROOT.TH1F("SimHitsLocalX_Debug","; SimHitsLocalX, cm (debug)",50,-100,100)
-        self.sorted_hists1D["SimHitsLocalY_Debug"]   = ROOT.TH1F("SimHitsLocalY_Debug","; SimHitsLocalY, cm (debug)",50,-100,100)
+        self.sorted_hists1D["SimHitsLocalY_Debug"]   = ROOT.TH1F("SimHitsLocalY_Debug","; SimHitsLocalY, cm (debug)",50,-200,200)
         self.sorted_hists1D["RecMuPt_Debug"]         = ROOT.TH1F("RecMuPt_Debug","; RecMuon PT, GeV (debug)",50,25,70)
 
         self.sorted_hists1D['DeltaThetaRecoSimSegment']  = ROOT.TH1F("DeltaThetaRecoSimSegment","; #Delta#theta (recoseg-simhit), rad", 60,-0.5, 0.5)
@@ -1119,25 +1140,31 @@ class Analysis():
         self.sorted_hists1D['RecoSegmentLocalTheta'] = ROOT.TH1F("RecoSegmentLocalTheta","; Reco segment local #theta, rad", 60,0, 0.5)
         self.sorted_hists1D['RecoSegmentLocalPhi']   = ROOT.TH1F("RecoSegmentLocalPhi","; Reco segment local #phi, rad ", 60,1, 2)
         self.sorted_hists1D['RecoSegmentLocalX']     = ROOT.TH1F("RecoSegmentLocalX","; Reco segment local X, cm", 50,-100, 100)
-        self.sorted_hists1D['RecoSegmentLocalY']     = ROOT.TH1F("RecoSegmentLocalY","; Reco segment local Y, cm", 50,-100, 100)
+        self.sorted_hists1D['RecoSegmentLocalY']     = ROOT.TH1F("RecoSegmentLocalY","; Reco segment local Y, cm", 50,-200, 200)
 
         self.sorted_hists1D['RecHitsLocalX'] = ROOT.TH1F("RecHitsLocalX","; RecHit local X, cm", 50,-100, 100)
         self.sorted_hists1D['RecHitsLocalY'] = ROOT.TH1F("RecHitsLocalY","; RecHit local Y, cm", 50,-100, 100)
 
         self.sorted_hists1D['RecHitsLocalX_nonSegment'] = ROOT.TH1F("RecHitsLocalX_nonSegment","; RecHit local X,(Not from segment record), cm", 50,-100, 100)
         self.sorted_hists1D['RecHitsLocalY_nonSegment'] = ROOT.TH1F("RecHitsLocalY_nonSegment","; RecHit local Y,(Not from segment record), cm", 50,-100, 100)
- 
-        self.sorted_hists1D['RHSegementDeltaLocalX']  = ROOT.TH1F("RHSegementDeltaLocalX","; #Delta Local X(RH - Seg) cm", 50,-1, 1)
-        self.sorted_hists1D['RHSegementDeltaLocalY']  = ROOT.TH1F("RHSegementDeltaLocalY","; #Delta Local Y(RH - Seg) cm", 50,-1, 1)
-        self.sorted_hists1D['RecHitsLayer']           = ROOT.TH1F("RecHitsLayer","; Layer RH ", 7,-0.5,6.5)
-        self.sorted_hists1D['RecoSegmentNRH']         = ROOT.TH1F('RecoSegmentNRH',"; N rechits of selected segment", 10, -0.5, 9.5);
-        self.sorted_hists1D['RecoSegmentChi2ndof']    = ROOT.TH1F('RecoSegmentChi2ndof',"; segment #chi^2/ndof", 50, 0, 5);
-        self.sorted_hists1D['allSimHitsInChamber']    = ROOT.TH1F('allSimHitsInChamber',"; N SimHits in chamber", 20, 0.5, 20.5);
-        self.sorted_hists1D['allMuonSimHitsInChamber']= ROOT.TH1F('allMuonSimHitsInChamber',"; N #mu SimHits in chamber", 20, 0.5, 20.5);
-        self.sorted_hists1D['allRecHitsInChamber']    = ROOT.TH1F('allRecHitsInChamber',"; N RecHits in chamber", 20, 0.5, 20.5);
+        self.sorted_hists1D['RecHitsPerLayer_nonSEgment'] = ROOT.TH1F("RecHitsPerLayer_nonSEgment","; RecHit per layer (Not from segment record) ", 8,-0.5,7.5)
+        self.sorted_hists1D['RHSegementDeltaLocalX']     = ROOT.TH1F("RHSegementDeltaLocalX","; #Delta Local X(RH - Seg) cm", 50,-1, 1)
+        self.sorted_hists1D['RHSegementDeltaLocalY']     = ROOT.TH1F("RHSegementDeltaLocalY","; #Delta Local Y(RH - Seg) cm", 50,-1, 1)
+        self.sorted_hists1D['RecHitsPerLayer']           = ROOT.TH1F("RecHitsPerLayer","; RecHit per layer (per selected segment) ", 8,-0.5,7.5)
+        self.sorted_hists1D['RecoSegmentNRH']            = ROOT.TH1F('RecoSegmentNRH',"; N rechits (selected segment)", 10, -0.5, 9.5);
+        self.sorted_hists1D['RecoSegmentChi2ndof']       = ROOT.TH1F('RecoSegmentChi2ndof',"; segment #chi^2/ndof", 50, 0, 5);
+        self.sorted_hists1D['allSimHitsInChamber']       = ROOT.TH1F('allSimHitsInChamber',"; N SimHits in chamber", 20, 0.5, 20.5);
+        self.sorted_hists1D['allMuonSimHitsInChamber']   = ROOT.TH1F('allMuonSimHitsInChamber',"; N #mu SimHits in chamber", 20, 0.5, 20.5);
+        self.sorted_hists1D['allRecHitsInChamber']       = ROOT.TH1F('allRecHitsInChamber',"; N RecHits in chamber", 20, 0.5, 20.5);
+        self.sorted_hists1D['AllSegmentsInMuonsChamber'] = ROOT.TH1F('AllSegmentsInMuonsChamber',"; N Segments in selected chambers",10, -0.5, 9.5)
 
-        self.sorted_hists2D['SimHitsVsMuonSimHits']   = ROOT.TH2F("SimHitsVsMuonSimHits","; N SimHits; N Muon SimHits", 20, 0.5, 20.5, 20, 0, 20.5)
-        self.sorted_hists2D['SimHitsVsRecHits']       = ROOT.TH2F("SimHitsVsRecHits","; N SimHits; N RecHits", 20, 0.5, 20.5, 20, 0, 20.5)
+
+        self.sorted_hists2D['SimHitsVsMuonSimHits']    = ROOT.TH2F("SimHitsVsMuonSimHits","; N SimHits; N Muon SimHits", 20, 0.5, 20.5, 20, 0, 20.5)
+        self.sorted_hists2D['SimHitsVsRecHits']        = ROOT.TH2F("SimHitsVsRecHits","; N SimHits; N RecHits", 20, 0.5, 20.5, 20, 0, 20.5)
+
+        self.sorted_hists1D['SimHitsParticleType']     = ROOT.TH1F("SimHitsParticleType", "; SimHit type ", 17, -1.5, 15.5) 
+        self.sorted_hists1D['RecHitSimHitParticleType']= ROOT.TH1F("RecHitSimHitParticleType", "; SimHit type matched  to the RecHit ", 17, -1.5, 15.5)
+
 
 
 #        self.sorted_hists1D[''] = ROOT.TH1F("", "; ", 11, -0.5, 10.5) # 1D hist templtae
