@@ -28,7 +28,7 @@ addDigiInfo = bool(True)
 addTimeMonitoringInfo = bool(True)
 addCalibrationInfo = bool(False)
 
-maxEvents = 50
+maxEvents = 5000
 
 MCGlobalTag='124X_mcRun3_2022_realistic_v12' #for DYmumu_PU140
 #DataGlobalTag='76X_dataRun2_v19'
@@ -109,28 +109,10 @@ process.out = cms.OutputModule("PoolOutputModule",
 
 
 process.TFileService = cms.Service("TFileService",
-#                                   fileName = cms.string("DUMMYFILENAME.root")
-#                                   fileName = cms.string("CSC_UF_ntuple_UF_SegmentBuilder.root")
-#                                   fileName = cms.string("run3_MC_UF_SingleMu1.root")
 
-#                                   fileName = cms.string("file:SingleMu10PtZMM_RU.root")
-#                                   fileName = cms.string("file:SingleMuPt10_UF_27_09.root")
+                                   fileName = cms.string("file:Test.root")
+                                  # fileName = cms.string("file:ZMM_25_04_RU.root")
 
-#                                   fileName = cms.string("file:SingleMu10PtZMM_RU.root")
-#                                   fileName = cms.string("file:ZMM_RU_27_09.root")
-
-
-
-                                   fileName = cms.string("file:ZMMSMALLL_18_04_UF.root")
-#                                   fileName = cms.string("file:ZMM10_15_04_UF.root")
-#                                   fileName = cms.string("file:Test.root")
-#                                   fileName = cms.string("file:ZMM10_18_10_UF.root")
-#                                   fileName = cms.string("file:ZMM_07_03_RU.root")
-
-
-#                                   fileName = cms.string("file:ZMM_UF_27_09.root")
-
-#                                   fileName = cms.string("test/SingleMuon_RAW-RECO_ZMu-12Nov2019_UL2018_CSCSegmentBuilder_UF_testRun.root")
                                    )
 
 # Primary Vertices

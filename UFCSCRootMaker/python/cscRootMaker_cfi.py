@@ -5,19 +5,30 @@ cscRootMaker = cms.EDAnalyzer('UFCSCRootMaker',
   vertexSrc = cms.untracked.InputTag('offlinePrimaryVertices'),
   genParticles = cms.untracked.InputTag('genParticles'),
   standAloneMuonsSrc = cms.untracked.InputTag('standAloneMuons'),
-  cscRecHitTagSrc = cms.untracked.InputTag('csc2DRecHits'), # it was default
+  generalTracksSrc   = cms.untracked.InputTag('generalTracks','','RECO'),
+
+#  cscRecHitTagSrc = cms.untracked.InputTag('csc2DRecHits'), # it was default
+#  cscSegTagSrc = cms.untracked.InputTag('cscSegments','','RECO'),    #  RU recocscSegTagSrc
 
 
 
 #  cscRecHitTagSrc = cms.untracked.InputTag('csc2DRecHits','','localRecoUF'), # UF RECO
-#  cscRecHitTagSrc = cms.untracked.InputTag('csc2DRecHits','','RECO'), # RU reco
+  cscRecHitTagSrc = cms.untracked.InputTag('csc2DRecHits','','RECO'), # RU reco # always use the rechots if STD aldo
+
+
+
+
 
 
 #  cscSegTagSrc = cms.untracked.InputTag('cscSegments','','localRecoUF'),   #  UF reco
   cscSegTagSrc = cms.untracked.InputTag('cscSegments','','RECO'),    #  RU reco
 
 
-  cscSegmentsRULR = cms.untracked.InputTag('cscSegments','','RECO'),    #  RU reco
+
+  cscRecHitTagSrcRULR = cms.untracked.InputTag('csc2DRecHits','','RECO'),        # RU reco
+  cscRecHitTagSrcUFLR = cms.untracked.InputTag('csc2DRecHits','','localRecoUF'), # UF RECO
+
+  cscSegmentsRULR = cms.untracked.InputTag('cscSegments','','RECO'),           #  RU reco
   cscSegmentsUFLR = cms.untracked.InputTag('cscSegments','','localRecoUF'),    #  UF reco
 
 
@@ -42,10 +53,12 @@ cscRootMaker = cms.EDAnalyzer('UFCSCRootMaker',
   isDATA = cms.untracked.bool(False),
   addMuons = cms.untracked.bool(False),
   addTracks = cms.untracked.bool(False),
+  addRecoTracks = cms.untracked.bool(False),
   addRecHits = cms.untracked.bool(False),
   addSegments = cms.untracked.bool(False),
   addTrigger = cms.untracked.bool(False),
   addDigis = cms.untracked.bool(False),
   addTimeMonitoring = cms.untracked.bool(False),
   addCalibrations = cms.untracked.bool(False)
+
 )
