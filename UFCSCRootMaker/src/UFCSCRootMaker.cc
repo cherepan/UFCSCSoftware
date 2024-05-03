@@ -24,6 +24,7 @@
 #include <memory>
 
 // user include files
+
 #include "FWCore/Framework/interface/EDAnalyzer.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
@@ -144,6 +145,7 @@
 #include "DataFormats/Luminosity/interface/LumiSummary.h"
 
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
+
 //#include "RecoLuminosity/LumiProducer/interface/LumiCorrectionParam.h"
 
 #include "TFile.h"
@@ -351,14 +353,14 @@ private:
 
   //Vertices
   int vertex_nVertex;
-  
+
   // Muons
   int       muons_nMuons, gen_muons_nMuons;
   bool      muons_isStandAloneMuon[1000], muons_isGlobalMuon[1000], muons_isPFMuon[1000], muons_isCaloMuon[1000], muons_isTrackerMuon[1000];
   bool      muons_isEnergyValid[1000];
   int       muons_numberOfChambers[1000], muons_numberOfMatches[1000], muons_numberOfSegments[1000];
   double    muons_calEnergyTower[1000], muons_calEnergyEm[1000], muons_calEnergyHad[1000];
-  int       muons_charge[1000], gen_muons_charge[1000], gen_muons_genindex[1000], muons_nRecHits[1000];
+  int       muons_charge[1000], gen_muons_charge[1000], gen_muons_genindex[1000], gen_muons_mother_index[1000], gen_muons_mother_pdgId[1000], muons_nRecHits[1000];
   double    muons_energy[1000],  muons_px[1000], muons_py[1000], muons_pz[1000], muons_pt[1000];
   double    gen_muons_energy[1000],  gen_muons_px[1000], gen_muons_py[1000], gen_muons_pz[1000];
   double    muons_et[1000], muons_p[1000], muons_phi[1000], muons_eta[1000], muons_theta[1000];
@@ -1513,6 +1515,7 @@ void UFCSCRootMaker::SimHitSimTkDebug(edm::Handle<reco::GenParticleCollection>& 
 void 
 UFCSCRootMaker::doGenMuons(edm::Handle<reco::GenParticleCollection>& genParticles)
 {
+
   counter =0;
   unsigned int gen_counter(0);
 
@@ -1520,24 +1523,31 @@ UFCSCRootMaker::doGenMuons(edm::Handle<reco::GenParticleCollection>& genParticle
     {
       const reco::GenParticle &g = genParticles->at(igenparticle);
 
-      //  for (reco::GenParticleCollection::const_iterator itr = genParticles->begin(); itr != genParticles->end(); ++itr, gen_counter++) 
-      //    {
-
       if(abs(g.pdgId()) == 13 && g.status() == 1 )
 	{
 
-	  gen_muons_charge[counter] = g.charge();
-	  gen_muons_px[counter]     = g.p4().Px();
-	  gen_muons_py[counter]     = g.p4().Py();
-	  gen_muons_pz[counter]     = g.p4().Pz();
-	  gen_muons_energy[counter] = sqrt(g.p4().Px()*g.p4().Px() + g.p4().Py()*g.p4().Py() + g.p4().Pz()*g.p4().Pz() + 0.102*0.102 );
+	  gen_muons_charge[counter]   = g.charge();
+	  gen_muons_px[counter]       = g.p4().Px();
+	  gen_muons_py[counter]       = g.p4().Py();
+	  gen_muons_pz[counter]       = g.p4().Pz();
+	  gen_muons_energy[counter]   = sqrt(g.p4().Px()*g.p4().Px() + g.p4().Py()*g.p4().Py() + g.p4().Pz()*g.p4().Pz() + 0.102*0.102 );
 	  gen_muons_genindex[counter] = igenparticle;
 
+	  const reco::Candidate *m = g.mother();
+	  unsigned int mother_index(0);
+	  for (unsigned int j=0; j  < genParticles->size(); j++)
+	    {
+	      const reco::GenParticle &gm = genParticles->at(j);
+	      if(gm.p4() == m->p4() && gm.pdgId() == m->pdgId())
+		mother_index = j;
+	    }
+	  gen_muons_mother_index[counter] = mother_index;
+	  gen_muons_mother_pdgId[counter] = genParticles->at(mother_index).pdgId();
 
 	  counter++;
 	}
-
     }
+
   gen_muons_nMuons = counter;
 
 }
@@ -4117,6 +4127,9 @@ UFCSCRootMaker::bookTree(TTree *tree)
   tree->Branch("gen_muons_px",   gen_muons_px,   "gen_muons_px[gen_muons_nMuons]/D");
   tree->Branch("gen_muons_py",   gen_muons_py,   "gen_muons_py[gen_muons_nMuons]/D");
   tree->Branch("gen_muons_pz",   gen_muons_pz,   "gen_muons_pz[gen_muons_nMuons]/D");
+  tree->Branch("gen_muons_mother_index", gen_muons_mother_index, "gen_muons_mother_index[gen_muons_nMuons]/I");
+  tree->Branch("gen_muons_mother_pdgId",gen_muons_mother_pdgId , "gen_muons_mother_pdgId[gen_muons_nMuons]/I");
+
 
 /*
   // L1 GMT
