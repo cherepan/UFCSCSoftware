@@ -1518,29 +1518,91 @@ UFCSCRootMaker::doGenMuons(edm::Handle<reco::GenParticleCollection>& genParticle
 
   counter =0;
   unsigned int gen_counter(0);
-
+  //  std::cout<<"  doGen  "<< std::endl;
   for (unsigned int igenparticle=0; igenparticle < genParticles->size(); igenparticle++)
     {
       const reco::GenParticle &g = genParticles->at(igenparticle);
 
-      if(abs(g.pdgId()) == 13 && g.status() == 1 )
+      if(abs(g.pdgId()) == 13 && (g.status() == 1))//  || g.status() == 23)  )
 	{
-
+	  //	  std::cout<<" ___________________________ muon loop ___________________________  "<< igenparticle << std::endl;
 	  gen_muons_charge[counter]   = g.charge();
 	  gen_muons_px[counter]       = g.p4().Px();
 	  gen_muons_py[counter]       = g.p4().Py();
 	  gen_muons_pz[counter]       = g.p4().Pz();
 	  gen_muons_energy[counter]   = sqrt(g.p4().Px()*g.p4().Px() + g.p4().Py()*g.p4().Py() + g.p4().Pz()*g.p4().Pz() + 0.102*0.102 );
 	  gen_muons_genindex[counter] = igenparticle;
-
+	  //	  std::cout<<"   mu loop  " <<std::endl;
+	  TLorentzVector mup4(g.p4().Px(),g.p4().Py(),g.p4().Pz(),sqrt(g.p4().Px()*g.p4().Px() + g.p4().Py()*g.p4().Py() + g.p4().Pz()*g.p4().Pz() + 0.102*0.102 ));
+	  //	  mup4.Print();
 	  const reco::Candidate *m = g.mother();
-	  unsigned int mother_index(0);
+	  /*	  unsigned int mother_index(0);
 	  for (unsigned int j=0; j  < genParticles->size(); j++)
 	    {
 	      const reco::GenParticle &gm = genParticles->at(j);
 	      if(gm.p4() == m->p4() && gm.pdgId() == m->pdgId())
-		mother_index = j;
+		{
+		  if( abs(gm.pdgId())  !=  13)
+		    {
+		      mother_index = j;
+		    }
+		  else if(abs(gm.pdgId())== 13)
+		    {
+		      const reco::Candidate *mm = gm.mother();
+		      for (unsigned int k = 0; k  < genParticles->size(); k++)
+			{
+			  const reco::GenParticle &gmm = genParticles->at(k);
+			  if(gmm.p4() == mm->p4() && gmm.pdgId() == mm->pdgId())
+			    {
+			      if(abs(gmm.pdgId())  !=  13)
+				{
+				  mother_index = k;
+				}
+			      else if(abs(gmm.pdgId())  ==  13)
+				{
+				  const reco::Candidate *mmm = gmm.mother();
+				  for (unsigned int l = 0; l  < genParticles->size(); l++)
+				    {
+				      const reco::GenParticle &gmmm = genParticles->at(l);
+				      if(gmmm.p4() == mmm->p4() && gmmm.pdgId() == mmm->pdgId())
+					{
+					  mother_index = l;
+					}
+				    }
+				}
+			    }
+			}
+		    }
+		}
 	    }
+	  */
+	
+	  unsigned int mother_index(0);
+	  for (unsigned int gen_source=0; gen_source < genParticles->size(); gen_source++)
+	    {
+	      const reco::GenParticle &z = genParticles->at(gen_source);
+	      if(abs(z.pdgId()) == 23)
+		{
+
+		  for (unsigned int d = 0; d < z.numberOfDaughters(); d++) {
+		    const reco::Candidate *dau = z.daughter(d);
+		    if(abs(dau->pdgId()) == 13 &&  (dau->status() == 1 || dau->status() == 23))
+		      {
+		      bool checkp4 = (dau->p4() == g.p4());
+		      TLorentzVector mz(dau->p4().Px(),dau->p4().Py(),dau->p4().Pz(),sqrt(dau->p4().Px()*dau->p4().Px() + dau->p4().Py()*dau->p4().Py() + dau->p4().Pz()*dau->p4().Pz() + 0.102*0.102 ));
+		      if(checkp4)
+			{
+			  mother_index = gen_source;
+			}
+		      else if(mz.DeltaR(mup4)  < 0.01)
+			{
+			  mother_index = gen_source;
+			}
+		      }
+		  }
+		}
+	    }
+
 	  gen_muons_mother_index[counter] = mother_index;
 	  gen_muons_mother_pdgId[counter] = genParticles->at(mother_index).pdgId();
 
