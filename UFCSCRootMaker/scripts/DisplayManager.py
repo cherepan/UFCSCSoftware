@@ -203,11 +203,12 @@ class DisplayManager(object):
                 h.Draw('')
             else:
                 h.Draw('SAME')
-
+            self.canvas.SaveAs(h.GetName()+'.png')    
         self.Legend.Draw()
 
 
         self.canvas.Update()
         self.canvas.SetLogy(False)
         self.canvas.Print(self.name)
+        self.canvas.SaveAs(self.name+'.png')
 

@@ -767,11 +767,11 @@ void UFCSCRootMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
      }
 
 
-     if(isGEN and isSIM)
-        {
+   //     if(isGEN and isSIM)
+       //        {
    //  // SimHitSimTkDebug(genParticles,simHits,simTk,saMuons,recHits);
 	  //              SimHitGENParticleDebug(genParticles,simHits,simTk,saMuons, muons, recHits);
-        }
+	  //        }
    ////////////////////////////////////////////////////////////////////////////////
    nEventsTotal++;
 
@@ -857,7 +857,8 @@ void UFCSCRootMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 
    //cout << "nRHs: " << recHits2D_nRecHits2D << endl;
-   if((addRecHits && recHits2D_nRecHits2D > 0 && (isFullRECO || isLocalRECO) ) /*|| !addRecHits*/) {tree->Fill();}
+   //   if((addRecHits && recHits2D_nRecHits2D > 0 && (isFullRECO || isLocalRECO) ) /*|| !addRecHits*/) {tree->Fill();}
+   if(( (isFullRECO || isLocalRECO) ) /*|| !addRecHits*/) {tree->Fill();}
 
 
    //clear some vectors 

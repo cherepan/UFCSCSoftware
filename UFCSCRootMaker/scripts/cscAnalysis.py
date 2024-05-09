@@ -103,7 +103,6 @@ class Analysis():
     def findMuonsFromZ(self, tree):
         Index = []
         for k in range(0, tree.gen_muons_nMuons):
-
             if (tree.gen_muons_mother_pdgId[k] == 23):
                 Index.append(k)
         return Index
@@ -730,7 +729,8 @@ class Analysis():
                 self.simHits_muonMatched[:]=[]
                 self.recHits_muonMatched[:]=[]
 
-
+                self.sorted_hists1D['EventTest'].Fill(float(tree.Event)/100)
+                print('--   ',tree.Event)
 #                self.sorted_hists1D['nSegmentsTotal'].Fill(tree.cscSegments_nSegments)
 
                 MuonSegmentsRechitsList = []
@@ -830,13 +830,21 @@ class Analysis():
 
                 if opt.isMC:
                     MuonsFromZ = self.findMuonsFromZ(tree)
+#                    print(' Event Number  ', float(tree.Event)/100)
+
+                    for k in range(0, tree.gen_muons_nMuons):
+                        JunkLV = self.genMuonLV(tree, k);
+                        self.sorted_hists1D['GenTest'].Fill(JunkLV.Pt())
+
                     for mu in MuonsFromZ:
                         MuLVGen = self.genMuonLV(tree, mu);
+                        self.sorted_hists1D['GenPtTest'].Fill(MuLVGen.Pt())
                         self.eff_denum_hists1D['MuonReconstruction_MuonPt_den'].Fill(MuLVGen.Pt())
                         self.eff_denum_hists1D['MuonReconstruction_MuonEta_den'].Fill(MuLVGen.Eta())
                         recoMu = self.recoMuonMatchedIndex(tree,mu)
                         if( recoMu !=-1 ):
                             RMuLV = self.recMuonLV(tree, recoMu);
+                            self.sorted_hists1D['RecPtTest'].Fill(RMuLV.Pt())
                             self.sorted_hists1D['MuonReconstruction_MuonPt'].Fill(MuLVGen.Pt())
                             self.sorted_hists1D['MuonReconstruction_MuonEta'].Fill(MuLVGen.Eta())
                             self.sorted_hists1D['MuonReconstruction_PtResolution'].Fill(MuLVGen.Pt() - RMuLV.Pt())
@@ -1488,6 +1496,11 @@ class Analysis():
 #        self.sorted_efficiency['']        = ROOT.TEfficiency("","; 
 
         self.sorted_hists1D['MuonReconstruction_PtResolution']   = ROOT.TH1F("MuonReconstruction_PtResolution","; #Delta pT  (gen - rec), Gev",30,-5,5)
+
+        self.sorted_hists1D['RecPtTest'] = ROOT.TH1F("RecPtTest","; pT (rec #mu), GeV ",30,25,70)
+        self.sorted_hists1D['GenPtTest'] = ROOT.TH1F("GenPtTest","; pT (gen #mu), GeV ",30,25,70)
+        self.sorted_hists1D['GenTest']   = ROOT.TH1F("GenTest","; pT (gen #mu), GeV ",30,25,70)
+        self.sorted_hists1D['EventTest'] = ROOT.TH1F("EventTest","; Events ",20,40,60)
         # ME11
         self.eff_denum_hists1D['SegmentEfficiency_MuonPt_den'] = ROOT.TH1F("SegmentEfficiency_MuonPt_den","; pT (gen #mu), GeV ",30,25,70)
         self.sorted_hists1D['SegmentEfficiency_MuonPt']        = ROOT.TH1F("SegmentEfficiency_MuonPt", "; pT (gen #mu), GeV ",30,25,70)
