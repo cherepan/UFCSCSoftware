@@ -45,17 +45,19 @@ def get1DHistsNames(f):
         print 'Failed to find 1D histograms in file, return None', f
     return None
 
+
 def getTEfficiencyNames(f):
     names1D = []
     for key in f.GetListOfKeys():
         h = f.Get(key.GetName())
+        print("  h test  ", h)
         if isinstance(h, ROOT.TEfficiency):
             names1D.append(key.GetName())
     if len(names1D)!=0:
         return names1D
     else:
-        print 'Failed to find TEfficiency in file, return None', f
-    return None
+        print 'Failed to find TEfficiency in file, return empty list', f
+    return names1D
 
 
 
@@ -86,8 +88,8 @@ def findTEfficiencyHists(f):
     if len(oneDimHists)!=0:
         return oneDimHists
     else:
-        print 'Failed to find TEfficiency in file, return None', f
-    return None
+        print 'Failed to find TEfficiency in file, return empty', f
+    return oneDimHists
 
 
 
@@ -162,6 +164,7 @@ if __name__ == '__main__':
     h_names = [  set(get1DHistsNames(f)) for f in filesTocompare ]
     hists = [find1DHists(f) for f in filesTocompare]
     h_names_common = set.intersection(*h_names)
+
 
     efficiency_names = [  set(getTEfficiencyNames(f)) for f in filesTocompare ]
     efficiency = [findTEfficiencyHists(f) for f in filesTocompare]

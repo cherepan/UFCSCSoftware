@@ -104,6 +104,7 @@ class DisplayManager(object):
             else:
                 h.Draw('SAME HIST E')
 
+
         self.Legend.Draw()
 #        self.NameLegend.Draw()
 
@@ -170,7 +171,7 @@ class DisplayManager(object):
         self.canvas.Update()
         self.canvas.SetLogy(False)
         self.canvas.Print(self.name)
-
+        self.canvas.SaveAs('output/'+h.GetName()+'.png')    
 
 
 
@@ -203,6 +204,7 @@ class DisplayManager(object):
                 h.Draw('')
             else:
                 h.Draw('SAME')
+            self.Legend.Draw()
             self.canvas.SaveAs(h.GetName()+'.png')    
         self.Legend.Draw()
 
