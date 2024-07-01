@@ -24,8 +24,7 @@ def parseOptions():
     parser.add_option('-m','--isMC', dest='isMC', type='int', default=1 ,help='isMC default:0')
     parser.add_option('-f','--file', dest='file', type='string', default='cscRootMaker.root' ,help='file default:blank')
     parser.add_option('-n','--maxEvents', dest='maxEvents', type='int', default=10000000 ,help='maxEvents default:100000')
-    parser.add_option('-d','--outDir', dest='outDir', type='string',
-                      default='output/' ,help='out directory default:CSC')
+    parser.add_option('-d','--outDir', dest='outDir', type='string', default='output/' ,help='out directory default:CSC')
     parser.add_option('-j','--jobName',dest='jobName',type='string', default='cscOverview',help='name of job and output files')
 
     parser.add_option('--isDigi', dest='isDigi', type='int', default=1 ,help='isDigi default:1')
@@ -36,10 +35,10 @@ def parseOptions():
     parser.add_option('-k','--ME21', dest='ME21', type='int', default=1 ,help='Only       ME21 chambers: 1')
         
     # store options and arguments as global variables
-    global opt, args, debug
+    global opt, args, debug, selchamber
     (opt, args) = parser.parse_args()
     debug = False
-
+    selchamber = 22
 
 class Analysis():
 
@@ -125,31 +124,79 @@ class Analysis():
                             
                             CleanSimChambers = []
 
+
+
+
+                            EventListWithRu0Segments= [5531,5912,6038,6150,7292,7370,11543,9624,8012,8018,8302,8764,8785,10236,10295,10661,10719,10832,10887,11081,11236,11295,12261,94,614,837,1555,2183,2662,2756,3110,9220,9227,9231,9445,14224,14239,14367,13397,13777,13791,15035,16050,16094,16443,15335,5786,7722,3291,3369,4333,5250,5251]
+
+
+
+
                             for chambers_with_gen_muon in ChambersCrossedByGenMuon:
                                 if(debug):print('>>>>>>>>>>>>>>>>>>>>>>>>>   loop chambers with muons  <<<<<<<<<<<<<<<<<<<<<<<<< ')
-                                allSimHitsInChamber     = tools.all_simhits_in_a_chamber(tree, chambers_with_gen_muon)
-                                allMuonSimHitsInChamber = tools.all_muon_simhits_in_a_chamber(tree, chambers_with_gen_muon, genMuIndex )
-                                allRecHitsInChamber     = tools.all_rechits_in_a_chamber(tree, chambers_with_gen_muon)
-                                allSegmentsInChamber    = tools.allSegments_InChamber(tree, chambers_with_gen_muon)
-                                Chamber_station         = tools.Chamber_station(chambers_with_gen_muon)
-                                Chamber_ring            = tools.Chamber_ring(chambers_with_gen_muon)
+                                allSimHitsInChamber        = tools.all_simhits_in_a_chamber(tree, chambers_with_gen_muon)
+                                allMuonSimHitsInChamber    = tools.all_muon_simhits_in_a_chamber(tree, chambers_with_gen_muon, genMuIndex )
+                                allRecHitsInChamber        = tools.all_rechits_in_a_chamber(tree, chambers_with_gen_muon)
+                                allSegmentsInChamber       = tools.allSegments_InChamber(tree, chambers_with_gen_muon)
+                                Chamber_station            = tools.Chamber_station(chambers_with_gen_muon)
+                                Chamber_ring               = tools.Chamber_ring(chambers_with_gen_muon)
+                                Chamber_endcap             = tools.Chamber_endcap(chambers_with_gen_muon)
+                                Chamber_chamber            = tools.Chamber_chamber(chambers_with_gen_muon)
 
+
+
+
+                                ###############################3  all chambers comments out when not necessary 
+                                #if Chamber_endcap == 2: Chamber_endcap = '-'
+                                #else: Chamber_endcap = '+'
+                                #stringsim = 'ME'+Chamber_endcap + str(int(Chamber_station)) + '_simHits2D'
+                                #for simhit in allSimHitsInChamber:
+                                #    gx = tree.simHits_globalX[simhit]
+                                #    gy = tree.simHits_globalY[simhit]
+                                #    self.sorted_hists2D[stringsim].Fill(gx, gy)
+
+                                #stringrec = 'ME'+Chamber_endcap + str(int(Chamber_station)) + '_recHits2D'
+                                #for rechit in allRecHitsInChamber:
+                                #    gx = tree.recHits2D_globalX[rechit]
+                                #    gy = tree.recHits2D_globalY[rechit]
+                                #    self.sorted_hists2D[stringrec].Fill(gx, gy)
+                                ###############################3  all chambers comments out when not necessary     
+                                
+
+
+                                HitsSelection = True
+                                if(opt.condition == 0 ): HitsSelection = (len(allSimHitsInChamber) >= 3 and len(allMuonSimHitsInChamber) >= 3 ) # at least tree muon simhits
+                                if(opt.condition == 1 ): HitsSelection = (len(allSimHitsInChamber)  ==  len(allMuonSimHitsInChamber)  and  len(allMuonSimHitsInChamber) >= 3)
+                                
+
+#                                print(' ch:  ', chambers_with_gen_muon, '  ec  ', Chamber_endcap, ' station  ', Chamber_station, '  ring ', Chamber_ring, ' chamber  ', Chamber_chamber) 
+
+                                if( Chamber_station*10  + Chamber_ring == selchamber): 
+                                    stringsim = 'ME'+str(int(selchamber)) + '_simHits2D'
+                                    for simhit in allSimHitsInChamber:
+                                        x = tree.simHits_localX[simhit]
+                                        y = tree.simHits_localY[simhit]
+                                        self.sorted_hists2D[stringsim].Fill(x, y)
+                                    
+                                    stringrec = 'ME'+str(int(selchamber)) + '_recHits2D'
+                                    for rechit in allRecHitsInChamber:
+                                        x = tree.recHits2D_localX[rechit]
+                                        y = tree.recHits2D_localY[rechit]
+                                        self.sorted_hists2D[stringrec].Fill(x, y)
+
+
+                                    
 
                                 if(opt.ME11 == 0 and ( Chamber_station ==1 and Chamber_ring == 1) ): continue  # non ME11
                                 if(opt.ME11 == 1 and ( Chamber_station !=1 or Chamber_ring != 1) ): continue  # ME11
                                 if(opt.ME21 == 1 and ( Chamber_station !=2 or Chamber_ring  != 1) ): continue  # selecti either ME21 or all except ME11
                                 if(opt.ME21 == 0 and ( Chamber_station ==2 and Chamber_ring  == 1) ): continue  # non ME21
 
-#                                print(' ch:  ', chambers_with_gen_muon)
+
 
 
                                 DifferenceMuonSimRecHits = len(AllSimHitOfTheMuon) - len(AllRecHitOfTheMuon)
 #                                AllSegmentsOfSelectedMuon =  tools.allSegments_belonging_toMuon(tree, recoMuIndex)
-
-
-                                HitsSelection = True
-                                if(opt.condition == 0 ): HitsSelection = (len(allSimHitsInChamber) >= 3 and len(allMuonSimHitsInChamber) >= 3 ) # at least tree muon simhits
-                                if(opt.condition == 1 ): HitsSelection = (len(allSimHitsInChamber)  ==  len(allMuonSimHitsInChamber)  and  len(allMuonSimHitsInChamber) >= 3)
 
 
                                 if ( HitsSelection ):  # here clean or noise
@@ -161,8 +208,37 @@ class Analysis():
 
                                     self.sorted_hists1D["SelectedSegments"].Fill(  len(allSegmentsInChamber)  )
 
-                                    if(len(allSegmentsInChamber)== 0):
-                                        print('  zero segment  but how many sim hits ', len(allMuonSimHitsInChamber), '  event N ', "{:02d}".format(tree.Event) )
+
+
+                                ##############################################
+                                    if tree.Event in EventListWithRu0Segments:
+                                        print('===================== event   ', tree.Event, '  Nsegments  ', len(allSegmentsInChamber) )
+
+                                        for allsim in allSimHitsInChamber: 
+                                            print("All Sim Hits :  ", allsim,    "  X/Y  ", tree.simHits_localX[allsim], " / ",
+                                                  tree.simHits_localY[allsim], ' layer:  ', tree.simHits_ID_layer[allsim])
+
+                                            self.sorted_hists1D['MissingSegmentSimHitsLayers'].Fill(tree.simHits_ID_layer[allsim] )
+                                            self.sorted_hists2D['XYSimHitsMissingSegmentInChamber'].Fill(tree.simHits_localX[allsim],tree.simHits_localY[allsim])
+
+                                        for musim in allMuonSimHitsInChamber: 
+                                            print("Muon Sim Hits :  ", musim,    "  X/Y  ", tree.simHits_localX[musim], " / ",
+                                                  tree.simHits_localY[musim], ' layer:  ', tree.simHits_ID_layer[musim])
+
+                                        for irec in allRecHitsInChamber:
+                                            print("rechit:  ",  irec, "  X/Y  ", tree.recHits2D_localX[irec], " / ",
+                                                  tree.recHits2D_localY[irec], ' layer:  ', tree.recHits2D_ID_layer[irec])
+                                            self.sorted_hists1D["MissingSegmentRecHitsLayers"].Fill(tree.simHits_ID_layer[allsim])
+                                        for segment in allSegmentsInChamber:
+                                             print(' segment # ', segment, "  segment local X/Y  ", tree.cscSegments_localX[segment], " /  ", tree.cscSegments_localY[segment])
+                                        
+                                             AllRecHitsOfSegment = tools.allRechits_of_segment(tree, segment)
+                                             for irec in AllRecHitsOfSegment:
+                                                 print("segment rechit:  ",  irec, "  X/Y  ", tree.recHits2D_localX[irec], " / ",
+                                                      tree.recHits2D_localY[irec], ' layer:  ', tree.recHits2D_ID_layer[irec])
+                                                 
+
+
                                     ####################################
                                     #if(debug):
                                     #    print('_______________________ ')
@@ -176,6 +252,7 @@ class Analysis():
                                     for isegment in allSegmentsInChamber:
 
                                         AllRecHitsOfSegment = tools.allRechits_of_segment(tree, isegment)
+                                        self.sorted_hists1D['NRecHitsPerMuonSegment'].Fill( len(AllRecHitsOfSegment) )
                                         for irec in AllRecHitsOfSegment:
                                             ################################
                                             #if(debug):
@@ -259,13 +336,13 @@ class Analysis():
 
                                         self.sorted_hists1D["SegmentYResolution"].Fill( tree.cscSegments_localY[i[0]] - tree.simHits_localY[i[1]] )
 
-                                        if tree.simHits_localY[i[1]] < -30:
+                                        if tree.simHits_localY[i[1]] < -27.5:
                                            self.sorted_hists1D["SegmentYResolutionBot"].Fill( tree.cscSegments_localY[i[0]] - tree.simHits_localY[i[1]] )
                                            self.sorted_hists1D["SegmentYResolutionBotPull"].Fill( (tree.cscSegments_localY[i[0]] - tree.simHits_localY[i[1]])/sqrt(tree.cscSegments_localYerr[i[0]])  )
-                                        if tree.simHits_localY[i[1]] > -30 and tree.simHits_localY[i[1]] < 30:
+                                        if tree.simHits_localY[i[1]] > -27.5 and tree.simHits_localY[i[1]] < 34:
                                             self.sorted_hists1D["SegmentYResolutionMid"].Fill( tree.cscSegments_localY[i[0]] - tree.simHits_localY[i[1]] )
                                             self.sorted_hists1D["SegmentYResolutionMidPull"].Fill( (tree.cscSegments_localY[i[0]] - tree.simHits_localY[i[1]])/sqrt(tree.cscSegments_localYerr[i[0]])  )
-                                        if tree.simHits_localY[i[1]] > 30:
+                                        if tree.simHits_localY[i[1]] > 34:
                                             self.sorted_hists1D["SegmentYResolutionUp"].Fill( tree.cscSegments_localY[i[0]] - tree.simHits_localY[i[1]] )
                                             self.sorted_hists1D["SegmentYResolutionUpPull"].Fill( (tree.cscSegments_localY[i[0]] - tree.simHits_localY[i[1]])/sqrt(tree.cscSegments_localYerr[i[0]])  )
 
@@ -279,9 +356,8 @@ class Analysis():
                                         self.sorted_hists2D['XYSimHitsInChamber'].Fill(tree.simHits_localX[simhit],tree.simHits_localY[simhit])
                                         if( math.fabs(tree.simHits_particleType[simhit])!=13 ): self.sorted_hists2D['XYNonMuonSimHitsInChamber'].Fill(tree.simHits_localX[simhit],tree.simHits_localY[simhit])
                                         if( math.fabs(tree.simHits_particleType[simhit])==11 ): self.sorted_hists2D['XYElectronSimHitsInChamber'].Fill(tree.simHits_localX[simhit],tree.simHits_localY[simhit])
-                                        if( math.fabs(tree.simHits_particleType[simhit])!=11 and math.fabs(tree.simHits_particleType[simhit])!=13 ):
-                                            self.sorted_hists2D['XYNonMuonAndElectronSimHitsInChamber'].Fill(tree.simHits_localX[simhit],tree.simHits_localY[simhit])
-                                            print('---------->    tree.simHits_particleType[simhit]', tree.simHits_particleType[simhit])
+                                        if( math.fabs(tree.simHits_particleType[simhit])!=11 and math.fabs(tree.simHits_particleType[simhit])!=13 ): self.sorted_hists2D['XYNonMuonAndElectronSimHitsInChamber'].Fill(tree.simHits_localX[simhit],tree.simHits_localY[simhit])
+                                        
                                         if( tree.simHits_localX[simhit] > 2 and tree.simHits_localX[simhit] < 8):
                                             if(tree.simHits_localY[simhit] > 20 and tree.simHits_localY[simhit] < 30): 
                                                 self.sorted_hists2D['XYSelSimHitsInChamber'].Fill(tree.simHits_localX[simhit],tree.simHits_localY[simhit])
@@ -342,6 +418,14 @@ class Analysis():
         self.sorted_hists2D['XYSimHitsInChamber']     = ROOT.TH2F('XYSimHitsInChamber',     "; X, cm; Y cm ", 800, -100, 100, 800 , -100, 100)
         self.sorted_hists2D['XYMuonSimHitsInChamber'] = ROOT.TH2F('XYMuonSimHitsInChamber', "; X, cm; Y cm ", 800, -100, 100, 800 , -100, 100) 
         self.sorted_hists2D['XYRecHitsInChamber']     = ROOT.TH2F('XYRecHitsInChamber',     "; X, cm; Y cm ", 800, -100, 100, 800 , -100, 100) 
+        self.sorted_hists2D['XYSimHitsMissingSegmentInChamber']     = ROOT.TH2F('XYSimHitsMissingSegmentInChamber',     "; X, cm; Y cm ", 800, -100, 100, 800 , -100, 100) 
+
+
+        stringsim = 'ME'+str(int(selchamber)) + '_simHits2D'
+        stringrec = 'ME'+str(int(selchamber)) + '_recHits2D'
+
+        self.sorted_hists2D[stringsim]     = ROOT.TH2F(stringsim,     "; X, cm; Y cm ", 800, -100, 100, 800 , -100, 100)
+        self.sorted_hists2D[stringrec]     = ROOT.TH2F(stringrec,     "; X, cm; Y cm ", 800, -100, 100, 800 , -100, 100)
 
 
         self.sorted_hists1D['RecHitResolutionX3rdLayer'] = ROOT.TH1F('RecHitResolutionX3rdLayer', "; X RecHit resolution 3rd layer, cm ", 50, -1.5, 1.5)
@@ -357,9 +441,9 @@ class Analysis():
 
 
         self.sorted_hists1D["SelectedSegments"] = ROOT.TH1F('SelectedSegments', "; N Segments ", 5, -0.5, 4.5)
-
         self.sorted_hists1D["SegmentPurity_Norm"]    = ROOT.TH1F('SegmentPurity_Norm', "; Purity  ", 6, 0. , 1.05 )
 
+        self.sorted_hists1D['NRecHitsPerMuonSegment']   = ROOT.TH1F('NRecHitsPerMuonSegment',"; # rechits per segment",8, -0.5, 7.5)
 
         ## Efficiency 
         self.eff_denum_hists1D['SegmentEfficiency_MuonPt_den'] = ROOT.TH1F("SegmentEfficiency_MuonPt_den","; pT (gen #mu) ",30,25,70)
@@ -391,8 +475,22 @@ class Analysis():
         self.sorted_hists1D['DeltaThetaSegmentSimHits']  = ROOT.TH1F("DeltaThetaSegmentSimHits","; Local #Delta#theta (segment - simhit), rad", 60, -0.5, 0.5)
         self.sorted_hists1D['DeltaPhiSegmentSimHits']    = ROOT.TH1F("DeltaPhiSegmentSimHits","; Local #Delta#phi (segment - simhit), rad", 60, -0.1, 0.1)
 
+ 
+        self.sorted_hists1D["MissingSegmentSimHitsLayers"] = ROOT.TH1F('MissingSegmentSimHitsLayers',"; SimHit layer of missing rec (Default) segment", 8, -0.5, 7.5)
+        self.sorted_hists1D["MissingSegmentRecHitsLayers"] = ROOT.TH1F('MissingSegmentRecHitsLayers',"; RecHit (UF) layer of missing rec (Default) segment", 8, -0.5, 7.5)
+        
+ 
 
-
+        #  2D plots Sim/Rec Hits 
+        #for i in range(len(EC)):
+        #    for j in range(len(ST)):
+        #        string = 'ME'+str(EC[i])+str(ST[j])
+        #        string1 = string+'_recHits2D'
+        #        print('==============  ', string1)
+        #        self.sorted_hists2D[string1] = ROOT.TH2F(string1,"; X; Y", 1600, -800, 800, 1600, -800, 800)
+        #        string2 = string+'_simHits2D'
+        #        print('==============  ', string2)
+        #        self.sorted_hists2D[string2] = ROOT.TH2F(string2,"; X; Y", 1600, -800, 800, 1600, -800, 800)
 
 #        self.sorted_hists1D['']
 
@@ -400,6 +498,7 @@ class Analysis():
     def writeHistos(self, Histos1D, Histos2D):
         
         ROOT.gROOT.ProcessLine(".L tdrstyle.cc")
+        ROOT.gROOT.SetBatch(kTRUE); 
         setTDRStyle(False)
         c = ROOT.TCanvas("c","c",700,700)
         for key in Histos1D:
@@ -455,6 +554,7 @@ class Analysis():
                 Histos1D[key].Scale(1/Histos1D[key].Integral())
             outFile.cd()
             Histos1D[key].Write()
+
         for key in Histos2D:
             Histos2D[key].Write()
 
@@ -489,13 +589,16 @@ class Analysis():
         if self.totalEvents > 0:
             if singleFile:
                 
-                self.writeHistos(self.hists1D,self.hists2D)
+#                self.writeHistos(self.hists1D,self.hists2D)
 #                self.writeHistosToRoot(self.hists1D,self.hists2D)
-                self.writeSortedHistosToRoot(self.sorted_hists1D, self.sorted_hists2D, self.sorted_efficiency,"sorted")
+                self.writeHistos(self.sorted_hists1D,self.sorted_hists2D)
+                self.writeSortedHistosToRoot(self.sorted_hists1D, self.sorted_hists2D, self.sorted_efficiency, "sorted")
             else:
-                self.writeHistos(self.hists1D, self.hists2D)
+#                self.writeHistos(self.hists1D, self.hists2D)
 #                self.writeHistosToRoot(self.hists1D,self.hists2D)
+                self.writeHistos(self.sorted_hists1D,self.sorted_hists2D)
                 self.writeSortedHistosToRoot(self.sorted_hists1D, self.sorted_hists2D, self.sorted_efficiency,"sorted")
+
         
 
 
