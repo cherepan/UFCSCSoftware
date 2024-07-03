@@ -1,0 +1,52 @@
+#!/usr/bin/env python
+
+import subprocess
+
+def submit_condor_job(root_file, python_script, job_name, config):
+    submit_file_content = f"""
+universe     = vanilla
+rank         = memory
+executable   = run.py
+output       = Run-Condor_{job_name}.o
+error        = Run-Condor_{job_name}.e
+log          = Run-Condor_{job_name}.log
+getenv       = True
++MaxRuntime  = 9600
+notification = Error
+
+# Specify arguments
+arguments    = -f {root_file} -p {python_script} -j {job_name} -c {config}
+
+queue 1
+"""
+
+    # Write the submit file
+    submit_file = f"submit_{job_name}.condor"
+    with open(submit_file, 'w') as f:
+        f.write(submit_file_content)
+
+    # Submit the job to Condor
+    subprocess.run(["condor_submit", submit_file])
+
+    print(f"Submitted Condor job with job_name: {job_name}")
+
+
+    
+def main():
+    # Example job parameters
+    job_params = [
+        {"root_file": "../ZMM_UF_10_05.root", "python_script": "eff_csc.py", "job_name": "UFAllSimHits", "config": "0"},
+        {"root_file": "../ZMM_UF_10_05.root", "python_script": "eff_csc.py", "job_name": "UFClean", "config": "1"},
+        {"root_file": "../ZMM_RU_10_05.root", "python_script": "eff_csc.py", "job_name": "RUAllSimHits", "config": "0"},
+        {"root_file": "../ZMM_RU_10_05.root", "python_script": "eff_csc.py", "job_name": "RUClean", "config": "1"},
+
+        # Add more job parameters as needed
+    ]
+
+    # Submit Condor jobs for each set of parameters
+    for params in job_params:
+        submit_condor_job(params["root_file"], params["python_script"], params["job_name"], params["config"])
+
+if __name__ == "__main__":
+    main()
+    
