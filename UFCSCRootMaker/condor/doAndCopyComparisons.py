@@ -17,17 +17,27 @@ def copy_to_eos_directory(source_dir, destination_dir, keyword):
     for filename in os.listdir(source_dir):
         if keyword in filename and filename.endswith('.pdf'):
             shutil.copy(os.path.join(source_dir, filename), destination_dir)
-            print "Copied {} to {}".format(filename, destination_dir)
+            print("Copied {} to {}".format(filename, destination_dir))
 
 def main(file1, file2, output_tag):
     # Run the comparison script
     output_pdf = '{}.pdf'.format(output_tag)
     run_comparison(file1, file2, output_pdf)
 
-    # Determine EOS directory path with date stamp and output tag
-    eos_dir = "/eos/user/c/cherepan/www/CSC/{}_{}".format(output_tag, datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
+    # Determine EOS base directory path with date stamp
+#    base_eos_dir = "/eos/user/c/cherepan/www/CSC/{}".format(datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
+    base_eos_dir = "/eos/user/c/cherepan/www/CSC/{}".format(datetime.now().strftime('%Y-%m-%d'))
+    
+    # Create base EOS directory if it doesn't exist
+    if not os.path.exists(base_eos_dir):
+        os.makedirs(base_eos_dir)
 
-    # Copy PDF files containing OutputTag to EOS directory
+    # Create subdirectory within base EOS directory based on output_tag
+    eos_dir = os.path.join(base_eos_dir, output_tag)
+    if not os.path.exists(eos_dir):
+        os.makedirs(eos_dir)
+
+    # Copy PDF files containing OutputTag to EOS subdirectory
     source_dir = os.getcwd()  # Assuming PDFs are generated in the current working directory
     copy_to_eos_directory(source_dir, eos_dir, output_tag)
 
