@@ -117,7 +117,7 @@ def comparisonEfficiencyPlots(hists, names_to_plot, titles, pname, ratio=False):
 
     display = DisplayManager(pname, ratio)
     print('____________________________________________________________________________________________')
-    print(names_to_plot,'LOLOLOLOLOL')
+
 
     for i_hist_name in names_to_plot:
         histstocompare = []
@@ -173,9 +173,7 @@ if __name__ == '__main__':
     for eff in efficiency:
         for f in eff:
             f.Draw()
-#        print('-----------------', eff)
 
-#    print(efficiency_names_common ,"==================")
 
     print('Making plots for all common branches')
     comparisonPlots(hists, h_names_common, titles, options.outfile, options.do_ratio)

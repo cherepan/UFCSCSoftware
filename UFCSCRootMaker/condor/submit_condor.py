@@ -38,6 +38,14 @@ def main():
         {"root_file": "../ZMM_UF_10_05.root", "python_script": "eff_csc.py", "job_name": "UFClean", "config": "1"},
         {"root_file": "../ZMM_RU_10_05.root", "python_script": "eff_csc.py", "job_name": "RUAllSimHits", "config": "0"},
         {"root_file": "../ZMM_RU_10_05.root", "python_script": "eff_csc.py", "job_name": "RUClean", "config": "1"},
+
+
+        {"root_file": "../ZMM_UF_10_05.root", "python_script": "missing_layers.py", "job_name": "UFAllSimHits_MissingLayers", "config": "0"},
+        {"root_file": "../ZMM_UF_10_05.root", "python_script": "missing_layers.py", "job_name": "UFClean_MissingLayers", "config": "1"},
+        {"root_file": "../ZMM_RU_10_05.root", "python_script": "missing_layers.py", "job_name": "RUAllSimHits_MissingLayers", "config": "0"},
+        {"root_file": "../ZMM_RU_10_05.root", "python_script": "missing_layers.py", "job_name": "RUClean_MissingLayers", "config": "1"},
+
+        
         # Add more job parameters as needed
     ]
 

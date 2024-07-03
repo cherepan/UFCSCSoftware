@@ -60,6 +60,7 @@ class DisplayManager(object):
         self.name = name
         self.draw_ratio = ratio
         self.histos = []
+        self.efficiencies = []
         self.Legend = ROOT.TLegend(0.15, 0.79, 0.5, 0.89)
         applyLegendSettings(self.Legend)
 
@@ -103,12 +104,14 @@ class DisplayManager(object):
             else:
                 h.Draw('SAME HIST E')
 
+
         self.Legend.Draw()
 #        self.NameLegend.Draw()
 
         pull_histos = []
 
         if self.draw_ratio:
+
 
             self.canvas.cd(2)
             for ihist in range(1, len(self.histos)):
@@ -168,4 +171,46 @@ class DisplayManager(object):
         self.canvas.Update()
         self.canvas.SetLogy(False)
         self.canvas.Print(self.name)
+        self.canvas.SaveAs('output/'+h.GetName()+'.png')    
+
+
+
+    def DrawEfficiency(self, efficiencies, titles, xmax=None):
+
+        self.efficiencies = efficiencies
+#        ymax = max(h.GetMaximum() for h in self.histos)
+
+        self.Legend.Clear()
+        self.NameLegend.Clear()
+        self.draw_ratioLegend.Clear()
+
+#        self.canvas.Update()
+        for i, h in enumerate(self.efficiencies):
+            title = titles[i]
+            h.UseCurrentStyle()
+#            h.GetYaxis().SetRangeUser(0.001, ymax * 1.3)
+#            self.canvas.Update()
+
+#            h.GetPaintedGraph().GetXaxis().GetTitle()
+#            h.GetPaintedGraph().GetYaxis().SetRangeUser(0., 1.05)
+#            if xmax:
+#                h.GetXaxis().SetRangeUser(0., xmax)
+#            self.Legend.AddEntry(h, title + ': ' + str(h.Integral()))
+
+            self.Legend.AddEntry(h, title)
+#            h.Draw()
+            if i == 0:
+                h.SetTitle(h.GetName())
+                h.Draw('')
+            else:
+                h.Draw('SAME')
+            self.Legend.Draw()
+            self.canvas.SaveAs(h.GetName()+'.png')    
+        self.Legend.Draw()
+
+
+        self.canvas.Update()
+        self.canvas.SetLogy(False)
+        self.canvas.Print(self.name)
+        self.canvas.SaveAs(self.name+'.png')
 
