@@ -26,6 +26,13 @@ def applyHistStyle(h, i):
     h.SetStats(False)
 
 
+def applyEfficiencyStyle(h, i):
+    h.SetLineColor(colours[i])
+    h.SetLineStyle(styles[i])
+    h.SetLineWidth(2)
+
+
+
 def get1DHistsNames(f):
     names1D = []
     for key in f.GetListOfKeys():
@@ -37,6 +44,20 @@ def get1DHistsNames(f):
     else:
         print 'Failed to find 1D histograms in file, return None', f
     return None
+
+
+def getTEfficiencyNames(f):
+    names1D = []
+    for key in f.GetListOfKeys():
+        h = f.Get(key.GetName())
+        print("  h test  ", h)
+        if isinstance(h, ROOT.TEfficiency):
+            names1D.append(key.GetName())
+    if len(names1D)!=0:
+        return names1D
+    else:
+        print 'Failed to find TEfficiency in file, return empty list', f
+    return names1D
 
 
 
@@ -56,13 +77,29 @@ def find1DHists(f):
 
 
 
+
+def findTEfficiencyHists(f):
+    oneDimHists = []
+    for key in f.GetListOfKeys():
+        h = f.Get(key.GetName())
+        if isinstance(h, ROOT.TEfficiency):
+            print('>>>>>>>>>>>>>>>',            h.GetPassedHistogram().GetXaxis().GetTitle())
+            oneDimHists.append(h)
+    if len(oneDimHists)!=0:
+        return oneDimHists
+    else:
+        print 'Failed to find TEfficiency in file, return empty', f
+    return oneDimHists
+
+
+
+
 #def comparisonPlots(u_names, trees, titles, pname='sync.pdf', ratio=True):
 
 def comparisonPlots(hists, names_to_plot, titles, pname, ratio=True):
 
     display = DisplayManager(pname, ratio)
 
-    print(names_to_plot)
 
     for i_hist_name in names_to_plot:
         histstocompare = []
@@ -76,6 +113,23 @@ def comparisonPlots(hists, names_to_plot, titles, pname, ratio=True):
         display.Draw(histstocompare, titles)
 
 
+def comparisonEfficiencyPlots(hists, names_to_plot, titles, pname, ratio=False):
+
+    display = DisplayManager(pname, ratio)
+    print('____________________________________________________________________________________________')
+    print(names_to_plot,'LOLOLOLOLOL')
+
+    for i_hist_name in names_to_plot:
+        histstocompare = []
+        for i,hlist in enumerate(hists):        
+            for j,h in enumerate(hlist):
+                if h.GetName() == i_hist_name:
+                    h_name = h.GetName()+str(j)
+                    applyEfficiencyStyle(h, i)
+                    histstocompare.append(h)
+        display.DrawEfficiency(histstocompare, titles)
+
+
 if __name__ == '__main__':
         
     usage = '''
@@ -84,7 +138,7 @@ if __name__ == '__main__':
 
     parser = OptionParser(usage=usage)
 
-    parser.add_option('-t', '--titles', type='string', dest='titles', default='UF, Recent', help='Comma-separated list of titles for the N input files')
+    parser.add_option('-t', '--titles', type='string', dest='titles', default='UF, Default', help='Comma-separated list of titles for the N input files')
     parser.add_option('-r', '--no-ratio', dest='do_ratio', action='store_false', default=True, help='Do not show ratio plots')
     parser.add_option('-f', '--outfile', type='string', default='compare_UF_RecentLR.pdf', help='Output file name')
 
@@ -109,11 +163,20 @@ if __name__ == '__main__':
 
     h_names = [  set(get1DHistsNames(f)) for f in filesTocompare ]
     hists = [find1DHists(f) for f in filesTocompare]
-
     h_names_common = set.intersection(*h_names)
 
-#    print(h_names_common,"==================")
+
+    efficiency_names = [  set(getTEfficiencyNames(f)) for f in filesTocompare ]
+    efficiency = [findTEfficiencyHists(f) for f in filesTocompare]
+    efficiency_names_common = set.intersection(*efficiency_names)
+ #   print(efficiency)
+    for eff in efficiency:
+        for f in eff:
+            f.Draw()
+#        print('-----------------', eff)
+
+#    print(efficiency_names_common ,"==================")
 
     print('Making plots for all common branches')
     comparisonPlots(hists, h_names_common, titles, options.outfile, options.do_ratio)
-
+    comparisonEfficiencyPlots(efficiency,efficiency_names_common,titles,"Efficiency_"+options.outfile, False)
