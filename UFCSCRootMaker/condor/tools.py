@@ -12,6 +12,37 @@ import ROOT
 from array import array
 from numpy import sqrt
 
+global HVSegments
+
+#  Areas excludes HV spacer in chambers (not precise and with some margin))
+HVSegments = {
+    'ME_12': [(-86, -36), (-30, 30), (36, 80)],
+    'ME_13': [(-80, -30), (-20, 20), (30, 76)],
+    'ME_21': [(-92, -34), (-25, 30), (40,90)],
+    'ME_22': [(-155, -90), (-75, -26), (-18,35), (45, 95), (105, 150)],
+    'ME_31': [(-85, -42), (-30, 20), (30,80)],
+    'ME_32': [(-155, -90), (-75, -26), (-18,35), (45, 95), (105, 150)],
+    'ME_41': [(-70, -30), (-20, 20), (30,65)],
+    'ME_42': [(-155, -90), (-75, -26), (-18,35), (45, 95), (105, 150)]
+}
+
+
+
+
+
+def is_y_in_not_dead_zone(y, chamber):
+    """
+    Check if the given hit is withing HV segmnet area
+    """
+    if chamber not in HVSegments: return True
+    dead_zones = HVSegments[chamber]
+
+    for zone in dead_zones:
+        if zone[0] <= y <= zone[1]:
+            return True
+    return False
+
+
 
 
 
@@ -20,9 +51,11 @@ def findMuonsFromZ(tree):  # find gen Muon from Z unt the   forward region and p
         for k in range(0, tree.gen_muons_nMuons):
             if (tree.gen_muons_mother_pdgId[k] == 23):
                 LV = genMuonLV(tree, k)
-                if(LV.Pt() > 15 and math.fabs(LV.Eta()) > 1.1 and math.fabs(LV.Eta()) < 2.42):
+                if(LV.Pt() > 15 and math.fabs(LV.Eta()) > 0.9 and math.fabs(LV.Eta()) < 2.42):
                     Index.append(k)
         return Index
+
+
 
 
 def genMuonLV(tree, index):                      # LV of GEN muon
@@ -36,6 +69,8 @@ def genMuonLV(tree, index):                      # LV of GEN muon
         return genMuon
 
 
+
+
 def recMuonLV(tree, index):                      # LV of RECO muon
         if index > tree.muons_nMuons or index == -1:
             print("============= >recMuonLV:  Requested index is out if range or equal to -1, return 0,0,0,0;")
@@ -45,6 +80,8 @@ def recMuonLV(tree, index):                      # LV of RECO muon
                                  tree.muons_pz[index],
                                  tree.muons_energy[index])
         return recMuon
+
+
 
 
 
@@ -61,11 +98,13 @@ def recoMuonMatchedIndex(tree, index_genMuon):    #  returns the index of reco M
 
 
 
+
 def linked_gen_mu_index(tree, i):                 #
         if i == -1:return -1
         for k in range(0, tree.gen_muons_nMuons):
             if tree.gen_muons_genindex[k] == i: return k
         return -1
+
 
 
 
@@ -140,20 +179,6 @@ def Chambers_crossedByGenMuon(tree, gen_muon_index):
                 chamberList.append(ChamberID(endcap,station,ring,chamber))
         out = [i for n, i in enumerate(chamberList) if i not in chamberList[:n]]  # remove duplicates as there are 6 entries if I count by simhits
         return out
-
-#    def Chambers_Not_crossedByGenMuon(tree, gen_muon_index):
-#        chamberList = []
-#        for n in range(0,tree.simHits_nSimHits):
-#            if simHitBelongToGenMuon(tree, n, gen_muon_index):
-#                endcap  = tree.simHits_ID_endcap[n]
-#                station = tree.simHits_ID_station[n]
-#                ring    = tree.simHits_ID_ring[n]
-#                chamber = tree.simHits_ID_chamber[n]
-#                chamberList.append(ChamberID(endcap,station,ring,chamber))
-#        out = [i for n, i in enumerate(chamberList) if i not in chamberList[:n]]  # remove duplicates as there are 6 entries if I count by simhits
-#        return out
-
-
 
 
 
@@ -423,6 +448,7 @@ def all_simhits_in_a_chamber(tree, chamber):
                 simhit_list.append(n)
         return simhit_list
 
+
 def RecHit_closest_SimHit(tree, rechit, SimHitsCollection): 
         chamber_rechit   = ChamberID(tree.recHits2D_ID_endcap[rechit],
                                      tree.recHits2D_ID_station[rechit],
@@ -552,8 +578,12 @@ def FoundMatchedSegment(tree, simsegment, chamber, ExcludeHVSpacer = True):
 
         if ThirdLayerSimHit == -1: return -1
 
+        ######################  values for ME21 chamber ############# 
+        XPullPosLow        = -2
+        XPullPosHigh       =  3
 
-        XPull       =  3.5
+        XPullNegLow       =  -3
+        XPullNegHigh       =  2.5
 
         UpPullLow    = -2.5
         UpPullHigh   =  5
@@ -583,10 +613,10 @@ def FoundMatchedSegment(tree, simsegment, chamber, ExcludeHVSpacer = True):
         ME21HVPLacerUP_High =  36. 
         
 
-        print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> ')
-        print('  3rd layer simhit    ', tree.simHits_localX[ThirdLayerSimHit], ' / ' , tree.simHits_localY[ThirdLayerSimHit] )
+#        print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> ')
+#        print('  3rd layer simhit    ', tree.simHits_localX[ThirdLayerSimHit] ,  ' / ' , tree.simHits_localY[ThirdLayerSimHit] )
         for segment_index in AllSegments:
-                print('segment  ', segment_index, '   X / Y   ',  tree.cscSegments_localX[segment_index], ' / ' , tree.cscSegments_localY[segment_index])
+#                print('segment  ', segment_index, '   X / Y   ',  tree.cscSegments_localX[segment_index],'  pm  ', sqrt(tree.cscSegments_localXerr[segment_index])  , ' / ' , tree.cscSegments_localY[segment_index], '  pm  ',  sqrt(tree.cscSegments_localYerr[segment_index]) )
                 if( math.fabs(tree.cscSegments_localX[segment_index] - tree.simHits_localX[ThirdLayerSimHit]) < minDiffX and 
                     math.fabs(tree.cscSegments_localY[segment_index] - tree.simHits_localY[ThirdLayerSimHit]) < minDiffY ):
                         minDiffX =  math.fabs(tree.cscSegments_localX[segment_index] - tree.simHits_localX[ThirdLayerSimHit])
@@ -594,27 +624,34 @@ def FoundMatchedSegment(tree, simsegment, chamber, ExcludeHVSpacer = True):
                         MatchedSegmentIndex = segment_index
 
                         
-        print('  X / Y  ', minDiffX, '/', minDiffY,  '  matched segment index  ',  MatchedSegmentIndex)
+#        print(' Closest  Segment   X / Y  ', minDiffX, '/', minDiffY,  '  matched segment index  ',  MatchedSegmentIndex  )
         
 
         
         if MatchedSegmentIndex!=-1:
-                if math.fabs((tree.cscSegments_localX[segment_index] - tree.simHits_localX[ThirdLayerSimHit])/sqrt(tree.cscSegments_localXerr[segment_index])) < XPull:
-                        if  tree.simHits_localY[ThirdLayerSimHit]  < ME21HVPLacerBot_High:
-                                pullY = (tree.cscSegments_localY[segment_index]  - tree.simHits_localY[ThirdLayerSimHit])/sqrt(tree.cscSegments_localYerr[segment_index])
-                                if( pullY   >  BotPullLow and pullY  <  BotPullHigh ):
-                                        print('pull_Bot  ', pullY )
-                                        FoundMatchedSegment = True
-                        if tree.simHits_localY[ThirdLayerSimHit]  >  ME21HVPLacerBot_Low  and tree.simHits_localY[ThirdLayerSimHit] < ME21HVPLacerUP_Low:
-                                pullY = (tree.cscSegments_localY[segment_index]  - tree.simHits_localY[ThirdLayerSimHit])/sqrt(tree.cscSegments_localYerr[segment_index])
-                                if( pullY >  MidPullLow and pullY <  MidPullHigh):
-                                        print('pull_Mid  ', pullY )
-                                        FoundMatchedSegment = True
-                        if tree.simHits_localY[ThirdLayerSimHit]  >  ME21HVPLacerUP_High:
-                                pullY = (tree.cscSegments_localY[segment_index]  - tree.simHits_localY[ThirdLayerSimHit])/sqrt(tree.cscSegments_localYerr[segment_index])
-                                print('pull_Mid  ', pullY )
-                                if( pullY   >  UpPullLow and pullY <  UpPullHigh):
-                                        FoundMatchedSegment = True
+                pullX = (tree.cscSegments_localX[MatchedSegmentIndex]  - tree.simHits_localX[ThirdLayerSimHit])/sqrt(tree.cscSegments_localXerr[MatchedSegmentIndex])
+                pullY = (tree.cscSegments_localY[MatchedSegmentIndex]  - tree.simHits_localY[ThirdLayerSimHit])/sqrt(tree.cscSegments_localYerr[MatchedSegmentIndex])
+#                print(' Check PullX   ', pullX, '   ==  '),  (tree.cscSegments_localX[MatchedSegmentIndex]  - tree.simHits_localX[ThirdLayerSimHit]), '  /  ', 
+                if tree.cscSegments_localX[MatchedSegmentIndex] > 0:
+#                        print(' xPullPosLow   ', XPullPosLow, ' pullX  ', pullX, '   XPullPosHigh    ', XPullPosHigh ,  ' passed  ', ( pullX  > XPullPosLow and pullX < XPullPosHigh))
+                        if( pullX  > XPullPosLow and pullX < XPullPosHigh):
+                                FoundMatchedSegment = True
+                if tree.cscSegments_localX[MatchedSegmentIndex] < 0:
+#                        print(' xPullNEgLow   ', XPullNegLow, ' pullX  ', pullX, '   XPullNegHigh    ', XPullNegHigh ,  ' passed  ', ( pullX  > XPullNegLow and pullX < XPullNegHigh))
+                        if( pullX  > XPullNegLow and pullX < XPullNegHigh):
+                                FoundMatchedSegment = True
+                if tree.cscSegments_localY[MatchedSegmentIndex]   < ME21HVPLacerBot_High:
+#                        print(' xPullNEgLow   ', BotPullLow, ' pullY  ', pullY, '   XPullNegHigh    ', BotPullHigh ,  ' passed  ', ( pullY   >  BotPullLow and pullY  <  BotPullHigh ))
+                        if( pullY   >  BotPullLow and pullY  <  BotPullHigh ):
+                                FoundMatchedSegment = True
+                if tree.cscSegments_localY[MatchedSegmentIndex]  >  ME21HVPLacerBot_Low  and tree.cscSegments_localY[MatchedSegmentIndex] < ME21HVPLacerUP_Low:
+#                        print(' xPullNEgLow   ', MidPullLow, ' pullY ', pullY, '   XPullNegHigh    ', MidPullHigh  ,  ' passed  ', ( pullY >  MidPullLow and pullY <  MidPullHigh))
+                        if( pullY >  MidPullLow and pullY <  MidPullHigh):
+                                FoundMatchedSegment = True
+                if tree.cscSegments_localY[MatchedSegmentIndex]  >  ME21HVPLacerUP_High:
+#                        print(' xPullNEgLow   ', UpPullLow, ' pullY ', pullY, '   XPullNegHigh    ', UpPullHigh  ,  ' passed  ', ( pullY   >  UpPullLow and pullY <  UpPullHigh))
+                        if( pullY   >  UpPullLow and pullY <  UpPullHigh):
+                                FoundMatchedSegment = True
 
 
 #        for segment_index in AllSegments:

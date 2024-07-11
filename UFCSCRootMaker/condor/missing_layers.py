@@ -38,7 +38,7 @@ def parseOptions():
     global opt, args, debug, selchamber
     (opt, args) = parser.parse_args()
     debug = False
-    selchamber = [31, 32 , 21, 22, 12, 41, 42, 11, 12, 13]
+    selchamber = [11, 12, 13 , 21, 22, 31, 32, 41 ,42]
 
 class Analysis():
 
@@ -81,7 +81,10 @@ class Analysis():
 
 
 
-
+        MoreThan3Segments = open("MoreThan3Segments.txt","w")
+        MissingSegmentRu = open("MissingSegmentRu.txt","w")
+        PiPEntry        = open("PiPEntry.txt","w")
+        NoiseEntry        = open("NoiseEntry.txt","w")
         #Analysis Loop
         for i in range( tree.GetEntries() ):
 #            print('===============================    Event loop    ========================================= ')
@@ -104,6 +107,7 @@ class Analysis():
 
                     MuonsFromZ = tools.findMuonsFromZ(tree)
 #                    GRMuonsMap = tools.GenCSCRecoMuonsMap(tree)
+
                     for mu in MuonsFromZ:                        
 
                             genMuIndex  = mu
@@ -143,6 +147,14 @@ class Analysis():
                                 Chamber_endcap             = tools.Chamber_endcap(chambers_with_gen_muon)
                                 Chamber_chamber            = tools.Chamber_chamber(chambers_with_gen_muon)
 
+                                if( len(allSegmentsInChamber) >= 2  ):
+                                    MoreThan3Segments.write('{}  {}  {}  {}   {}   \n '.format(tree.Event,
+                                                                                               int(tools.Chamber_endcap(chambers_with_gen_muon)),
+                                                                                               int(tools.Chamber_station(chambers_with_gen_muon)),
+                                                                                               int(tools.Chamber_ring(chambers_with_gen_muon)),
+                                                                                               int(tools.Chamber_chamber(chambers_with_gen_muon))))
+
+
 
 
 
@@ -172,18 +184,37 @@ class Analysis():
 #                                print(' ch:  ', chambers_with_gen_muon, '  ec  ', Chamber_endcap, ' station  ', Chamber_station, '  ring ', Chamber_ring, ' chamber  ', Chamber_chamber) 
 
                                 if( (  Chamber_station*10  + Chamber_ring ) in selchamber): 
-                                    stringsim    = 'ME'+str(int(Chamber_station*10  + Chamber_ring)) + '_simHits2D'
-                                    stringsimele = 'ME'+str(int(Chamber_station*10  + Chamber_ring)) + '_ElesimHits2D'
-                                    stringsimmu  = 'ME'+str(int(Chamber_station*10  + Chamber_ring)) + '_MusimHits2D'
+                                    stringsim     = 'ME'+str(int(Chamber_station*10  + Chamber_ring)) + '_simHits2D'
+                                    stringsimele  = 'ME'+str(int(Chamber_station*10  + Chamber_ring)) + '_ElesimHits2D'
+                                    stringsimmu   = 'ME'+str(int(Chamber_station*10  + Chamber_ring)) + '_MusimHits2D'
+                                    stringsimhad  = 'ME'+str(int(Chamber_station*10  + Chamber_ring)) + '_HadsimHits2D'
+                                    eleSimHitsInChamber=[]
                                     for simhit in allSimHitsInChamber:
+#                                        print(' chamber   ', chambers_with_gen_muon, '  simhit  # ', simhit, '  simHit Type:  ', tree.simHits_particleType[simhit])
                                         x = tree.simHits_localX[simhit]
                                         y = tree.simHits_localY[simhit]
                                         self.sorted_hists2D[stringsim].Fill(x, y)
                                         if ( math.fabs(tree.simHits_particleType[simhit]) == 11 ):
                                             self.sorted_hists2D[stringsimele].Fill(x, y)
+                                            eleSimHitsInChamber.append(eleSimHitsInChamber)
                                         if ( math.fabs(tree.simHits_particleType[simhit]) == 13 ):
                                             self.sorted_hists2D[stringsimmu].Fill(x, y)
-                                    
+                                        if( math.fabs(tree.simHits_particleType[simhit])!=11 and
+                                            math.fabs(tree.simHits_particleType[simhit])!=13 ):
+                                            self.sorted_hists2D[stringsimhad].Fill(x, y)
+                                            PiPEntry.write('{}  {}  {}  {}   {}   \n '.format(tree.Event,
+                                                                                              int(tools.Chamber_endcap(chambers_with_gen_muon)),
+                                                                                              int(tools.Chamber_station(chambers_with_gen_muon)),
+                                                                                              int(tools.Chamber_ring(chambers_with_gen_muon)),
+                                                                                              int(tools.Chamber_chamber(chambers_with_gen_muon))))
+                                    self.sorted_hists1D['NoiseEleSimHits'].Fill(len(eleSimHitsInChamber))
+                                    if(len(eleSimHitsInChamber) > 35):
+                                        NoiseEntry.write('{}  {}  {}  {}   {}   \n '.format(tree.Event,
+                                                                                            int(tools.Chamber_endcap(chambers_with_gen_muon)),
+                                                                                            int(tools.Chamber_station(chambers_with_gen_muon)),
+                                                                                            int(tools.Chamber_ring(chambers_with_gen_muon)),
+                                                                                            int(tools.Chamber_chamber(chambers_with_gen_muon))))
+                                            
                                     stringrec = 'ME'+str(int(Chamber_station*10  + Chamber_ring)) + '_recHits2D'
                                     for rechit in allRecHitsInChamber:
                                         x = tree.recHits2D_localX[rechit]
@@ -215,11 +246,15 @@ class Analysis():
                                     self.sorted_hists1D["SelectedSegments"].Fill(  len(allSegmentsInChamber)  )
 
 
-
                                 ##############################################
                                     if tree.Event in EventListWithRu0Segments:
                                         print('===================== event   ', tree.Event, '  Nsegments  ', len(allSegmentsInChamber) )
 
+                                        MissingSegmentRu.write('{}  {}  {}  {}   {}   \n '.format(tree.Event,
+                                                                                                  int(tools.Chamber_endcap(chambers_with_gen_muon)),
+                                                                                                  int(tools.Chamber_station(chambers_with_gen_muon)),
+                                                                                                  int(tools.Chamber_ring(chambers_with_gen_muon)),
+                                                                                                  int(tools.Chamber_chamber(chambers_with_gen_muon))))
                                         for allsim in allSimHitsInChamber: 
                                             print("All Sim Hits :  ", allsim,    "  X/Y  ", tree.simHits_localX[allsim], " / ",
                                                   tree.simHits_localY[allsim], ' layer:  ', tree.simHits_ID_layer[allsim])
@@ -233,11 +268,10 @@ class Analysis():
                                             print("Muon Sim Hits :  ", musim,    "  X/Y  ", tree.simHits_localX[musim], " / ",
                                                   tree.simHits_localY[musim], ' layer:  ', tree.simHits_ID_layer[musim])
                                             self.sorted_hists1D['MissingSegmentMuSimHitsLayers'].Fill(tree.simHits_ID_layer[musim] )
-
                                              
                                         for irec in allRecHitsInChamber:
                                             print("rechit:  ",  irec, "  X/Y  ", tree.recHits2D_localX[irec], " / ",
-                                                  tree.recHits2D_localY[irec], ' layer:  ', tree.recHits2D_ID_layer[irec])
+                                                  tree.recHits2D_localY[irec], ' layer:  ', tree.recHits2D_ID_layer[irec], "  nearest WG     ", tree.recHits2D_nearestWireGroup[irec])
                                             self.sorted_hists1D["MissingSegmentRecHitsLayers"].Fill(tree.simHits_ID_layer[irec])
                                         for segment in allSegmentsInChamber:
                                              print(' segment # ', segment, "  segment local X/Y  ", tree.cscSegments_localX[segment], " /  ", tree.cscSegments_localY[segment])
@@ -363,10 +397,14 @@ class Analysis():
                                     for musimhit in allMuonSimHitsInChamber:
                                         self.sorted_hists2D['XYMuonSimHitsInChamber'].Fill(tree.simHits_localX[musimhit],tree.simHits_localY[musimhit])
                                     print(' ------------->  chamber  ', tools.Chamber_chamber(chambers_with_gen_muon), chambers_with_gen_muon)
+
                                     for simhit in allSimHitsInChamber:
+
                                         self.sorted_hists2D['XYSimHitsInChamber'].Fill(tree.simHits_localX[simhit],tree.simHits_localY[simhit])
                                         if( math.fabs(tree.simHits_particleType[simhit])!=13 ): self.sorted_hists2D['XYNonMuonSimHitsInChamber'].Fill(tree.simHits_localX[simhit],tree.simHits_localY[simhit])
-                                        if( math.fabs(tree.simHits_particleType[simhit])==11 ): self.sorted_hists2D['XYElectronSimHitsInChamber'].Fill(tree.simHits_localX[simhit],tree.simHits_localY[simhit])
+                                        if( math.fabs(tree.simHits_particleType[simhit])==11 ):
+                                            self.sorted_hists2D['XYElectronSimHitsInChamber'].Fill(tree.simHits_localX[simhit],tree.simHits_localY[simhit])
+
                                         if( math.fabs(tree.simHits_particleType[simhit])!=11 and math.fabs(tree.simHits_particleType[simhit])!=13 ): self.sorted_hists2D['XYNonMuonAndElectronSimHitsInChamber'].Fill(tree.simHits_localX[simhit],tree.simHits_localY[simhit])
                                         
                                         if( tree.simHits_localX[simhit] > 2 and tree.simHits_localX[simhit] < 8):
@@ -375,6 +413,8 @@ class Analysis():
                                                 print('simHits_ID_processType  ', tree.simHits_ID_processType[simhit],  tree.simHits_particleType[simhit], simhit  )
                                                 if simhit in allMuonSimHitsInChamber:
                                                     print(' this is a muon simhit  ', simhit)
+
+
                                     for rechit in allRecHitsInChamber:
                                         self.sorted_hists2D['XYRecHitsInChamber'].Fill(tree.recHits2D_localX[rechit], tree.recHits2D_localY[rechit])
                                         
@@ -431,17 +471,22 @@ class Analysis():
         self.sorted_hists2D['XYRecHitsInChamber']     = ROOT.TH2F('XYRecHitsInChamber',     "; X, cm; Y cm ", 800, -100, 100, 800 , -100, 100) 
         self.sorted_hists2D['XYSimHitsMissingSegmentInChamber']     = ROOT.TH2F('XYSimHitsMissingSegmentInChamber',     "; X, cm; Y cm ", 800, -100, 100, 800 , -100, 100) 
 
+
+        self.sorted_hists1D['NoiseEleSimHits'] = ROOT.TH1F('NoiseEleSimHits', "; EleSimHits (id == 11)", 60, -0.5, 59)
+        
         for ring in selchamber:
             stringsim    = 'ME'+str(int(ring)) + '_simHits2D'
             stringsimele = 'ME'+str(int(ring)) + '_ElesimHits2D'
             stringsimmu  = 'ME'+str(int(ring)) + '_MusimHits2D'
+            stringsimhad = 'ME'+str(int(ring)) + '_HadsimHits2D'
             stringrec    = 'ME'+str(int(ring)) + '_recHits2D'
             Range  =  100
-            if ring == 11: Range = 50
+            if ring == 11: Range = 80
             if ( ring == 42 or ring == 22 or ring == 32) : Range = 170
             self.sorted_hists2D[stringsim]        = ROOT.TH2F(stringsim,        "; X, cm; Y cm ", 800, -100, 100, 800 , -Range, Range)
             self.sorted_hists2D[stringsimele]     = ROOT.TH2F(stringsimele,     "; X, cm; Y cm ", 800, -100, 100, 800 , -Range, Range)
             self.sorted_hists2D[stringsimmu]      = ROOT.TH2F(stringsimmu,      "; X, cm; Y cm ", 800, -100, 100, 800 , -Range, Range)
+            self.sorted_hists2D[stringsimhad]     = ROOT.TH2F(stringsimhad,     "; X, cm; Y cm ", 800, -100, 100, 800 , -Range, Range)
             self.sorted_hists2D[stringrec]        = ROOT.TH2F(stringrec,        "; X, cm; Y cm ", 800, -100, 100, 800 , -Range, Range)
 
 
@@ -479,10 +524,6 @@ class Analysis():
         self.eff_denum_hists1D['SegmentEfficiency_LocalY_den']  = ROOT.TH1F("SegmentEfficiency_LocalY_den","; Muon SimHit (3rd Layer) Y, cm  ",50,-100,100)
         self.sorted_hists1D['SegmentEfficiency_LocalY']     = ROOT.TH1F("SegmentEfficiency_LocalY","; Muon SimHit (3rd Layer) Y, cm  ",50,-100,100)
         self.sorted_efficiency['SegmentEfficiency_LocalY']  = ROOT.TEfficiency("SegmentEfficiency_LocalY","; Muon SimHit (3rd Layer) Y, cm  ",50,-100,100)
-
-
-
-
 
 
 
