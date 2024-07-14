@@ -11,10 +11,13 @@ from ROOT import *
 import ROOT
 from array import array
 from numpy import sqrt
+import numpy as np
 
-global HVSegments
 
-#  Areas excludes HV spacer in chambers (not precise and with some margin))
+
+global HVSegments, ChambersResolutionX, ChambersResolutionY
+
+#  Areas excludes HV spacer in chambers (not precise and with some margin) in cm + exclude chamber edges)
 HVSegments = {
     'ME_12': [(-86, -36), (-30, 30), (36, 80)],
     'ME_13': [(-80, -30), (-20, 20), (30, 76)],
@@ -28,7 +31,46 @@ HVSegments = {
 
 
 
+ChambersResolutionX = {
+    'ME_12': [(-5,  5)],
+    'ME_13': [(-3,  3)],
+    'ME_21': [(-4,  3)],
+    'ME_22': [(-4,  4)],
+    'ME_31': [(-4,  4)], 
+    'ME_32': [(-3.5,3.5)],
+    'ME_41': [(-4,  4)],
+    'ME_42': [(-3.5,  3.5)]
+}
 
+
+ChambersResolutionY = {
+    'ME_12': [(-2,  4)],
+    'ME_13': [(-1,  3.5)],
+    'ME_21': [(-1,  4)],
+    'ME_22': [(-1,  3)],
+    'ME_31': [(-4,  1)], 
+    'ME_32': [(-4,  1)],
+    'ME_41': [(-5,  1)],
+    'ME_42': [(-4,  1)]
+}
+
+
+
+
+
+def is_value_within_range(val, chamber, dictionary):
+
+    if chamber not in dictionary: return True
+    zones = dictionary[chamber]
+    for zone in zones:
+        if zone[0] <= val <= zone[1]:
+#            print('zone[0]  ',  zone[0], '  val ', val, ' zone[1] ', zone[1])
+            return True
+    return False
+
+
+
+    
 
 def is_y_in_not_dead_zone(y, chamber):
     """
@@ -43,7 +85,71 @@ def is_y_in_not_dead_zone(y, chamber):
     return False
 
 
+def write_th2f(hist):
+    for i in range(1, hist.GetNbinsY() + 1):
+        for j in range(1, hist.GetNbinsX() + 1):
+            if hist.GetBinContent(j, i) == 0:
+                sys.stdout.write("-")
+            else:
+                sys.stdout.write("*")
+        print()
 
+
+def fill_wire_matrix(tree, rechits):
+            nWireGroups = 111
+            WireHits = ROOT.TH2F('wHitsPerChamber','',nWireGroups , 1, nWireGroups, 6,1,7 )
+
+            rows_v = []
+            cols_v = []
+            data_v = []
+
+            for w_layer in range(1,7):
+                for w in range(0,nWireGroups):
+                    wg=0
+                    for whit in rechits:
+                        if tree.recHits2D_ID_layer[whit] == w_layer and tree.recHits2D_nearestWireGroup[whit] == w:
+                            wg = tree.recHits2D_nearestWireGroup[whit]
+                    cols_v.append(wg)
+                    data_v.append(1)
+                    rows_v.append(w_layer)
+
+
+            rows_a = np.array(rows_v,dtype='float64')
+            cols_a = np.array(cols_v,dtype='float64')
+            data_a = np.array(data_v,dtype='float64')
+
+
+            WireHits.FillN(len(rows_v), cols_a, rows_a, data_a)
+            return WireHits
+
+
+
+def fill_strip_matrix(tree, rechits):
+            nStrips = 80
+            StripHits = ROOT.TH2F('StripPerChamber','',nStrips , 1, nStrips, 6,1,7 )
+
+            rows_v = []
+            cols_v = []
+            data_v = []
+
+            for w_layer in range(1,7):
+                for s in range(0,nStrips):
+                    strip=0
+                    for whit in rechits:
+                        if tree.recHits2D_ID_layer[whit] == w_layer and tree.recHits2D_nearestStrip[whit] == s:
+                            strip = tree.recHits2D_nearestStrip[whit]
+                    cols_v.append(strip)
+                    data_v.append(1)
+                    rows_v.append(w_layer)
+
+
+            rows_a = np.array(rows_v,dtype='float64')
+            cols_a = np.array(cols_v,dtype='float64')
+            data_a = np.array(data_v,dtype='float64')
+
+
+            StripHits.FillN(len(rows_v), cols_a, rows_a, data_a)
+            return StripHits
 
 
 def findMuonsFromZ(tree):  # find gen Muon from Z unt the   forward region and pt > 15
@@ -449,6 +555,47 @@ def all_simhits_in_a_chamber(tree, chamber):
         return simhit_list
 
 
+def Segment_closest_to_simhit(tree, SimHits, Segments):
+        SegmentSimHitPair = []
+        ThirdLayerSimHits = -1
+        for simhit in SimHits:
+            if tree.simHits_ID_layer[simhit] == 3: ThirdLayerSimHits = simhit
+
+        localX_simhit = 0
+        localY_simhit = 0
+        if(ThirdLayerSimHits!=-1):  # if there is no simhit in the 3rd layer  take an average coor wrt first and last layer
+            localX_simhit = tree.simHits_localX[ThirdLayerSimHits]
+            localY_simhit = tree.simHits_localY[ThirdLayerSimHits]
+        else:
+            localX_simhit  = ( tree.simHits_localX[SimHits[0]] + tree.simHits_localX[SimHits[-1]] )*0.5
+            localY_simhit = ( tree.simHits_localY[SimHits[0]] + tree.simHits_localY[SimHits[-1]] )*0.5
+        
+        X = ( tree.simHits_localX[SimHits[0]] + tree.simHits_localX[SimHits[-1]] )*0.5
+        Y = ( tree.simHits_localY[SimHits[0]] + tree.simHits_localY[SimHits[-1]] )*0.5
+
+        
+        mindiffX = 99.
+        mindiffY = 99.
+        minR     = 99.
+        minX     = 99.
+        
+        ClosestSegment = -1
+
+        for segment in Segments:
+            localX_segment = tree.cscSegments_localX[segment]
+            localY_segment = tree.cscSegments_localY[segment]
+
+            if( sqrt(math.pow( localX_simhit - localX_segment ,2)  + math.pow( localY_simhit - localY_segment, 2) )  <  minR and     math.fabs( localX_simhit - localX_segment ) <
+                minX and  math.fabs( localY_simhit - localY_segment ) < 10 ):
+                minR = sqrt(math.pow( localX_simhit - localX_segment ,2)  + math.pow( localY_simhit - localY_segment, 2))
+                minX = math.fabs( localX_simhit - localX_segment )
+                ClosestSegment = segment
+                
+
+        return ClosestSegment
+
+            
+    
 def RecHit_closest_SimHit(tree, rechit, SimHitsCollection): 
         chamber_rechit   = ChamberID(tree.recHits2D_ID_endcap[rechit],
                                      tree.recHits2D_ID_station[rechit],
@@ -565,6 +712,22 @@ def MuonHasRecoSegmentInTheChamber(tree, good_chambers, recoMuIndex, allMuonSimH
         return Segment_index
 
 
+def SegmentWithinResolution(tree, segment,  simX, simY, chamber):
+    if segment == -1: return False
+    pullX = (tree.cscSegments_localX[segment] - simX )/ sqrt(tree.cscSegments_localXerr[segment])
+    pullY = (tree.cscSegments_localY[segment] - simY )/ sqrt(tree.cscSegments_localYerr[segment])
+    
+#    print('check ', chamber, ' pullX  ', pullX, ' get it  ', is_value_within_range(pullX,chamber,ChambersResolutionX)  )
+#    print('check ', chamber, ' pullY  ', pullY, ' get it  ', is_value_within_range(pullY,chamber,ChambersResolutionY)  )
+
+    if(is_value_within_range(pullX,chamber,ChambersResolutionX)  and is_value_within_range(pullY,chamber,ChambersResolutionY)):
+        return True
+    return True
+#    return False
+
+    
+    
+
 
 def FoundMatchedSegment(tree, simsegment, chamber, ExcludeHVSpacer = True):
         
@@ -591,17 +754,12 @@ def FoundMatchedSegment(tree, simsegment, chamber, ExcludeHVSpacer = True):
         MidPullHigh  =  5.0 
         BotPullLow   = -1.5
         BotPullHigh  =  4.5
-
-
-
 #        UpPullLow   = -1.5
 #        UpPullHigh  =  4
 #        MidPullLow   = -1.0
 #        MidPullHigh  =  4.0 
 #        BotPullLow   = -0.5
 #        BotPullHigh  =  3.5 
-
-
         minDiffX = 100.
         minDiffY = 100.
 
