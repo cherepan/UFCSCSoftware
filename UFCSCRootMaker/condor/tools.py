@@ -4,7 +4,7 @@ import os
 import time
 
 import ROOT
-import sys, pwd, commands
+import sys, pwd
 import optparse, shlex, re
 import math
 from ROOT import *
@@ -19,7 +19,7 @@ global HVSegments, ChambersResolutionX, ChambersResolutionY
 
 #  Areas excludes HV spacer in chambers (not precise and with some margin) in cm + exclude chamber edges)
 HVSegments = {
-    'ME_12': [(-86, -36), (-30, 30), (36, 80)],
+    'ME_12': [(-83, -36), (-30, 30), (36, 80)],
     'ME_13': [(-80, -30), (-20, 20), (30, 76)],
     'ME_21': [(-92, -34), (-25, 30), (40,90)],
     'ME_22': [(-155, -90), (-75, -26), (-18,35), (45, 95), (105, 150)],
@@ -32,26 +32,26 @@ HVSegments = {
 
 
 ChambersResolutionX = {
-    'ME_12': [(-5,  5)],
+    'ME_12': [(-3,  3)],
     'ME_13': [(-3,  3)],
-    'ME_21': [(-4,  3)],
-    'ME_22': [(-4,  4)],
+    'ME_21': [(-3.5,  3.5)],
+    'ME_22': [(-3.5,  3.5)],
     'ME_31': [(-4,  4)], 
     'ME_32': [(-3.5,3.5)],
-    'ME_41': [(-4,  4)],
+    'ME_41': [(-5,  3.5)],
     'ME_42': [(-3.5,  3.5)]
 }
 
 
 ChambersResolutionY = {
-    'ME_12': [(-2,  4)],
-    'ME_13': [(-1,  3.5)],
-    'ME_21': [(-1,  4)],
-    'ME_22': [(-1,  3)],
-    'ME_31': [(-4,  1)], 
-    'ME_32': [(-4,  1)],
-    'ME_41': [(-5,  1)],
-    'ME_42': [(-4,  1)]
+    'ME_12': [(-3.5,  3)],
+    'ME_13': [(-3,  3)],
+    'ME_21': [(-3.5,  3.5)],
+    'ME_22': [(-3,  3)],
+    'ME_31': [(-3,  3)], 
+    'ME_32': [(-3,  3)],
+    'ME_41': [(-3.5,  3.5)],
+    'ME_42': [(-3,  3)]
 }
 
 
@@ -91,12 +91,32 @@ def write_th2f(hist):
             if hist.GetBinContent(j, i) == 0:
                 sys.stdout.write("-")
             else:
-                sys.stdout.write("*")
+                sys.stdout.write("O")
         print()
 
 
-def fill_wire_matrix(tree, rechits):
+def fill_wire_matrix(tree, rechits , chamber ):
+
+
             nWireGroups = 111
+            Type  = int(Chamber_station(chamber)*10  + Chamber_ring(chamber))
+            if Type == 12:
+                nWireGroups = 64
+            elif Type == 13:
+                nWireGroups = 32
+            elif Type == 21:
+                nWireGroups = 112
+            elif Type == 22:
+                nWireGroups = 64
+            elif Type == 31:
+                nWireGroups = 96
+            elif Type == 32:
+                nWireGroups = 64
+            elif Type == 41:
+                nWireGroups = 96
+            elif Type == 42:
+                nWireGroups = 64
+                
             WireHits = ROOT.TH2F('wHitsPerChamber','',nWireGroups , 1, nWireGroups, 6,1,7 )
 
             rows_v = []
@@ -124,8 +144,13 @@ def fill_wire_matrix(tree, rechits):
 
 
 
-def fill_strip_matrix(tree, rechits):
+def fill_strip_matrix(tree, rechits, chamber):
             nStrips = 80
+
+            Type  = int(Chamber_station(chamber)*10  + Chamber_ring(chamber))
+            if Type == 13:
+                nWireGroups = 64
+
             StripHits = ROOT.TH2F('StripPerChamber','',nStrips , 1, nStrips, 6,1,7 )
 
             rows_v = []
@@ -204,6 +229,8 @@ def recoMuonMatchedIndex(tree, index_genMuon):    #  returns the index of reco M
 
 
 
+
+    
 
 def linked_gen_mu_index(tree, i):                 #
         if i == -1:return -1
@@ -555,23 +582,67 @@ def all_simhits_in_a_chamber(tree, chamber):
         return simhit_list
 
 
+def SimSegment_localPosition(tree, SimHits):
+
+    localX = 0
+    localY = 0
+
+    simhit_in_layer1 = -1
+    simhit_in_layer2 = -1
+    
+    simhit_in_layer3 = -1
+    simhit_in_layer4 = -1
+
+    simhit_in_layer5 = -1
+    simhit_in_layer6 = -1
+    for simhit in SimHits:
+        if tree.simHits_ID_layer[simhit] == 1:
+            simhit_in_layer1=simhit
+        if tree.simHits_ID_layer[simhit] == 2:
+            simhit_in_layer2=simhit
+        if tree.simHits_ID_layer[simhit] == 3:
+            simhit_in_layer3=simhit
+        if tree.simHits_ID_layer[simhit] == 4:
+            simhit_in_layer4=simhit
+        if tree.simHits_ID_layer[simhit] == 5:
+            simhit_in_layer5=simhit
+        if tree.simHits_ID_layer[simhit] == 6:
+            simhit_in_layer6=simhit
+    if (simhit_in_layer3!=-1 and simhit_in_layer4!=-1):
+        localX = (tree.simHits_localX[simhit_in_layer3] + tree.simHits_localX[simhit_in_layer4])*0.5
+        localY = (tree.simHits_localY[simhit_in_layer3] + tree.simHits_localY[simhit_in_layer4])*0.5
+    elif(simhit_in_layer2!=-1 and simhit_in_layer5!=-1):
+        localX = (tree.simHits_localX[simhit_in_layer2] + tree.simHits_localX[simhit_in_layer5])*0.5
+        localY = (tree.simHits_localY[simhit_in_layer2] + tree.simHits_localY[simhit_in_layer5])*0.5
+    elif(simhit_in_layer1!=-1 and simhit_in_layer6!=-1):
+        localX = (tree.simHits_localX[simhit_in_layer1] + tree.simHits_localX[simhit_in_layer6])*0.5
+        localY = (tree.simHits_localY[simhit_in_layer1] + tree.simHits_localY[simhit_in_layer6])*0.5
+    elif(len(SimHits) == 3 and simhit_in_layer3!=-1):    # if only 3 mu sim hits use either
+        localX = tree.simHits_localX[simhit_in_layer3]   # 3rd layer
+        localY = tree.simHits_localY[simhit_in_layer3]
+    elif(len(SimHits) == 3 and simhit_in_layer4!=-1):
+        localX = tree.simHits_localX[simhit_in_layer4]   # 4th layer
+        localY = tree.simHits_localY[simhit_in_layer4]
+
+    return TVector3(localX, localY, 0)
+
 def Segment_closest_to_simhit(tree, SimHits, Segments):
         SegmentSimHitPair = []
         ThirdLayerSimHits = -1
-        for simhit in SimHits:
-            if tree.simHits_ID_layer[simhit] == 3: ThirdLayerSimHits = simhit
+#        for simhit in SimHits:
+#            if tree.simHits_ID_layer[simhit] == 3: ThirdLayerSimHits = simhit
 
-        localX_simhit = 0
-        localY_simhit = 0
-        if(ThirdLayerSimHits!=-1):  # if there is no simhit in the 3rd layer  take an average coor wrt first and last layer
-            localX_simhit = tree.simHits_localX[ThirdLayerSimHits]
-            localY_simhit = tree.simHits_localY[ThirdLayerSimHits]
-        else:
-            localX_simhit  = ( tree.simHits_localX[SimHits[0]] + tree.simHits_localX[SimHits[-1]] )*0.5
-            localY_simhit = ( tree.simHits_localY[SimHits[0]] + tree.simHits_localY[SimHits[-1]] )*0.5
+        localX_simhit = SimSegment_localPosition(tree, SimHits).X()
+        localY_simhit = SimSegment_localPosition(tree, SimHits).Y()
+#        if(ThirdLayerSimHits!=-1):  # if there is no simhit in the 3rd layer  take an average coor wrt first and last layer
+#            localX_simhit = tree.simHits_localX[ThirdLayerSimHits]
+#            localY_simhit = tree.simHits_localY[ThirdLayerSimHits]
+#        else:
+#            localX_simhit  = ( tree.simHits_localX[SimHits[0]] + tree.simHits_localX[SimHits[-1]] )*0.5
+#            localY_simhit = ( tree.simHits_localY[SimHits[0]] + tree.simHits_localY[SimHits[-1]] )*0.5
         
-        X = ( tree.simHits_localX[SimHits[0]] + tree.simHits_localX[SimHits[-1]] )*0.5
-        Y = ( tree.simHits_localY[SimHits[0]] + tree.simHits_localY[SimHits[-1]] )*0.5
+#        X = ( tree.simHits_localX[SimHits[0]] + tree.simHits_localX[SimHits[-1]] )*0.5
+#        Y = ( tree.simHits_localY[SimHits[0]] + tree.simHits_localY[SimHits[-1]] )*0.5
 
         
         mindiffX = 99.
@@ -722,8 +793,8 @@ def SegmentWithinResolution(tree, segment,  simX, simY, chamber):
 
     if(is_value_within_range(pullX,chamber,ChambersResolutionX)  and is_value_within_range(pullY,chamber,ChambersResolutionY)):
         return True
-    return True
-#    return False
+#    return True
+    return False
 
     
     
@@ -736,11 +807,14 @@ def FoundMatchedSegment(tree, simsegment, chamber, ExcludeHVSpacer = True):
         MatchedSegmentIndex = -1
         ThirdLayerSimHit = -1
 
-        for isim in simsegment:
-                if tree.simHits_ID_layer[isim]  == 3:  ThirdLayerSimHit = isim
+#        for isim in simsegment:
+#                if tree.simHits_ID_layer[isim]  == 3:  ThirdLayerSimHit = isim
 
-        if ThirdLayerSimHit == -1: return -1
+#        if ThirdLayerSimHit == -1: return -1
 
+
+        localX_simhit = SimSegment_localPosition(tree, simsegment).X()
+        localY_simhit = SimSegment_localPosition(tree, simsegment).Y()
         ######################  values for ME21 chamber ############# 
         XPullPosLow        = -2
         XPullPosHigh       =  3
@@ -772,13 +846,13 @@ def FoundMatchedSegment(tree, simsegment, chamber, ExcludeHVSpacer = True):
         
 
 #        print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> ')
-#        print('  3rd layer simhit    ', tree.simHits_localX[ThirdLayerSimHit] ,  ' / ' , tree.simHits_localY[ThirdLayerSimHit] )
+#        print('  3rd layer simhit    ', localX_simhit ,  ' / ' , localY_simhit )
         for segment_index in AllSegments:
 #                print('segment  ', segment_index, '   X / Y   ',  tree.cscSegments_localX[segment_index],'  pm  ', sqrt(tree.cscSegments_localXerr[segment_index])  , ' / ' , tree.cscSegments_localY[segment_index], '  pm  ',  sqrt(tree.cscSegments_localYerr[segment_index]) )
-                if( math.fabs(tree.cscSegments_localX[segment_index] - tree.simHits_localX[ThirdLayerSimHit]) < minDiffX and 
-                    math.fabs(tree.cscSegments_localY[segment_index] - tree.simHits_localY[ThirdLayerSimHit]) < minDiffY ):
-                        minDiffX =  math.fabs(tree.cscSegments_localX[segment_index] - tree.simHits_localX[ThirdLayerSimHit])
-                        minDiffY =  math.fabs(tree.cscSegments_localY[segment_index] - tree.simHits_localY[ThirdLayerSimHit])
+                if( math.fabs(tree.cscSegments_localX[segment_index] - localX_simhit) < minDiffX and 
+                    math.fabs(tree.cscSegments_localY[segment_index] - localY_simhit) < minDiffY ):
+                        minDiffX =  math.fabs(tree.cscSegments_localX[segment_index] - localX_simhit)
+                        minDiffY =  math.fabs(tree.cscSegments_localY[segment_index] - localY_simhit)
                         MatchedSegmentIndex = segment_index
 
                         
@@ -787,9 +861,9 @@ def FoundMatchedSegment(tree, simsegment, chamber, ExcludeHVSpacer = True):
 
         
         if MatchedSegmentIndex!=-1:
-                pullX = (tree.cscSegments_localX[MatchedSegmentIndex]  - tree.simHits_localX[ThirdLayerSimHit])/sqrt(tree.cscSegments_localXerr[MatchedSegmentIndex])
-                pullY = (tree.cscSegments_localY[MatchedSegmentIndex]  - tree.simHits_localY[ThirdLayerSimHit])/sqrt(tree.cscSegments_localYerr[MatchedSegmentIndex])
-#                print(' Check PullX   ', pullX, '   ==  '),  (tree.cscSegments_localX[MatchedSegmentIndex]  - tree.simHits_localX[ThirdLayerSimHit]), '  /  ', 
+                pullX = (tree.cscSegments_localX[MatchedSegmentIndex]  - localX_simhit)/sqrt(tree.cscSegments_localXerr[MatchedSegmentIndex])
+                pullY = (tree.cscSegments_localY[MatchedSegmentIndex]  - localY_simhit)/sqrt(tree.cscSegments_localYerr[MatchedSegmentIndex])
+#                print(' Check PullX   ', pullX, '   ==  '),  (tree.cscSegments_localX[MatchedSegmentIndex]  - localX_simhit), '  /  ', 
                 if tree.cscSegments_localX[MatchedSegmentIndex] > 0:
 #                        print(' xPullPosLow   ', XPullPosLow, ' pullX  ', pullX, '   XPullPosHigh    ', XPullPosHigh ,  ' passed  ', ( pullX  > XPullPosLow and pullX < XPullPosHigh))
                         if( pullX  > XPullPosLow and pullX < XPullPosHigh):
@@ -813,18 +887,18 @@ def FoundMatchedSegment(tree, simsegment, chamber, ExcludeHVSpacer = True):
 
 
 #        for segment_index in AllSegments:
-#                if math.fabs((tree.cscSegments_localX[segment_index] - tree.simHits_localX[ThirdLayerSimHit])/sqrt(tree.cscSegments_localXerr[segment_index])) < XPull:
-#                        if  tree.simHits_localY[ThirdLayerSimHit] < -30:
-#                                if( (tree.cscSegments_localY[segment_index]  - tree.simHits_localY[ThirdLayerSimHit])/sqrt(tree.cscSegments_localYerr[segment_index] )   >  BotPullLow and
-#                                    (tree.cscSegments_localY[segment_index]  - tree.simHits_localY[ThirdLayerSimHit])/sqrt(tree.cscSegments_localYerr[segment_index])  ) <  BotPullHigh:
+#                if math.fabs((tree.cscSegments_localX[segment_index] - localX_simhit)/sqrt(tree.cscSegments_localXerr[segment_index])) < XPull:
+#                        if  localY_simhit < -30:
+#                                if( (tree.cscSegments_localY[segment_index]  - localY_simhit)/sqrt(tree.cscSegments_localYerr[segment_index] )   >  BotPullLow and
+#                                    (tree.cscSegments_localY[segment_index]  - localY_simhit)/sqrt(tree.cscSegments_localYerr[segment_index])  ) <  BotPullHigh:
 #                                        FoundMatchedSegment = True
-#                        if tree.simHits_localY[ThirdLayerSimHit] > -30 and tree.simHits_localY[ThirdLayerSimHit] < 30:
-#                                if( (tree.cscSegments_localY[segment_index]  - tree.simHits_localY[ThirdLayerSimHit])/sqrt(tree.cscSegments_localYerr[segment_index] )   >  MidPullLow and
-#                                    (tree.cscSegments_localY[segment_index]  - tree.simHits_localY[ThirdLayerSimHit])/sqrt(tree.cscSegments_localYerr[segment_index])  ) <  MidPullHigh:
+#                        if localY_simhit > -30 and localY_simhit < 30:
+#                                if( (tree.cscSegments_localY[segment_index]  - localY_simhit)/sqrt(tree.cscSegments_localYerr[segment_index] )   >  MidPullLow and
+#                                    (tree.cscSegments_localY[segment_index]  - localY_simhit)/sqrt(tree.cscSegments_localYerr[segment_index])  ) <  MidPullHigh:
 #                                        FoundMatchedSegment = True
-#                        if tree.simHits_localY[ThirdLayerSimHit] > 30:
-#                                if( (tree.cscSegments_localY[segment_index]  - tree.simHits_localY[ThirdLayerSimHit])/sqrt(tree.cscSegments_localYerr[segment_index] )   >  UpPullLow and
-#                                    (tree.cscSegments_localY[segment_index]  - tree.simHits_localY[ThirdLayerSimHit])/sqrt(tree.cscSegments_localYerr[segment_index])  ) <  UpPullHigh:
+#                        if localY_simhit > 30:
+#                                if( (tree.cscSegments_localY[segment_index]  - localY_simhit)/sqrt(tree.cscSegments_localYerr[segment_index] )   >  UpPullLow and
+#                                    (tree.cscSegments_localY[segment_index]  - localY_simhit)/sqrt(tree.cscSegments_localYerr[segment_index])  ) <  UpPullHigh:
 #                                        FoundMatchedSegment = True
 
 
@@ -1099,3 +1173,33 @@ def SegmentPurity(tree, segment, SimHitsCollection):
                             math.fabs(( tree.recHits2D_localY[irec] - tree.simHits_localY[ClosestSimHit] ) / math.sqrt(tree.recHits2D_localYYerr[irec] )) < 2): PurityNom +=1
         Purity = float(PurityNom)/float(PurityDenom)
         return Purity
+###################################################### Utils
+
+
+def RecHitsPerLayer(tree, chamber):
+
+    nRecHitsPerLayer = [0 for dim1 in range(6)]
+    RecHits = all_rechits_in_a_chamber(tree,chamber)
+    for rc in RecHits:
+        nRecHitsPerLayer[tree.recHits2D_ID_layer[rc]-1] +=1
+    return nRecHitsPerLayer
+
+
+def capture_print_output(func, filename):
+    # Save the original stdout
+    original_stdout = sys.stdout
+    # Redirect stdout to a StringIO object
+    sys.stdout = StringIO()
+
+    try:
+        # Call the function which does the print
+        func()
+        # Get the output from the StringIO object
+        output = sys.stdout.getvalue()
+    finally:
+        # Restore the original stdout
+        sys.stdout = original_stdout
+
+    # Write the captured output to a file
+    with open(filename, 'w') as f:
+        f.write(output)

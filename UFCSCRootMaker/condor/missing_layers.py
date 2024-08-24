@@ -188,6 +188,7 @@ class Analysis():
                                     stringsimele  = 'ME'+str(int(Chamber_station*10  + Chamber_ring)) + '_ElesimHits2D'
                                     stringsimmu   = 'ME'+str(int(Chamber_station*10  + Chamber_ring)) + '_MusimHits2D'
                                     stringsimhad  = 'ME'+str(int(Chamber_station*10  + Chamber_ring)) + '_HadsimHits2D'
+                                    
                                     eleSimHitsInChamber=[]
                                     for simhit in allSimHitsInChamber:
 #                                        print(' chamber   ', chambers_with_gen_muon, '  simhit  # ', simhit, '  simHit Type:  ', tree.simHits_particleType[simhit])

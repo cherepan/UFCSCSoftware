@@ -1,4 +1,5 @@
-#! /bin/env python
+#!/usr/bin/env python3
+
 
 import subprocess
 
@@ -28,7 +29,7 @@ queue 1
     # Submit the job to Condor
     subprocess.call(["condor_submit", submit_file])
 
-    print "Submitted Condor job with job_name: {}".format(job_name)
+    print("Submitted Condor job with job_name: {}".format(job_name))
 
 
 def main():
@@ -36,17 +37,20 @@ def main():
     job_params = [
 
         
-        {"root_file": "../ZMM_UF_10_05.root", "python_script": "eff_csc.py", "job_name": "UFAllSimHits", "config": "0"},
-        {"root_file": "../ZMM_UF_10_05.root", "python_script": "eff_csc.py", "job_name": "UFClean", "config": "1"},
-        {"root_file": "../ZMM_RU_10_05.root", "python_script": "eff_csc.py", "job_name": "RUAllSimHits", "config": "0"},
-        {"root_file": "../ZMM_RU_10_05.root", "python_script": "eff_csc.py", "job_name": "RUClean", "config": "1"},
+#        {"root_file": "../ZMM_UF_10_05.root", "python_script": "eff_csc.py", "job_name": "UFAllSimHits", "config": "0"},
+#        {"root_file": "../ZMM_UF_10_05.root", "python_script": "eff_csc.py", "job_name": "UFClean", "config": "1"},
+#        {"root_file": "../ZMM_RU_10_05.root", "python_script": "eff_csc.py", "job_name": "RUAllSimHits", "config": "0"},
+#        {"root_file": "../ZMM_RU_10_05.root", "python_script": "eff_csc.py", "job_name": "RUClean", "config": "1"},#
 
 
-        {"root_file": "../ZMM_UF_10_05.root", "python_script": "missing_layers.py", "job_name": "UFAllSimHits_MissingLayers", "config": "0"},
-        {"root_file": "../ZMM_UF_10_05.root", "python_script": "missing_layers.py", "job_name": "UFClean_MissingLayers", "config": "1"},
-        {"root_file": "../ZMM_RU_10_05.root", "python_script": "missing_layers.py", "job_name": "RUAllSimHits_MissingLayers", "config": "0"},
-        {"root_file": "../ZMM_RU_10_05.root", "python_script": "missing_layers.py", "job_name": "RUClean_MissingLayers", "config": "1"},
+#        {"root_file": "../ZMM_UF_10_05.root", "python_script": "missing_layers.py", "job_name": "UFAllSimHits_MissingLayers", "config": "0"},
+#        {"root_file": "../ZMM_UF_10_05.root", "python_script": "missing_layers.py", "job_name": "UFClean_MissingLayers", "config": "1"},
+#        {"root_file": "../ZMM_RU_10_05.root", "python_script": "missing_layers.py", "job_name": "RUAllSimHits_MissingLayers", "config": "0"},
+#        {"root_file": "../ZMM_RU_10_05.root", "python_script": "missing_layers.py", "job_name": "RUClean_MissingLayers", "config": "1"},
 
+        
+        {"root_file": "../21_08_10K_UF.root", "python_script": "segments_efficiency.py", "job_name": "UFSegmentsEfficiency_WithResolutionCut", "config": "0"},
+        {"root_file": "../21_08_10K_RU.root", "python_script": "segments_efficiency.py", "job_name": "RUSegmentsEfficiency_WithResolutionCut", "config": "1"},
         
         # Add more job parameters as needed
     ]
