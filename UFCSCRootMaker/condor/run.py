@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+
 
 import sys
 import subprocess
@@ -21,7 +22,7 @@ def execute_python_script(python_script, root_file, job_name, config):
         show_help()
 
     print("Executing Python script: {} with root file: {}, job name: {}, and config: {}".format(python_script, root_file, job_name, config))
-    subprocess.call(["python", "-i", python_script, "-m", "1", "-f", root_file, "-j", job_name, "-c", config, "-r", "0", "-k", "1", " 2>&1 | tee ", job_name])
+    subprocess.call(["python3", "-i", python_script, "-m", "1", "-f", root_file, "-j", job_name, "-c", config, "-r", "0", "-k", "1", " 2>&1 | tee ", job_name])
 
 def main():
     # Initialize variables
@@ -54,10 +55,10 @@ def main():
         show_help()
 
     print('Starting Job')
-    subprocess.call(["ls", "-lt", "/afs/cern.ch/work/c/cherepan/CSC/LocalReco/CMSSW_12_4_4/src/UFCSCSoftware/UFCSCRootMaker/condor"])
-    os.environ["workdir"] = "/afs/cern.ch/work/c/cherepan/CSC/LocalReco/CMSSW_12_4_4/src/UFCSCSoftware/UFCSCRootMaker/condor"
+    subprocess.call(["ls", "-lt", "/afs/cern.ch/work/c/cherepan/CSC/LocalReco/CMSSW_13_3_0/src/UFCSCSoftware/UFCSCRootMaker/condor"])
+    os.environ["workdir"] = "/afs/cern.ch/work/c/cherepan/CSC/LocalReco/CMSSW_13_3_0/src/UFCSCSoftware/UFCSCRootMaker/condor"
     os.environ["X509_USER_PROXY"] = "/afs/cern.ch/work/c/cherepan/T3M/Tools/ControlScripts/proxy/x509up_u54841"
-    os.chdir("/afs/cern.ch/work/c/cherepan/CSC/LocalReco/CMSSW_12_4_4/src/UFCSCSoftware/UFCSCRootMaker/condor")
+    os.chdir("/afs/cern.ch/work/c/cherepan/CSC/LocalReco/CMSSW_13_3_0/src/UFCSCSoftware/UFCSCRootMaker/condor")
 
     # Execute the Python script with the provided options
     execute_python_script(python_script, root_file, job_name, config)

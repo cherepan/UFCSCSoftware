@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+
 
 
 import sys, os, pwd
@@ -361,24 +362,24 @@ class Analysis():
                 ## Efficiency
                 self.sorted_hists1D[string+ "SelectedSegments_Norm"]                = ROOT.TH1F(string+'SelectedSegments_Norm', "; N Segments ", 15, -0.5, 14.5)
                 self.sorted_hists1D[string+ "ClosestSegment"]                  = ROOT.TH1F(string+'ClosestSegment', "; N Segments ", 3, -1.5, 1.5)
-                self.eff_denum_hists1D[string+'SegmentEfficiency_MuonPt_den']  = ROOT.TH1F(string+"SegmentEfficiency_MuonPt_den","; pT (gen #mu) ",30,25,70)
-                self.sorted_hists1D[string+'SegmentEfficiency_MuonPt']         = ROOT.TH1F(string+"SegmentEfficiency_MuonPt", "; pT (gen #mu), GeV ",30,25,70)
-                self.sorted_hists1D[string+'SegmentEfficiency_MuonPt_ToBeRemoved']         = ROOT.TH1F(string+"SegmentEfficiency_MuonPt_ToBeRemoved", "; pT (gen #mu), GeV ",30,25,70)
+                self.eff_denum_hists1D[string+'SegmentEfficiency_MuonPt_den']  = ROOT.TH1F(string+"SegmentEfficiency_MuonPt_den","; pT (gen #mu) ",25,25,70)
+                self.sorted_hists1D[string+'SegmentEfficiency_MuonPt']         = ROOT.TH1F(string+"SegmentEfficiency_MuonPt", "; pT (gen #mu), GeV ",25,25,70)
+                self.sorted_hists1D[string+'SegmentEfficiency_MuonPt_ToBeRemoved']         = ROOT.TH1F(string+"SegmentEfficiency_MuonPt_ToBeRemoved", "; pT (gen #mu), GeV ",25,25,70)
 
-                self.sorted_efficiency[string+'SegmentEfficiency_MuonPt']      = ROOT.TEfficiency(string+"SegmentEfficiency_MuonPt","; pT (gen #mu), GeV ",30,25,70)
+                self.sorted_efficiency[string+'SegmentEfficiency_MuonPt']      = ROOT.TEfficiency(string+"SegmentEfficiency_MuonPt","; pT (gen #mu), GeV ",25,25,70)
 
                 self.eff_denum_hists1D[string+'SegmentEfficiency_MuonEta_den'] = ROOT.TH1F(string+"SegmentEfficiency_MuonEta_den","; |#eta| (gen #mu)",30,1.0,2.5)
                 self.sorted_hists1D[string+'SegmentEfficiency_MuonEta']        = ROOT.TH1F(string+"SegmentEfficiency_MuonEta", "; |#eta| (gen #mu) ",30,1.0,2.5)
                 self.sorted_efficiency[string+'SegmentEfficiency_MuonEta']     = ROOT.TEfficiency(string+"SegmentEfficiency_MuonEta",";  |#eta| (gen #mu) ",30,1.0,2.5)
 
 
-                self.eff_denum_hists1D[string+'SegmentEfficiency_LocalX_den']  = ROOT.TH1F(string+"SegmentEfficiency_LocalX_den","; Sim muon local Y, cm  ",50,-100,100)
-                self.sorted_hists1D[string+'SegmentEfficiency_LocalX']         = ROOT.TH1F(string+"SegmentEfficiency_LocalX","; Sim muon local Y, cm  ",50,-100,100)
-                self.sorted_efficiency[string+'SegmentEfficiency_LocalX']      = ROOT.TEfficiency(string+"SegmentEfficiency_LocalX","; Sim muon local X, cm  ",50,-100,100)
+                self.eff_denum_hists1D[string+'SegmentEfficiency_LocalX_den']  = ROOT.TH1F(string+"SegmentEfficiency_LocalX_den","; Sim muon local Y, cm  ",30,-100,100)
+                self.sorted_hists1D[string+'SegmentEfficiency_LocalX']         = ROOT.TH1F(string+"SegmentEfficiency_LocalX","; Sim muon local Y, cm  ",30,-100,100)
+                self.sorted_efficiency[string+'SegmentEfficiency_LocalX']      = ROOT.TEfficiency(string+"SegmentEfficiency_LocalX","; Sim muon local X, cm  ",30,-100,100)
 
-                self.eff_denum_hists1D[string+'SegmentEfficiency_LocalY_den']  = ROOT.TH1F(string+"SegmentEfficiency_LocalY_den","; Sim muon local Y, cm  ",50,-100,100)
-                self.sorted_hists1D[string+'SegmentEfficiency_LocalY']         = ROOT.TH1F(string+"SegmentEfficiency_LocalY","; Sim muon local Y, cm  ",50,-100,100)
-                self.sorted_efficiency[string+'SegmentEfficiency_LocalY']      = ROOT.TEfficiency(string+"SegmentEfficiency_LocalY","; Sim muon local Y, cm  ",50,-100,100)
+                self.eff_denum_hists1D[string+'SegmentEfficiency_LocalY_den']  = ROOT.TH1F(string+"SegmentEfficiency_LocalY_den","; Sim muon local Y, cm  ",30,-100,100)
+                self.sorted_hists1D[string+'SegmentEfficiency_LocalY']         = ROOT.TH1F(string+"SegmentEfficiency_LocalY","; Sim muon local Y, cm  ",30,-100,100)
+                self.sorted_efficiency[string+'SegmentEfficiency_LocalY']      = ROOT.TEfficiency(string+"SegmentEfficiency_LocalY","; Sim muon local Y, cm  ",30,-100,100)
 
 
                 # SimHit Resolution 
