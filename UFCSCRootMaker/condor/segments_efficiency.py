@@ -35,7 +35,8 @@ def parseOptions():
     parser.add_option('-c','--condition', dest='condition', type='int', default=1 ,help='condition: 1')
     parser.add_option('-r','--ME11', dest='ME11', type='int', default=1 ,help='Include    ME11 chambers: 0')
     parser.add_option('-k','--ME21', dest='ME21', type='int', default=1 ,help='Only       ME21 chambers: 1')
-        
+
+    
     # store options and arguments as global variables
     global opt, args, debug, Chambers
     (opt, args) = parser.parse_args()
@@ -76,9 +77,9 @@ class Analysis():
         print("Opened file ", file)
         
         if opt.isMC:
-            tree = tfile.Get("cscRootMaker/Events")
+            tree = tfile.Get("cscRootMaker/CSCTree")
         else:
-            tree = tfile.Get("cscRootMaker/Events")
+            tree = tfile.Get("cscRootMaker/CSCTree")
 
         if not tree:
             raise RunTimeError("Tree not found!")
@@ -88,6 +89,9 @@ class Analysis():
         EventsAndChambersWithTwoSegments = open("EventsAndChambersWithTwoSegments.txt","w")
         EventsAndChambersWithFourSegments = open("EventsAndChambersWithFourSegments.txt","w")
 
+
+        Events_with_Clean_CSC_with_muon = open("Events_with_Clean_CSC_with_muon.txt","w")
+        Events_with_Noisy_CSC_with_muon = open("Events_with_Noisy_CSC_with_muon.txt","w")
         #Analysis Loop
         for i in range( tree.GetEntries() ):
 #            print('===============================    Event loop    ========================================= ')
@@ -152,8 +156,29 @@ class Analysis():
                                 if(len(allMuonSimHitsInChamber) < 3 ):continue   # Skip if 2 mu simHits in here, who cares
                                 if(len(allRecHitsInChamber)     < 3 ):continue   # Skip if less than 3 rechits
 
+                                print('-------------  Hits Selection',HitsSelectionPrefix)
+                                if(HitsSelectionPrefix=='Clean_'):
+                                    Events_with_Clean_CSC_with_muon.write('{}:{}:{}  \n '.format(tree.Event,
+                                                                                                                 tree.Run,    
+                                                                                                                 tree.LumiSect))
+#                                                                                                                 int(tools.Chamber_endcap(chambers_with_gen_muon)),
+#                                                                                                                 int(tools.Chamber_station(chambers_with_gen_muon)),
+#                                                                                                                 int(tools.Chamber_ring(chambers_with_gen_muon)),
+#                                                                                                                 int(tools.Chamber_chamber(chambers_with_gen_muon))))
+
+                                if(HitsSelectionPrefix=='Noise_' and len(allSimHitsInChamber) > 10):
+                                    print(' N sim hits ', len(allSimHitsInChamber))
+                                    Events_with_Noisy_CSC_with_muon.write('{}:{}:{}   \n '.format(tree.Event,
+                                                                                                                tree.Run,
+                                                                                                                tree.LumiSect))
+#                                                                                                                int(tools.Chamber_endcap(chambers_with_gen_muon)),
+#                                                                                                                int(tools.Chamber_station(chambers_with_gen_muon)),
+#                                                                                                                int(tools.Chamber_ring(chambers_with_gen_muon)),
+#                                                                                                                int(tools.Chamber_chamber(chambers_with_gen_muon))))
 
 
+
+                                    
                                 DifferenceMuonSimRecHits = len(AllSimHitOfTheMuon) - len(AllRecHitOfTheMuon)
 
                                 SkipEvent = False # Here I check that muSimHIts are not in HV spacer

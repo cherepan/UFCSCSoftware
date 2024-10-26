@@ -8,7 +8,7 @@ from ROOT import *
 import ROOT
 from array import array
 from numpy import sqrt 
-
+import numpy as np
 
 import tools as tools
 ROOT.gStyle.SetTitleYOffset(1.5)
@@ -61,6 +61,8 @@ class Analysis():
         self.simHits_muonMatched = []
         self.recHits_muonMatched = []
 
+
+        
                       
     def doAnalysis(self,file):
         global opt, args
@@ -141,6 +143,29 @@ class Analysis():
                                 allSegmentsInChamber    = tools.allSegments_InChamber(tree, chambers_with_gen_muon)
                                 Chamber_station         = tools.Chamber_station(chambers_with_gen_muon)
                                 Chamber_ring            = tools.Chamber_ring(chambers_with_gen_muon)
+                                print('  N rec hits  ', len(allRecHitsInChamber))
+
+                                for rh in allRecHitsInChamber:
+                                    print('rh:  ', rh, '  WG #  ',tree.recHits2D_nearestWireGroup[rh], tree.recHits2D_nearestWire[rh] )
+                                print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>   ", tree.Event )
+                                if(len(allRecHitsInChamber) > 15):
+                                    print('---------- alll sim hits ')
+                                    WireHist = tools.fill_wire_matrix(tree,allRecHitsInChamber,chambers_with_gen_muon)
+                                    StripHist = tools.fill_strip_matrix(tree,allRecHitsInChamber,chambers_with_gen_muon)
+                                    tools.write_th2f(WireHist)
+                                    print('   >>>>>>>>>>>  ')
+                                    tools.write_th2f(StripHist)
+                                    print('===================================================== Number of segment ', len(allSegmentsInChamber))
+                                    for segment in allSegmentsInChamber:
+                                        print('segment #  ', segment, '  x / y  ', tree.cscSegments_localX[segment], '  /   ', tree.cscSegments_localY[segment])
+                                        AllRecHitsOfSegment = tools.allRechits_of_segment(tree, segment)
+                                        WireHist = tools.fill_wire_matrix(tree,AllRecHitsOfSegment,chambers_with_gen_muon)
+                                        StripHist = tools.fill_strip_matrix(tree, AllRecHitsOfSegment,chambers_with_gen_muon)
+                                        tools.write_th2f(WireHist)
+                                        print('   >>>>>>>>>>>  ')
+                                        tools.write_th2f(StripHist)
+#                                Hist.Draw()
+#                                self.fill_wire_matrix(Hist)
 
 
                                 SkipeEvent = False
@@ -153,12 +178,13 @@ class Analysis():
                                     ME21HVPLacerUP_High   =  44.
                                     
                                     ME21HighEnd           =  90. # cm 
-                                    ME21LowEnd            = -70.
+                                    ME21LowEnd            = -80.
                                     SimHitTV3 = TVector3(tree.simHits_globalX[simHit], tree.simHits_globalY[simHit], 1)
 
                                     if( (tree.simHits_localY[simHit] > ME21HVPLacerBot_Low  and tree.simHits_localY[simHit] < ME21HVPLacerBot_High)  or
-                                        (tree.simHits_localY[simHit] > ME21HVPLacerUP_Low   and tree.simHits_localY[simHit] < ME21HVPLacerUP_High)  or
-                                        (tree.simHits_localY[simHit] > ME21HighEnd)         and tree.simHits_localY[simHit] < ME21LowEnd ): SkipeEvent = True
+                                        (tree.simHits_localY[simHit] > ME21HVPLacerUP_Low   and tree.simHits_localY[simHit] < ME21HVPLacerUP_High)   or
+                                        (tree.simHits_localY[simHit] > ME21HighEnd)                                                                  or
+                                        (tree.simHits_localY[simHit] < ME21LowEnd) ): SkipeEvent = True
                                 if SkipeEvent == True: continue
                                 ###########
                                 
@@ -229,14 +255,19 @@ class Analysis():
                                         self.sorted_hists1D["SegmentTuplePull"].Fill( tree.cscSegments_Resolution_pull[isegment] )
                                         
                                         AllRecHitsOfSegment = tools.allRechits_of_segment(tree, isegment)
+                                        
                                         for irec in AllRecHitsOfSegment:
                                             ################################
                                             #if(debug):
                                             #    print("  segment local X/Y  ", tree.cscSegments_localX[isegment], " /  ", tree.cscSegments_localY[isegment])
                                             #    print("rechit:  ",  irec, "  X/Y  ", tree.recHits2D_localX[irec], " / ",
                                             #          tree.recHits2D_localY[irec], ' layer:  ', tree.recHits2D_ID_layer[irec])
+#                                            nWireGroups = 32
+#                                            WireHits = ROOT.TH2F('wHitsPerChamber','',nWireGroups , 0, nWireGroups, 6,0,6 )
 
 
+
+                                            
                                             ClosestSimHit =  tools.RecHit_closest_SimHit(tree, irec, allMuonSimHitsInChamber)
 
                                             if(debug): print('Closes Sim Hit  ', ClosestSimHit)
@@ -312,18 +343,19 @@ class Analysis():
                                         print('  local resol ---> ')
                                         if tree.simHits_localX[i[1]]  > 0:
                                             self.sorted_hists1D["SegmentXResolutionPos"].Fill( tree.cscSegments_localX[i[0]] - tree.simHits_localX[i[1]] )
+                                            self.sorted_hists1D["SegmentXResolutionPosPull"].Fill( (tree.cscSegments_localX[i[0]] - tree.simHits_localX[i[1]])/sqrt(tree.cscSegments_localXerr[i[0]]) )
                                         if tree.simHits_localX[i[1]]  < 0:
                                             self.sorted_hists1D["SegmentXResolutionNeg"].Fill( tree.cscSegments_localX[i[0]] - tree.simHits_localX[i[1]] )
-
+                                            self.sorted_hists1D["SegmentXResolutionNegPull"].Fill( (tree.cscSegments_localX[i[0]] - tree.simHits_localX[i[1]])/sqrt(tree.cscSegments_localXerr[i[0]]) )
                                         self.sorted_hists1D["SegmentYResolution"].Fill( tree.cscSegments_localY[i[0]] - tree.simHits_localY[i[1]] )
 
                                         if tree.simHits_localY[i[1]] < -27.5:
                                            self.sorted_hists1D["SegmentYResolutionBot"].Fill( tree.cscSegments_localY[i[0]] - tree.simHits_localY[i[1]] )
                                            self.sorted_hists1D["SegmentYResolutionBotPull"].Fill( (tree.cscSegments_localY[i[0]] - tree.simHits_localY[i[1]])/sqrt(tree.cscSegments_localYerr[i[0]])  )
-                                        if tree.simHits_localY[i[1]] > -27.5 and tree.simHits_localY[i[1]] < 34:
+                                        if tree.simHits_localY[i[1]] > -27.5 and tree.simHits_localY[i[1]] < 35:
                                             self.sorted_hists1D["SegmentYResolutionMid"].Fill( tree.cscSegments_localY[i[0]] - tree.simHits_localY[i[1]] )
                                             self.sorted_hists1D["SegmentYResolutionMidPull"].Fill( (tree.cscSegments_localY[i[0]] - tree.simHits_localY[i[1]])/sqrt(tree.cscSegments_localYerr[i[0]])  )
-                                        if tree.simHits_localY[i[1]] > 34:
+                                        if tree.simHits_localY[i[1]] > 35:
                                             self.sorted_hists1D["SegmentYResolutionUp"].Fill( tree.cscSegments_localY[i[0]] - tree.simHits_localY[i[1]] )
                                             self.sorted_hists1D["SegmentYResolutionUpPull"].Fill( (tree.cscSegments_localY[i[0]] - tree.simHits_localY[i[1]])/sqrt(tree.cscSegments_localYerr[i[0]])  )
 
@@ -339,12 +371,7 @@ class Analysis():
                                         if( math.fabs(tree.simHits_particleType[simhit])==11 ): self.sorted_hists2D['XYElectronSimHitsInChamber'].Fill(tree.simHits_localX[simhit],tree.simHits_localY[simhit])
                                         if( math.fabs(tree.simHits_particleType[simhit])!=11 and math.fabs(tree.simHits_particleType[simhit])!=13 ): self.sorted_hists2D['XYNonMuonAndElectronSimHitsInChamber'].Fill(tree.simHits_localX[simhit],tree.simHits_localY[simhit])
                                         
-                                        if( tree.simHits_localX[simhit] > 2 and tree.simHits_localX[simhit] < 8):
-                                            if(tree.simHits_localY[simhit] > 20 and tree.simHits_localY[simhit] < 30): 
-                                                self.sorted_hists2D['XYSelSimHitsInChamber'].Fill(tree.simHits_localX[simhit],tree.simHits_localY[simhit])
-                                                print('simHits_ID_processType  ', tree.simHits_ID_processType[simhit],  tree.simHits_particleType[simhit], simhit  )
-                                                if simhit in allMuonSimHitsInChamber:
-                                                    print(' this is a muon simhit  ', simhit)
+                                                    
                                     for rechit in allRecHitsInChamber:
                                         self.sorted_hists2D['XYRecHitsInChamber'].Fill(tree.recHits2D_localX[rechit], tree.recHits2D_localY[rechit])
                                         
@@ -370,22 +397,28 @@ class Analysis():
 
         self.sorted_hists1D['nChambers_crossedByGenMuon'] = ROOT.TH1F("nChambers_crossedByGenMuon", "; N chambers crossed by gen #mu (simhits)", 11, -0.5, 10.5)
         self.sorted_hists1D['nChambers_crossedByRecMuon'] = ROOT.TH1F("nChambers_crossedByRecMuon", "; N chambers crossed by rec #mu (segment record)", 11, -0.5, 10.5)
-        self.sorted_hists1D['SegmentXResolution'] = ROOT.TH1F("SegmentXResolution", "; reco Segment resolution X, cm ", 50, -50, 50)
+        
+        self.sorted_hists1D['SegmentXResolution'] = ROOT.TH1F("SegmentXResolution", "; reco Segment resolution X, cm ", 50, -2, 2)
+        self.sorted_hists1D['SegmentYResolution'] = ROOT.TH1F("SegmentYResolution", "; reco Segment resolution Y, cm ", 50, -2, 2)
+
         self.sorted_hists1D['SegmentXResolutionPos'] = ROOT.TH1F("SegmentXResolutionPos", "; reco Segment resolution X, cm ", 50, -0.5, 0.5)
         self.sorted_hists1D['SegmentXResolutionNeg'] = ROOT.TH1F("SegmentXResolutionNeg", "; reco Segment resolution X, cm ", 50, -0.5, 0.5)
-        self.sorted_hists1D['SegmentYResolution'] = ROOT.TH1F("SegmentYResolution", "; reco Segment resolution Y, cm ", 50, -150, 150)
 
         self.sorted_hists1D['SegmentYResolutionBot'] = ROOT.TH1F("SegmentYResolutionBot", "; reco Segment resolution Y, cm ", 50, -1.5, 1.5)
         self.sorted_hists1D['SegmentYResolutionMid'] = ROOT.TH1F("SegmentYResolutionMid", "; reco Segment resolution Y, cm ", 50, -1.5, 1.5)
         self.sorted_hists1D['SegmentYResolutionUp'] = ROOT.TH1F("SegmentYResolutionUp", "; reco Segment resolution Y, cm ", 50, -1.5, 1.5)
 
-        self.sorted_hists1D['SegmentXResolutionPull'] = ROOT.TH1F("SegmentXResolutionPull", "; reco Segment resolution X, pull ", 20, -50.0, 50.0)
-        self.sorted_hists1D['SegmentYResolutionPull'] = ROOT.TH1F("SegmentYResolutionPull", "; reco Segment resolution Y, pull ", 20, -50.0, 50.0)
+        self.sorted_hists1D['SegmentXResolutionNegPull'] = ROOT.TH1F("SegmentXResolutionNegPull", "; reco Segment resolution X ( x < 0), pull ", 30, -10.0, 10.0)
+        self.sorted_hists1D['SegmentXResolutionPosPull'] = ROOT.TH1F("SegmentXResolutionPosPull", "; reco Segment resolution X ( x > 0), pull ", 30, -10.0, 10.0)
+
+        
+        self.sorted_hists1D['SegmentXResolutionPull'] = ROOT.TH1F("SegmentXResolutionPull", "; reco Segment resolution X, pull ", 30, -10.0, 10.0)
+        self.sorted_hists1D['SegmentYResolutionPull'] = ROOT.TH1F("SegmentYResolutionPull", "; reco Segment resolution Y, pull ", 30, -10.0, 10.0)
 
 
-        self.sorted_hists1D['SegmentYResolutionBotPull'] = ROOT.TH1F("SegmentYResolutionBotPull", "; reco Segment resolution Y, pull ", 20, -50.0, 50.0)
-        self.sorted_hists1D['SegmentYResolutionMidPull'] = ROOT.TH1F("SegmentYResolutionMidPull", "; reco Segment resolution Y, pull ", 20, -50.0, 50.0)
-        self.sorted_hists1D['SegmentYResolutionUpPull'] = ROOT.TH1F("SegmentYResolutionUpPull", "; reco Segment resolution Y, pull ", 20, -50.0, 50.0)
+        self.sorted_hists1D['SegmentYResolutionBotPull'] = ROOT.TH1F("SegmentYResolutionBotPull", "; reco Segment resolution Y, pull ", 30, -10.0, 10.0)
+        self.sorted_hists1D['SegmentYResolutionMidPull'] = ROOT.TH1F("SegmentYResolutionMidPull", "; reco Segment resolution Y, pull ", 30, -10.0, 10.0)
+        self.sorted_hists1D['SegmentYResolutionUpPull'] = ROOT.TH1F("SegmentYResolutionUpPull", "; reco Segment resolution Y, pull ", 30, -10.0, 10.0)
 
 
         self.sorted_hists2D['SegmentXResolutionPullVsX'] = ROOT.TH2F('SegmentXResolutionPullVsX',';#Delta X/#sigma; X,cm', 40, -5.0, 5.0, 800, -100, 100)
@@ -394,8 +427,8 @@ class Analysis():
 
 
 
-        self.sorted_hists1D['SegmentTupleResidual'] = ROOT.TH1F("SegmentTupleResidual", "; reco Segment resolution X, pull ", 20, -100.0, 50.0)
-        self.sorted_hists1D['SegmentTuplePull'] = ROOT.TH1F("SegmentTuplePull", "; reco Segment resolution Y, pull ", 20, -100.0, 50.0)
+        self.sorted_hists1D['SegmentTupleResidual'] = ROOT.TH1F("SegmentTupleResidual", "; reco Segment resolution X, pull ", 20, -10.0, 10.0)
+        self.sorted_hists1D['SegmentTuplePull'] = ROOT.TH1F("SegmentTuplePull", "; reco Segment resolution Y, pull ", 20, -10.0, 10.0)
 #        self.sorted_hists1D["SegmentTupleResidual"].Fill( tree.cscSegments_Resolution_residual[isegment])
 #        self.sorted_hists1D["SegmentTuplePull"].Fill( tree.cscSegments_Resolution_pull[isegment] )
 
