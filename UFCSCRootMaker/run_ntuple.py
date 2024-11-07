@@ -7,6 +7,7 @@ import FWCore.ParameterSet.Config as cms
 doUnpacking = bool(True)
 
 ########## Options ############
+doUF    = bool(False)
 isDATA = bool(False)
 isRAW = bool(True)
 isDIGI = bool(True)
@@ -28,9 +29,10 @@ addDigiInfo = bool(True)
 addTimeMonitoringInfo = bool(True)
 addCalibrationInfo = bool(False)
 
-maxEvents = 5000
+maxEvents = -1
 
-MCGlobalTag='124X_mcRun3_2022_realistic_v12' #for DYmumu_PU140
+#MCGlobalTag='124X_mcRun3_2022_realistic_v12' #for DYmumu_PU140
+MCGlobalTag='133X_mcRun3_2024_realistic_v7'
 #DataGlobalTag='76X_dataRun2_v19'
 #DataGlobalTag='76X_dataRun2_v15'
 #DataGlobalTag='92X_dataRun2_Prompt_v11'
@@ -41,6 +43,7 @@ DataGlobalTag='124X_dataRun3_PromptAnalysis_v1'
 
 
 doDebug = bool(False)
+
 ###############################
 
 ### Debug Printing ###
@@ -53,6 +56,7 @@ doDebug = bool(False)
 
 
 
+    
 #####################
 process = cms.Process("UFCSCRootMaker")
 
@@ -78,14 +82,7 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 # which is read in CMSSW applications via Frontier caching servers.   #
 # https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideFrontierConditions  #
 #######################################################################
-#process.load('Configuration.StandardSequences.Services_cff')
-#process.load('Configuration.StandardSequences.Geometry_cff')
-#process.load('Configuration.StandardSequences.MagneticField_cff')
-#process.load('Configuration.StandardSequences.Reconstruction_cff')
-#process.load('Configuration.StandardSequences.EndOfProcess_cff')
-#process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
-#process.load('Configuration.EventContent.EventContent_cff')
-###
+
 
 process.load("CondCore.CondDB.CondDB_cfi")
 process.load('Configuration.Geometry.GeometryRecoDB_cff')
@@ -93,6 +90,7 @@ process.load("Configuration/StandardSequences/MagneticField_cff")
 process.load("Configuration/StandardSequences/FrontierConditions_GlobalTag_cff")
 process.load("Configuration/StandardSequences/RawToDigi_Data_cff")
 process.load("Configuration.StandardSequences.Reconstruction_cff")
+process.load("UFCSCSoftware.UFCSCRootMaker.cscRootMaker_cfi")
 ###
 if not isDATA:
     process.GlobalTag.globaltag=MCGlobalTag 
@@ -108,10 +106,27 @@ process.out = cms.OutputModule("PoolOutputModule",
                                )
 
 
+
+
+
+process.cscRootMaker.cscRecHitTagSrc = cms.untracked.InputTag('csc2DRecHits','','localRecoUF')
+process.cscRootMaker.cscSegTagSrc    = cms.untracked.InputTag('cscSegments','','localRecoUF')
+
+if(not doUF):
+    process.cscRootMaker.cscRecHitTagSrc = cms.untracked.InputTag('csc2DRecHits','','RECO')
+    process.cscRootMaker.cscSegTagSrc    = cms.untracked.InputTag('cscSegments','','RECO')
+
+
+
+
+outputFileName = 'CSC_UF_Ntuple_SegmentAlgoUF.root'
+if(not doUF):
+    outputFileName = 'CSC_UF_Ntuple_SegmentAlgoDefault.root'
+
+    
 process.TFileService = cms.Service("TFileService",
 
-                                   fileName = cms.string("file:Test.root")
-                                  # fileName = cms.string("file:ZMM_25_04_RU.root")
+                                   fileName = cms.string("file:"+outputFileName)
 
                                    )
 
@@ -134,115 +149,17 @@ process.source = cms.Source ("PoolSource",
 
 if isDATA:
     process.source.fileNames = cms.untracked.vstring(
-#        'file:/eos/user/c/cherepan/HeavyFiles/SingleMuon_RAW-RECO_ZMu-12Nov2019_UL2018_CSCSegmentBuilder_UF.root'
-#        'file:test/SingleMuon_RAW-RECO_ZMu-12Nov2019_UL2018_CSCSegmentBuilder_UF_testRun.root'
-#         'file:/eos/user/c/cherepan/CSC/SingleMuon_RAW-RECO_ZMu-12Nov2019_UL2018_CSCSegmentBuilder_UF_testRun.root'
-
-
-
         '/store/user/cherepan/RelValSingleMuPt1/RelValZMM_14_CMSSW_12_4_0RAW2DIGI_L1Reco_RECO_RECOSIM_UF_SingleMu1_UF_LocalRECO/230908_124247/0000/SingleMu1Pt_14_UF_CSCSegmentBuilder_1.root',
         '/store/user/cherepan/RelValSingleMuPt1/RelValZMM_14_CMSSW_12_4_0RAW2DIGI_L1Reco_RECO_RECOSIM_UF_SingleMu1_UF_LocalRECO/230908_124247/0000/SingleMu1Pt_14_UF_CSCSegmentBuilder_2.root',
         '/store/user/cherepan/RelValSingleMuPt1/RelValZMM_14_CMSSW_12_4_0RAW2DIGI_L1Reco_RECO_RECOSIM_UF_SingleMu1_UF_LocalRECO/230908_124247/0000/SingleMu1Pt_14_UF_CSCSegmentBuilder_3.root'
-
-
-
-
-
-
-#        'file:../crab/DY_MUMURelVal_UF_CSCSegmentBuilder.root'
-#        '/store/data/Run2022C/SingleMuon/RAW-RECO/ZMu-PromptReco-v1/000/356/381/00000/6513929e-95f2-4528-9b6b-6b0a15a768d4.root'
-
-
-#        'file:test/SingleMuon_RAW-RECO_ZMu-12Nov2019_UL2018_CSCSegmentBuilder_UF.root'
-#        '/store/data/Run2018B/SingleMuon/RAW-RECO/ZMu-12Nov2019_UL2018-v2/270003/5FE6A215-7096-6B41-B499-D12FE193A89B.root',
-#        '/store/data/Run2018B/SingleMuon/RAW-RECO/ZMu-12Nov2019_UL2018-v2/270003/A0AE2F0B-740C-B646-BF3B-58EE0943A261.root',
-#        '/store/data/Run2018B/SingleMuon/RAW-RECO/ZMu-12Nov2019_UL2018-v2/270003/7E66C6C3-7AEB-C048-8450-58BBD7E70343.root',
-#        '/store/data/Run2018B/SingleMuon/RAW-RECO/ZMu-12Nov2019_UL2018-v2/270003/2ACDF7AC-B65B-BB4C-915F-A0AF22098386.root',
-#        '/store/data/Run2018B/SingleMuon/RAW-RECO/ZMu-12Nov2019_UL2018-v2/270003/4C8FFD75-6243-8A4E-848E-ED14C0F8B9B2.root',
-#        '/store/data/Run2018B/SingleMuon/RAW-RECO/ZMu-12Nov2019_UL2018-v2/270003/F427E364-B84C-FA4D-9C5F-B1DF11176D71.root',
-#        '/store/data/Run2018B/SingleMuon/RAW-RECO/ZMu-12Nov2019_UL2018-v2/270003/7FD2532C-A050-DE47-B3CC-5D9FECA2312D.root',
-#        '/store/data/Run2018B/SingleMuon/RAW-RECO/ZMu-12Nov2019_UL2018-v2/270003/CC95D6CA-A6FE-D14B-98BF-77307ACFBCEE.root',
-#        '/store/data/Run2018B/SingleMuon/RAW-RECO/ZMu-12Nov2019_UL2018-v2/270003/A46A6EAF-311C-E248-8B44-FB8F13FDB3D5.root',
-#        '/store/data/Run2018B/SingleMuon/RAW-RECO/ZMu-12Nov2019_UL2018-v2/270003/D5A55C35-CF1A-664C-855C-0317C6F518A8.root',
-#        '/store/data/Run2018B/SingleMuon/RAW-RECO/ZMu-12Nov2019_UL2018-v2/270003/CA91E075-380C-2142-B047-0D214F6822B6.root',
-#        '/store/data/Run2018B/SingleMuon/RAW-RECO/ZMu-12Nov2019_UL2018-v2/270003/5DC4A3AC-206C-CC4A-9FBB-7080182ECDDD.root'
-
-#        'file:001D83E9-4350-6648-89D2-155101834DEF.root'
-
-
-#        '/store/data/Run2018B/SingleMuon/RAW-RECO/ZMu-12Nov2019_UL2018-v2/100000/001D83E9-4350-6648-89D2-155101834DEF.root'
-#        'file:../../../../../UFCSCSoftware/UFCSCRootMaker/Zmu_rawreco_2016H.root'
-# 'root://cmsxrootd.fnal.gov//store/data/Run2015D/SingleMuon/RAW-RECO/ZMu-16Dec2015-v1/10000/005D37B2-3CA9-E511-B9AF-001E67398223.root',
-# 'root://cmsxrootd.fnal.gov//store/data/Run2015D/SingleMuon/RAW-RECO/ZMu-16Dec2015-v1/10000/005D37B2-3CA9-E511-B9AF-001E67398223.root',
-# 'root://cmsxrootd.fnal.gov//store/data/Run2015D/SingleMuon/RAW-RECO/ZMu-16Dec2015-v1/10000/005D37B2-3CA9-E511-B9AF-001E67398223.root',
-# 'root://cmsxrootd.fnal.gov//store/data/Run2015D/SingleMuon/RAW-RECO/ZMu-16Dec2015-v1/10000/005D37B2-3CA9-E511-B9AF-001E67398223.root',
-# 'root://cmsxrootd.fnal.gov//store/data/Run2015D/SingleMuon/RAW-RECO/ZMu-16Dec2015-v1/10000/005D37B2-3CA9-E511-B9AF-001E67398223.root',
-#'root://cmsxrootd.fnal.gov//store/data/Run2016F/SingleMuon/RECO/PromptReco-v1/000/277/981/00000/0075B7D0-6659-E611-8EB7-02163E012008.root'
-#'root://cmsxrootd.fnal.gov//store/data/Run2016B/SingleMuon/RECO/PromptReco-v2/000/273/150/00000/1C609FC2-D919-E611-ACFB-02163E011C02.root'
-#'file:/raid/raid8/mhl/CSC_Run2/CMSSW_dev/outputRoot/test2.root'
-#'file://00E68DCF-E3B2-E711-910F-48FD8EE73A03.root'
-#'file:/raid/raid8/mhl/CSC_Run2/CMSSW_dev/inputRoot/0014C2C5-92BA-E711-ADD1-008CFAFBE8F2.root'
-
 )
 else:
     process.source.fileNames = cms.untracked.vstring(
 
-# 'file:/eos/user/c/cherepan/CSC/LocalReco_output_UF/RelValZMM_14_UF_CSCSegmentBuilder_v2.root'
 
-
-#        'file:../crab/SingleMu10Pt_100_TestEvents_AddUFLocalREco.root'
-#
-
-#        'file:../crab/SingleMu10Pt_100_TestEvents_AddUFLocalREco.root'
-
-
-
-#       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_2.root',
-#       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_18.root',
-#       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_8.root',
-#       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_4.root',
-#       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_16.root',
-#       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_7.root',
-#       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_14.root',
-#       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_10.root',
-#       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_19.root',
-#       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_21.root',
-#       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_13.root',
-#       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_20.root',
-#       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_1.root',
-#       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_11.root',
-#       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_12.root',
-#       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_9.root',
-#       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_3.root',
-#       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_15.root',
-#       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_5.root',
-#       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_6.root',
-#       '/store/user/cherepan/RelValSingleMuPt10/RelValZ_SingleMuPt10_ReRunLocalReco_26_09_2023/230926_094045/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_17.root'
-
-#        'file:SingleMu10Pt_100_TestEvents_AddUFLocalREco_2.root'
-
-
-#        'file:/eos/user/c/cherepan/CSC/LocalReco_output_Test_whileCantDownload/SingleMu10Pt_100_TestEvents_AddUFLocalREco_3.root'
-
-#  uncomment later 
-        '/store/user/cherepan/RelValZMM_14/RelValMM14_ReRunLocalReco/230927_095118/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_1.root',
-        '/store/user/cherepan/RelValZMM_14/RelValMM14_ReRunLocalReco/230927_095118/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_3.root',
-        '/store/user/cherepan/RelValZMM_14/RelValMM14_ReRunLocalReco/230927_095118/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_4.root',
-        '/store/user/cherepan/RelValZMM_14/RelValMM14_ReRunLocalReco/230927_095118/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_6.root',
-        '/store/user/cherepan/RelValZMM_14/RelValMM14_ReRunLocalReco/230927_095118/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_2.root',
-        '/store/user/cherepan/RelValZMM_14/RelValMM14_ReRunLocalReco/230927_095118/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_7.root',
-        '/store/user/cherepan/RelValZMM_14/RelValMM14_ReRunLocalReco/230927_095118/0000/SingleMu10Pt_100_TestEvents_AddUFLocalREco_5.root'
-
-
-
-
-
-
-#        '/store/user/cherepan/RelValSingleMuPt1/RelValZMM_14_CMSSW_12_4_0RAW2DIGI_L1Reco_RECO_RECOSIM_UF_SingleMu1_UF_LocalRECO/230908_124247/0000/SingleMu1Pt_14_UF_CSCSegmentBuilder_1.root',
-#        '/store/user/cherepan/RelValSingleMuPt1/RelValZMM_14_CMSSW_12_4_0RAW2DIGI_L1Reco_RECO_RECOSIM_UF_SingleMu1_UF_LocalRECO/230908_124247/0000/SingleMu1Pt_14_UF_CSCSegmentBuilder_2.root',
-#        '/store/user/cherepan/RelValSingleMuPt1/RelValZMM_14_CMSSW_12_4_0RAW2DIGI_L1Reco_RECO_RECOSIM_UF_SingleMu1_UF_LocalRECO/230908_124247/0000/SingleMu1Pt_14_UF_CSCSegmentBuilder_3.root'
-
-
+#  uncomment later
+#        'file:/eos/user/c/cherepan/CSC/Test_AddUFLocalReco.root'
+        'file:/eos/user/c/cherepan/CSC/AddUFLocalReco_4.root'
 
 #        '/store/relval/CMSSW_12_4_13/RelValZMM_14/GEN-SIM-DIGI-RECO/124X_mcRun3_2022_realistic_v12_2021_FastSim-v1/2590000/8a48a70c-ddaf-4aa3-91b5-23dcac5a80a2.root'
 

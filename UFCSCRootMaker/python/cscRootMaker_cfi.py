@@ -13,11 +13,7 @@ cscRootMaker = cms.EDAnalyzer('UFCSCRootMaker',
 
 
 #  cscRecHitTagSrc = cms.untracked.InputTag('csc2DRecHits','','localRecoUF'), # UF RECO
-  cscRecHitTagSrc = cms.untracked.InputTag('csc2DRecHits','','RECO'), # RU reco # always use the rechots if STD aldo
-
-
-
-
+ cscRecHitTagSrc = cms.untracked.InputTag('csc2DRecHits','','RECO'), # RU reco # always use the rechots if STD aldo
 
 
 #  cscSegTagSrc = cms.untracked.InputTag('cscSegments','','localRecoUF'),   #  UF reco

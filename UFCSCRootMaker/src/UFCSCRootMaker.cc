@@ -25,7 +25,10 @@
 
 // user include files
 
-#include "FWCore/Framework/interface/EDAnalyzer.h"
+#include "FWCore/Framework/interface/Frameworkfwd.h"
+#include "FWCore/Framework/interface/one/EDAnalyzer.h"
+
+
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
@@ -160,7 +163,8 @@ using namespace std;
 // class declaration
 //
 
-class UFCSCRootMaker : public edm::EDAnalyzer {
+//class UFCSCRootMaker : public edm::EDAnalyzer {
+class UFCSCRootMaker : public edm::one::EDAnalyzer<edm::one::SharedResources> {  
 public:
   explicit UFCSCRootMaker(const edm::ParameterSet&);
   ~UFCSCRootMaker();
@@ -229,7 +233,7 @@ private:
 		  edm::Handle<CSCCorrelatedLCTDigiCollection> correlatedlcts,
 		  edm::Handle<L1MuGMTReadoutCollection> pCollection,const CSCGeometry* cscGeom, 
 		  const edm::EventSetup& eventSetup, const edm::Event &event);
-  void doCalibrations(const edm::EventSetup& eventSetup);
+  //  void doCalibrations(const edm::EventSetup& eventSetup);
   double fitX(CLHEP::HepMatrix points, CLHEP::HepMatrix errors);
   void doNonAssociatedRecHits(edm::Handle<CSCSegmentCollection> cscSegments,  const CSCGeometry* cscGeom,  edm::Handle<CSCStripDigiCollection> strips);
   int chamberSerial( CSCDetId id );
@@ -414,7 +418,7 @@ private:
   
   // CSCSegments
   int       cscSegments_nSegments;
-  double    cscSegments_localX[10000], cscSegments_localY[10000], cscSegments_globalX[10000], cscSegments_globalY[10000];
+  double    cscSegments_localX[10000], cscSegments_localY[10000], cscSegments_localXerr[10000], cscSegments_localYerr[10000], cscSegments_globalX[10000], cscSegments_globalY[10000];
   double    cscSegments_globalTheta[10000], cscSegments_globalPhi[10000];
   double    cscSegments_localTheta[10000],  cscSegments_localPhi[10000],cscSegments_chi2[10000], cscSegments_nRecHits[10000];
   int       cscSegments_nDOF[10000];
@@ -592,7 +596,7 @@ UFCSCRootMaker::UFCSCRootMaker(const edm::ParameterSet& iConfig) :
   nEventsTotal = 0;
   counter = 0;
 
-  tree = new TTree("Events","Events");
+  tree = new TTree("CSCTree","CSCTree");
   
 
 }
@@ -834,7 +838,7 @@ void UFCSCRootMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 
    if(addRecHits && isDIGI && (isLocalRECO || isFullRECO) ) doNonAssociatedRecHits(cscSegments,cscGeom,strips);
-   if(addCalibrations && nEventsTotal == 1) doCalibrations(iSetup);
+   //   if(addCalibrations && nEventsTotal == 1) doCalibrations(iSetup);
 
 
 /*
@@ -2418,6 +2422,11 @@ UFCSCRootMaker::doSegments(edm::Handle<CSCSegmentCollection> cscSegments, const 
      LocalPoint localPos = (*dSiter).localPosition();
      cscSegments_localX[counter]     = localPos.x();
      cscSegments_localY[counter]     = localPos.y();
+
+     
+     cscSegments_localXerr[counter]     = (*dSiter).localPositionError().xx() ;
+     cscSegments_localYerr[counter]     = (*dSiter).localPositionError().yy() ;
+
      LocalVector segDir = (*dSiter).localDirection();
      cscSegments_localTheta[counter] = segDir.theta();
      cscSegments_localPhi[counter] = segDir.phi();
@@ -3346,7 +3355,7 @@ void UFCSCRootMaker::doLCTDigis( edm::Handle<CSCALCTDigiCollection> alcts, edm::
 //
 // ==============================================
 
-void UFCSCRootMaker::doCalibrations(const edm::EventSetup& eventSetup){
+/*void UFCSCRootMaker::doCalibrations(const edm::EventSetup& eventSetup){
 
   // Only do this for the first event
   // get the gains
@@ -3368,31 +3377,31 @@ void UFCSCRootMaker::doCalibrations(const edm::EventSetup& eventSetup){
 
   for (int i = 0; i < 400; i++)
     {
-      calibrations_Gain_slope[i] = pGains->gains[i].gain_slope;
-      calibrations_XT_slope_left[i] = pCrosstalk->crosstalk[i].xtalk_slope_left;
-      calibrations_XT_slope_right[i] = pCrosstalk->crosstalk[i].xtalk_slope_right;
-      calibrations_XT_intercept_left[i] = pCrosstalk->crosstalk[i].xtalk_intercept_left;
+      calibrations_Gain_slope[i]         = pGains->gains[i].gain_slope;
+      calibrations_XT_slope_left[i]      = pCrosstalk->crosstalk[i].xtalk_slope_left;
+      calibrations_XT_slope_right[i]     = pCrosstalk->crosstalk[i].xtalk_slope_right;
+      calibrations_XT_intercept_left[i]  = pCrosstalk->crosstalk[i].xtalk_intercept_left;
       calibrations_XT_intercept_right[i] = pCrosstalk->crosstalk[i].xtalk_intercept_right;
-      calibrations_Pedestals_ped[i] = pPedestals->pedestals[i].ped;
-      calibrations_Pedestals_rms[i] = pPedestals->pedestals[i].rms;
-      calibrations_NoiseMatrix_33[i] = pNoiseMatrix->matrix[i].elem33;
-      calibrations_NoiseMatrix_34[i] = pNoiseMatrix->matrix[i].elem34;
-      calibrations_NoiseMatrix_35[i] = pNoiseMatrix->matrix[i].elem35;
-      calibrations_NoiseMatrix_44[i] = pNoiseMatrix->matrix[i].elem44;
-      calibrations_NoiseMatrix_45[i] = pNoiseMatrix->matrix[i].elem45;
-      calibrations_NoiseMatrix_46[i] = pNoiseMatrix->matrix[i].elem46;
-      calibrations_NoiseMatrix_55[i] = pNoiseMatrix->matrix[i].elem55;
-      calibrations_NoiseMatrix_56[i] = pNoiseMatrix->matrix[i].elem56;
-      calibrations_NoiseMatrix_57[i] = pNoiseMatrix->matrix[i].elem57;
-      calibrations_NoiseMatrix_66[i] = pNoiseMatrix->matrix[i].elem66;
-      calibrations_NoiseMatrix_67[i] = pNoiseMatrix->matrix[i].elem67;
-      calibrations_NoiseMatrix_77[i] = pNoiseMatrix->matrix[i].elem77;
+      calibrations_Pedestals_ped[i]      = pPedestals->pedestals[i].ped;
+      calibrations_Pedestals_rms[i]      = pPedestals->pedestals[i].rms;
+      calibrations_NoiseMatrix_33[i]     = pNoiseMatrix->matrix[i].elem33;
+      calibrations_NoiseMatrix_34[i]     = pNoiseMatrix->matrix[i].elem34;
+      calibrations_NoiseMatrix_35[i]     = pNoiseMatrix->matrix[i].elem35;
+      calibrations_NoiseMatrix_44[i]     = pNoiseMatrix->matrix[i].elem44;
+      calibrations_NoiseMatrix_45[i]     = pNoiseMatrix->matrix[i].elem45;
+      calibrations_NoiseMatrix_46[i]     = pNoiseMatrix->matrix[i].elem46;
+      calibrations_NoiseMatrix_55[i]     = pNoiseMatrix->matrix[i].elem55;
+      calibrations_NoiseMatrix_56[i]     = pNoiseMatrix->matrix[i].elem56;
+      calibrations_NoiseMatrix_57[i]     = pNoiseMatrix->matrix[i].elem57;
+      calibrations_NoiseMatrix_66[i]     = pNoiseMatrix->matrix[i].elem66;
+      calibrations_NoiseMatrix_67[i]     = pNoiseMatrix->matrix[i].elem67;
+      calibrations_NoiseMatrix_77[i]     = pNoiseMatrix->matrix[i].elem77;
 
     }
   calibrations_nCalib = 400;
 
 
-}
+  } */
 
 
 
@@ -4105,6 +4114,9 @@ UFCSCRootMaker::bookTree(TTree *tree)
   tree->Branch("cscSegments_nSegments", &cscSegments_nSegments,"cscSegments_nSegments/I");
   tree->Branch("cscSegments_localX",  cscSegments_localX,  "cscSegments_localX[cscSegments_nSegments]/D");
   tree->Branch("cscSegments_localY",  cscSegments_localY,  "cscSegments_localY[cscSegments_nSegments]/D");
+  tree->Branch("cscSegments_localXerr",  cscSegments_localXerr,  "cscSegments_localXerr[cscSegments_nSegments]/D");
+  tree->Branch("cscSegments_localYerr",  cscSegments_localYerr,  "cscSegments_localYerr[cscSegments_nSegments]/D");
+
   tree->Branch("cscSegments_globalX",  cscSegments_globalX,"cscSegments_globalX[cscSegments_nSegments]/D");
   tree->Branch("cscSegments_globalY",  cscSegments_globalY,"cscSegments_globalY[cscSegments_nSegments]/D");
   tree->Branch("cscSegments_globalTheta",  cscSegments_globalTheta,"cscSegments_globalTheta[cscSegments_nSegments]/D");
